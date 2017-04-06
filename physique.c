@@ -40,7 +40,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
     
 
 }
-
+/*the animation of the sprite turn */
 void sprite_turn_left(sprite_t *sprite)
 {
   sprite->current += 1;
@@ -48,6 +48,7 @@ void sprite_turn_left(sprite_t *sprite)
     sprite->current = 0;
 }
 
+/*the animation of the sprite turn */
 void sprite_turn_right(sprite_t *sprite)
 {
   sprite->current -= 1;
@@ -55,6 +56,7 @@ void sprite_turn_right(sprite_t *sprite)
     sprite->current = sprite->nb_sprite - 1;
 }
 
+/*Move of the sprite (+ hyperespace)*/
 void sprite_move(sprite_t *sprite)
 {
   sprite->x += sprite->vx;
@@ -69,8 +71,11 @@ void sprite_move(sprite_t *sprite)
     sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
   sprite->col = sprite->x;
   sprite->lig = sprite->y;
+
+
 }
 
+/*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
   if (sprite->type == 0){

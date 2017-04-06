@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <SDL.h>
 
 #include "physique.h"
@@ -44,18 +45,33 @@
 /* Speed of ship */
 #define CONS_ACCEL      0.01
 
+/*Set Position of all Sprites*/
+void SetUpPosition(sprite_t *sprite, SDL_Surface *surface, SDL_Rect *rectPosition){
+  
+  /* set sprite position in the middle of the window */
+  switch(sprite->type) {
+  case 1:
+    Random_Position(rectPosition);
+    surface->clip_rect.x = rectPosition->x;
+    surface->clip_rect.y = rectPosition->y;
+  default:
+    rectPosition->x = (SCREEN_WIDTH - SPRITE_SIZE) / 2;
+    surface->clip_rect.x = rectPosition->x;
+    rectPosition->y = (SCREEN_HEIGHT - SPRITE_SIZE) / 2;
+    surface->clip_rect.y = rectPosition->y;
+    break;
+  }
+}
 
 /*Create comet size 64*64*/
-void Create_Big_Comet(sprite_t *big_ast,SDL_Surface *big_comet, SDL_Rect *bigCometPosition )
+void CreateBigComet(sprite_t *big_ast,SDL_Surface *big_comet, SDL_Rect *bigCometPosition )
 {
-
-  Random_Position(bigCometPosition);
-  big_comet->clip_rect.x = bigCometPosition->x;
-  big_comet->clip_rect.y = bigCometPosition->y;
-  
-  sprite_init(big_ast,1,big_comet,BIG_AST_SIZE,NB_BIG_AST_SPRITE);
+  SetUpPosition(big_ast, big_comet, bigCometPosition);
+  sprite_init(big_ast, 1, big_comet, BIG_AST_SIZE, NB_BIG_AST_SPRITE);
   sprite_boost(big_ast, VIT_BIG_AST);
+  
 }
+
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
    - quit the game?
@@ -63,7 +79,7 @@ void Create_Big_Comet(sprite_t *big_ast,SDL_Surface *big_comet, SDL_Rect *bigCom
    - use up to move on the ship to the right direction
 */
 void HandleEvent(SDL_Event event,
-		 int *quit, sprite_t *sprite,double *accel,sprite_t *big_ast,SDL_Surface *big_comet, SDL_Rect *bigCometPosition)
+		 int *quit, sprite_t *sprite, double *accel, sprite_t *big_ast, SDL_Surface *big_comet, SDL_Rect *bigCometPosition, bool *thereisacomet)
 {
   switch (event.type) {
     /* close button clicked */
@@ -90,8 +106,9 @@ void HandleEvent(SDL_Event event,
     case SDLK_DOWN:
       break;
     case SDLK_o:
-      Create_Big_Comet(big_ast,big_comet, bigCometPosition);
-  
+      *thereisacomet = true;
+      CreateBigComet(big_ast,big_comet, bigCometPosition);
+      break;
     default:
       break;
     }
@@ -146,14 +163,12 @@ int main(int argc, char* argv[])
   background = SDL_DisplayFormat(temp);
   SDL_FreeSurface(temp);
    
-
-  /* set sprite position in the middle of the window */
-  spritePosition.x = (SCREEN_WIDTH - SPRITE_SIZE) / 2;
-  sprite->clip_rect.x = spritePosition.x;
-  spritePosition.y = (SCREEN_HEIGHT - SPRITE_SIZE) / 2;
-  sprite->clip_rect.y = spritePosition.x;
+  /*set up position of ship*/
+  SetUpPosition(&space_ship, sprite, &spritePosition);
   sprite_init(&space_ship,0,sprite,SPRITE_SIZE,NB_SPRITE);
 
+  /*no comet at begun*/
+  bool thereisacomet = false;
 
   int gameover = 0;
   /* Define the float position of the ship */
@@ -167,16 +182,17 @@ int main(int argc, char* argv[])
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, &big_ast, big_comet, &bigCometPosition);
+	HandleEvent(event, &gameover, &space_ship, &accel, &big_ast, big_comet, &bigCometPosition, &thereisacomet);
       }
+      /*position, mouvement et acceleration des sprites*/
       sprite_boost(&space_ship, accel);
       sprite_move(&space_ship);
 
-      sprite_move(&big_ast);
-      /* collide with edges of screen */
       spritePosition.x = space_ship.col;
       spritePosition.y = space_ship.lig;
+  
 
+      sprite_move(&big_ast);
       bigCometPosition.x = big_ast.col;
       bigCometPosition.y = big_ast.lig;
       
@@ -199,10 +215,11 @@ int main(int argc, char* argv[])
       }
 
       /*draw Asteroid*/
+      if (thereisacomet){
       SDL_BlitSurface(big_comet, NULL, screen, &bigCometPosition);
-      
+      }
       /* update the screen */
-      SDL_UpdateRect(screen, 0, 0, 0, 0);
+      SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }
   
   /* clean up */
