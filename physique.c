@@ -1,11 +1,34 @@
 #include "physique.h"
+
+
+/*Set Position of all Sprites*/
+void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
+  
+  /* set sprite position in the middle of the window */
+  switch(sprite->type) {
+  case 0:
+    sprite->x = (SCREEN_WIDTH - SPRITE_SIZE) / 2;
+    surface->clip_rect.x = sprite->x;
+    sprite->y = (SCREEN_HEIGHT - SPRITE_SIZE) / 2;
+    surface->clip_rect.y = sprite->y;
+    break;
+  case 1:
+    Random_Position(sprite, BIG_AST_SIZE);
+    surface->clip_rect.x = sprite->x;
+    surface->clip_rect.y = sprite->y;
+    break;
+  default:
+    break;
+  }
+}
+
 /*Set a random position on the grid*/
-void Random_Position (SDL_Rect *Position)
+void Random_Position (sprite_t *sprite, int size)
 {
 
   srand(time(NULL));
-  Position->x = rand()%(SCREEN_WIDTH-BIG_AST_SIZE);
-  Position->y = rand()%(SCREEN_HEIGHT-BIG_AST_SIZE);
+  sprite->x = rand()%(SCREEN_WIDTH-size);
+  sprite->y = rand()%(SCREEN_HEIGHT-size);
   
 }
 
@@ -79,8 +102,8 @@ void sprite_move(sprite_t *sprite)
 void sprite_boost(sprite_t *sprite, float accel)
 {
   if (sprite->type == 0){
-    sprite->vx += accel * cos(sprite->current * 10 * M_PI / 180) - FROTEMENT * sprite->vx;
-    sprite->vy += accel * (-sin(sprite->current * 10 * M_PI / 180)) - FROTEMENT * sprite->vy;
+    sprite->vx += accel * cos(sprite->current * 10 * M_PI / 180) - FROTTEMENT * sprite->vx;
+    sprite->vy += accel * (-sin(sprite->current * 10 * M_PI / 180)) - FROTTEMENT * sprite->vy;
     if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->current * 10 * M_PI / 180)) && accel > 0)
       sprite->vx -= accel * cos(sprite->current * 10 * M_PI / 180);
     if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 10 * M_PI / 180)))
