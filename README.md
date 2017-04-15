@@ -2,8 +2,11 @@
 This is a project from two L1 informatique from fac des sciences et technologie of Nancy.
 
 CHANGELOG:
+
 la v.0.5 sera quand les astéroides seront bien implémentés
 Update v.0.420:
+
+
 -Ajout d'une procédure SetUpPosition:
 --Qui prend un sprite_t et un SDL_Surface.
 --Pour chaque type elle definit une position.
