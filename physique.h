@@ -42,7 +42,7 @@
 
 /* Size and number of asteroids, je sais que c'est beaucoup pour l'instant :p */
 #define BIG_AST_SIZE    64
-#define NB_MAX_BIG_AST      5
+#define NB_MAX_BIG_AST      10
 #define VIT_BIG_AST     0.02
 
 #define NORM_AST_SIZE   32
@@ -52,10 +52,12 @@
 #define SMALL_AST_SIZE  16
 #define NB_MAX_SMALL_AST    20
 #define VIT_SMALL_AST   0.1
+/*Number of type of asteroid => big, norm, small actually*/
+#define NB_TYPE_AST 3
 /*in the ast, for now we have just 1 picture of 64*64*/
 #define NB_BIG_AST_SPRITE 1
 
-
+SDL_Surface *screen, *temp, *spaceship, *big_comet, *background;
 
 struct Sprite_t{
   int type;
@@ -68,12 +70,17 @@ struct Sprite_t{
   int nb_sprite;
   double vx;
   double vy;
+  SDL_Rect position;
 };
 
 typedef struct Sprite_t sprite_t;
 
+
+SDL_Surface* download_sprite_(char *nomSprite);
+void downloadsprite(int *colorkey);
+
 void SetUpPosition(sprite_t *sprite, SDL_Surface *surface);
-void Random_Position (sprite_t *sprite, int size);
+void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
 
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num);
