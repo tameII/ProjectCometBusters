@@ -1,18 +1,18 @@
 #include "physique.h"
 
-
+/*Create Norm Ast*/
+/*void CreateNormAst(sprite_t *norm_ast, SDL_Surface *norm_ast)*/
 /*Create comet size 64*64,*/
-void CreateBigAst(sprite_t *big_ast,SDL_Surface *big_comet, int *nbBigAst )
+void CreateBigAst(sprite_t *big_ast,SDL_Surface *big_comet)
 {
-  //int nbBigAst;
-  //nbBigAst = big_ast;
-  // int nombre_test;
+ 
   if (*nbBigAst < NB_MAX_BIG_AST){
-    sprite_init(&big_ast[*nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_BIG_AST_SPRITE);
+    
+    sprite_init(&big_ast[*nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE);
     sprite_boost(&big_ast[*nbBigAst], VIT_BIG_AST);
     *nbBigAst += 1;
-    // nombre_test = big_ast[*nbBigAst]->nb_sprite;
   }
+  
 }
 
 /*Kill asteroid*/
@@ -21,6 +21,7 @@ void kill(int *nb)
   if (*nb>0){
     *nb -= 1;
     }
+  
 }
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
@@ -31,7 +32,7 @@ void kill(int *nb)
    -o o to create a new big asteroide
 */
 void HandleEvent(SDL_Event event,
-		 int *quit, sprite_t *sprite, double *accel, sprite_t *big_ast, SDL_Surface *big_comet, int *nbBigAst)
+		 int *quit, sprite_t *sprite, double *accel, sprite_t *big_ast, SDL_Surface *big_comet)
 {
  
   switch (event.type) {
@@ -60,7 +61,7 @@ void HandleEvent(SDL_Event event,
       break;
     case SDLK_o:
       printf("Touch o pressed\n");
-      CreateBigAst(big_ast, big_comet, nbBigAst);
+      CreateBigAst(big_ast, big_comet);
       SDL_Delay(100); //delai de 100 ms pour pas faire ooooooooooo
       break;
     case SDLK_p:
@@ -80,7 +81,8 @@ int main(int argc, char* argv[])
 {
   
   int colorkey;
-  int nbBigAst = 0;
+  int nombreBigAst = 0;
+  nbBigAst = &nombreBigAst; //pointeur général qui permet d'être utilisé partout.
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
   //sprite_t norm_ast[NB_MAX_NORM_AST];
@@ -104,7 +106,7 @@ int main(int argc, char* argv[])
   downloadsprite(&colorkey);
  
   /*set up position of ship*/
-  sprite_init(&space_ship,0,spaceship,SPRITE_SIZE,NB_SPRITE);
+  sprite_init(&space_ship,0,spaceship,SPACE_SHIP_SIZE,NB_SPRITE);
 
 
   int gameover = 0;
@@ -114,13 +116,13 @@ int main(int argc, char* argv[])
   while (!gameover)
     {
       int i;
-      double accel=0.0;
+      double accel = 0.0;
       SDL_Event event;
       
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, big_comet, &nbBigAst);
+	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, big_comet);
       }
 
 
@@ -134,31 +136,23 @@ int main(int argc, char* argv[])
 	/*position, mouvement et acceleration des sprites*/
 	sprite_boost(&space_ship, accel);
 	sprite_move(&space_ship);
-	/* Define the source rectangle for the BlitSurface */
-	SDL_Rect spriteImage;
-	spriteImage.y = 0;
-	spriteImage.w = space_ship.size;
-	spriteImage.h = space_ship.size;
-	/* choose image according to direction and animation flip: */
-	spriteImage.x = space_ship.size * space_ship.current;
-	
-	SDL_BlitSurface(spaceship, &spriteImage, screen, &space_ship.position);
+
+	SDL_BlitSurface(spaceship, &space_ship.image, screen, &space_ship.position);
       }
 
       /*draw Asteroid*/
-      for (i=0; i<nbBigAst; i++){
-	if (nbBigAst>0){
+      for (i=0; i<*nbBigAst; i++){
+	if (*nbBigAst>0){
 	  sprite_move(&big_ast[i]);
-	  SDL_BlitSurface(big_comet, NULL, screen, &big_ast[i].position);
-	  // printf("i = %d \n",i );
+	  SDL_BlitSurface(big_comet, &big_ast[i].image, screen, &big_ast[i].position);
+	  
 	}
-	}
+      }
       /* update the screen */
       SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }
   
   /* clean up */
-  //SDL_FreeSurface(screen);
   SDL_FreeSurface(big_comet);
   SDL_FreeSurface(spaceship);
   SDL_FreeSurface(background);
@@ -166,4 +160,5 @@ int main(int argc, char* argv[])
   SDL_Quit();
   
   return 0;
+  
 }
