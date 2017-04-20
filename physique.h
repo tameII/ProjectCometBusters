@@ -1,7 +1,6 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H
 
-#define FROTTEMENT   0.001
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -13,6 +12,8 @@
 #define INIT_ROTATION 1
 
 #define VIT_MAX 4.7
+
+#define FROTTEMENT   0.0009
 
 /* Size of the window */
 #define SCREEN_WIDTH    640
@@ -36,7 +37,7 @@
 #define CONS_ACCEL      0.01
 
 /* Size of ship: */
-#define SPRITE_SIZE     32
+#define SPACE_SHIP_SIZE     32
 /* Size of projectiles */
 #define PROJECT_SIZE    8
 
@@ -52,13 +53,13 @@
 #define SMALL_AST_SIZE  16
 #define NB_MAX_SMALL_AST    20
 #define VIT_SMALL_AST   0.1
-/*Number of type of asteroid => big, norm, small actually*/
+/*Number of type of asteroid => big, norm, small at this moment*/
 #define NB_TYPE_AST 3
 /*in the ast, for now we have just 1 picture of 64*64*/
-#define NB_BIG_AST_SPRITE 1
+#define NB_AST_SPRITE 32
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *background;
-
+int *nbBigAst;
 struct Sprite_t{
   int type;
   int col;
@@ -68,16 +69,16 @@ struct Sprite_t{
   int current;
   int size;
   int nb_sprite;
+  int decompte;
   double vx;
   double vy;
   SDL_Rect position;
+  SDL_Rect image;
 };
 
 typedef struct Sprite_t sprite_t;
 
 
-SDL_Surface* download_sprite_(char *nomSprite);
-void downloadsprite(int *colorkey);
 
 void SetUpPosition(sprite_t *sprite, SDL_Surface *surface);
 void Random_Position (sprite_t *sprite);
@@ -88,7 +89,9 @@ void sprite_turn_left(sprite_t *sprite);
 void sprite_turn_right(sprite_t *sprite);
 void sprite_move(sprite_t *sprite); 
 void sprite_boost(sprite_t *sprite, float accel);
+void hyperespace(sprite_t *sprite);
 
-
+SDL_Surface* download_sprite_(char *nomSprite);
+void downloadsprite(int *colorkey);
 
 #endif
