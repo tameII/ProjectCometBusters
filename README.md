@@ -1,15 +1,41 @@
 # ProjectCometBusters
 This is a project from two L1 informatique from fac des sciences et technologie of Nancy.
 
-Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )
-Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
-(et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).
+
 -
 CHANGELOG:
 -
 
+Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )
+Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
+(et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).
 
 la v.0.5 sera quand les astéroides seront bien implémentés
+
+Update v.0.430: (Mathieu Levy)
+Allelujah
+
+-Ajout de la procédure CreateSmallAst:
+--similaire a CreateBigAst
+--press u to pop a small ast
+
+-Ajout de la procédure CreateNormAst:
+--similaire a CreateBigAst
+--press i to pop a norm ast
+
+-Ajout des procédures permettant de poper régulièrement des asts:
+--utilisation du SDL_GetTick qui récupère le nb de ms passée depuis début du jeu.
+--ça fonctionne bizarre, deux ast popent d'un coup...
+--Mise en commentaires car besoin d'être améliorée.
+
+-Amélioration de la procédure Random_Position:
+--notamment par l'utilisation de SDL_GetTick.
+--Mais aussi par l'utilisation d'un booleen.
+--permet de déplacer l'ast pour eviter de le faire poper exactement au meme endroit qu'avant.
+--en effet il faut deux trois secondes pour avoir un nouveau random correct.
+--je pense que c'est dû au fait de faire modulo le temps depuis 1980 ou je sais plus quelle date.
+--en corrigeant a l'aide de SDL_GetTick on obtient un aléatoire plus puissant.
+
 
 Update v.0.425: (Mathieu Levy)
 

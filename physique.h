@@ -9,7 +9,6 @@
 #include <time.h>
 
 #define INIT_DIR 9
-#define INIT_ROTATION 1
 
 #define VIT_MAX 4.7
 
@@ -42,24 +41,30 @@
 #define PROJECT_SIZE    8
 
 /* Size and number of asteroids, je sais que c'est beaucoup pour l'instant :p */
+//#define BIG_AST_TYPE    1
 #define BIG_AST_SIZE    64
 #define NB_MAX_BIG_AST      10
 #define VIT_BIG_AST     0.02
 
+//#define NORM_AST_TYPE   2
 #define NORM_AST_SIZE   32
 #define NB_MAX_NORM_AST     10
 #define VIT_NORM_AST    0.05
 
+//#define SMALL_AST_TYPE  3
 #define SMALL_AST_SIZE  16
-#define NB_MAX_SMALL_AST    20
+#define NB_MAX_SMALL_AST    6
 #define VIT_SMALL_AST   0.1
 /*Number of type of asteroid => big, norm, small at this moment*/
 #define NB_TYPE_AST 3
 /*in the ast, for now we have just 1 picture of 64*64*/
 #define NB_AST_SPRITE 32
 
-SDL_Surface *screen, *temp, *spaceship, *big_comet, *background;
-int *nbBigAst;
+SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background;
+int *nbBigAst, *nbNormAst, *nbSmallAst;
+bool *Random_Position_activated; //the function is activated ?
+int *temps_actuel; //utilisé avec SDL_GetTick.
+
 struct Sprite_t{
   int type;
   int col;

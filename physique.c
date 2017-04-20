@@ -13,6 +13,19 @@ void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
     surface->clip_rect.y = sprite->y;
     break;
   case 1:
+    //printf("sprite type : %d \n",sprite->type);
+    Random_Position(sprite);
+    surface->clip_rect.x = sprite->x;
+    surface->clip_rect.y = sprite->y;
+    break;
+  case 2:
+    //printf("sprite type : %d \n",sprite->type);
+    Random_Position(sprite);
+    surface->clip_rect.x = sprite->x;
+    surface->clip_rect.y = sprite->y;
+    break;
+  case 3:
+    printf("in SU Position : sprite type : %d \n",sprite->type);
     Random_Position(sprite);
     surface->clip_rect.x = sprite->x;
     surface->clip_rect.y = sprite->y;
@@ -26,28 +39,36 @@ void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
 void Random_Position (sprite_t *sprite)
 {
   int i;
+  int repositionnement = 0; //if an ast is called, the second after it's not at the same position
+  if (*Random_Position_activated == true){
+    //printf ("true\n");
+    repositionnement = *temps_actuel;
+      *Random_Position_activated = false;
+  }
   
   srand(time(NULL));
   i = rand()%(4);
   
   if (i == 0){
-  sprite->x = rand()%(SCREEN_WIDTH);
+  sprite->x = rand()%(SCREEN_WIDTH + repositionnement);
   sprite->y = 0;
   }
   if (i == 1){
-    sprite->x = rand()%(SCREEN_WIDTH);
+    sprite->x = rand()%(SCREEN_WIDTH + repositionnement);
     sprite->y = SCREEN_HEIGHT;
   }
   if (i == 2){
     sprite->x = 0;
-    sprite->y = rand()%(SCREEN_HEIGHT);
+    sprite->y = rand()%(SCREEN_HEIGHT + repositionnement);
   }
   if (i == 3){
     sprite->x = SCREEN_WIDTH;
-    sprite->y = rand()%(SCREEN_HEIGHT);
+    sprite->y = rand()%(SCREEN_HEIGHT + repositionnement);
+  }
+  if (repositionnement == 0){
+    *Random_Position_activated = true;
   }
 }
-
 /*Set a random direction at a constant speed */
 void Random_Direction(sprite_t *sprite, float vitesse)
 {
@@ -78,12 +99,18 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
 }
   //big_ast
   if(type == 1){
-    sprite->current = INIT_ROTATION;
-    sprite->size = BIG_AST_SIZE;
     SetUpPosition(sprite, sprite_picture);
   }
-    
-
+  //norm_ast
+  if(type == 2){
+    SetUpPosition(sprite, sprite_picture);
+  }
+  //small_ast
+  if(type == 3){
+    printf("in sprite init :sprite type : %d \n",sprite->type);
+    SetUpPosition(sprite, sprite_picture);
+  }
+  
 }
 /*the animation of the sprite turn */
 void sprite_turn_left(sprite_t *sprite)
@@ -122,8 +149,7 @@ void sprite_move(sprite_t *sprite)
   sprite->image.x = sprite->size * sprite->current;
   }
 
-  if (sprite->type == 1){
-    
+  if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){
     sprite->image.y = 0;
     sprite->image.w = sprite->size;
     sprite->image.h = sprite->size;
@@ -149,7 +175,7 @@ void sprite_boost(sprite_t *sprite, float accel)
     if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 10 * M_PI / 180)))
       sprite->vy -= accel * (-sin(sprite->current * 10 * M_PI / 180));
   }
-  if (sprite->type == 1){
+  if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){
     Random_Direction(sprite, accel);
   }
 }
@@ -182,8 +208,8 @@ SDL_Surface* download_sprite_(char *nomSprite)
 /*init SDL-Surface with picture, set up colorkey for each.*/
 void downloadsprite(int *colorkey)
 {
-
- 
+  small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
+  norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
   spaceship = download_sprite_("greenship-v1.bmp");
   background = download_sprite_("backgroundlvl1.bmp");
@@ -191,4 +217,6 @@ void downloadsprite(int *colorkey)
   SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
   *colorkey = SDL_MapRGB(screen->format, 0, 255, 255);
     SDL_SetColorKey(big_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
+    SDL_SetColorKey(norm_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
+    SDL_SetColorKey(small_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
 }
