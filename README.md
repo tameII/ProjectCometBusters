@@ -12,6 +12,50 @@ Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
 
 la v.0.5 sera quand les astéroides seront bien implémentés
 
+Update v.0.435: (Mathieu Levy)
+
+-Dans struct sprite_t :
+
+--Ajout de int numero_object:
+
+---Permet de connaitre le numero de l'objet demandé.
+
+--- est-ce vraiment utile ? comment s'en servir efficacement?
+
+--Ajout de nombre_max;
+
+---ça c'est très utile.
+
+---Donne le nombre max possible de sprite du type demandé.
+
+---Pour l'instant me sert pour kill_ast (voir ci dessous).
+
+---Je vais peut être améliorer d'autres fonctions grace à ça.
+
+-Dans sprite_init :
+
+--Lors de l'appel de la fonction on doit
+
+--donner le nombre max de sprite prévu.
+
+--suite logique de l'ajout de nombre_max. 
+
+--Ajout de le l'initialisation de numero_object.
+
+-Ajout de la procédure kill_ast:
+--Qui prend un sprite_t, un int et un bool.
+--le int permet de positionner le curseur dans le tableau.
+--le bool doit être initialisé a false au début.
+--Il indique si l'astéroide est détruit ou pas.
+--Utilise la procédure kill créé precedemment.
+--Fonctionne pour gros, normal, petit asteroide.
+--Cette fonction pourrait servir pour d'autre tableaux de sprites.
+--Du coup on la renommera au pire.
+
+-Dans HandleEvent:
+--press k to test kill_ast 
+--Remplacez le numero pour tester les différents trucs.
+
 Update v.0.430: (Mathieu Levy)
 Allelujah
 
