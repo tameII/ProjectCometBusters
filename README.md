@@ -6,13 +6,47 @@ This is a project from two L1 informatique from fac des sciences et technologie 
 CHANGELOG:
 ----
 
-Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )
-Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
-(et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).
+Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )  
+Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.  
+(et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).  
 
-la v.0.5 sera quand les astéroides seront bien implémentés.
--
-Update v.0.435: (Mathieu Levy).
+la v.0.5 sera quand les astéroides seront bien implémentés.  
+
+--------
+
+Update v.0.436: (Mathieu Levy, 21/04/2017:23h55)  
+
+- the global variable *temps_actuel:  
+ -- is isn't used with SDL_GetTick for the time being.  
+
+- in kill_ast:  
+--Bug fixed:  
+---Fixed the capacity of kill when just one ast is init  
+---Add a security, so no prob if we forgot to init something (see explication after)  
+
+- in main  
+-- Now we init all ast before the while  
+-- so if no ast is on screen, the kill_ast dont overrun the memory.  
+
+- in main-while  
+-- add procedure CreateAst:  
+--- take 3 sprite_t : big, norm and small ast.  
+
+- Utilisation of SDL_GetTick :  
+--There is some issue i don't understand:  
+--In the while i call CreateAst, in Create Ast, when the SDL_GetTick = 
+1000 for exemple i create an ast. But the fonction is called twice in a same milisecond (i think). So i prefer to use a personal variable who count +1 for each turn of while.   
+
+- in HandleEvent :  
+-- J'ai fait joujou.  
+-- when press "k" : a random ast is chosen and destroyed from all ast.  
+
+- in Random_Position:  
+-- some modification was held.  
+-- i try to do a good random position,this will get better with time.  
+
+
+Update v.0.435: (Mathieu Levy, 21/04/2017).
 
 - Dans struct sprite_t :  
 -- Ajout de int numero_object:  

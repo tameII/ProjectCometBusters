@@ -41,28 +41,28 @@ void Random_Position (sprite_t *sprite)
   int i;
   int repositionnement = 0; //if an ast is called, the second after it's not at the same position
   if (*Random_Position_activated == true){
-    repositionnement = *temps_actuel;
+    repositionnement = *temps_actuel+18749;
       *Random_Position_activated = false;
   }
   
   srand(time(NULL));
-  i = rand()%(4);
+  i = (rand()+repositionnement)%(4);
   
   if (i == 0){
-  sprite->x = rand()%(SCREEN_WIDTH + repositionnement);
+    sprite->x = (rand()+repositionnement)%(SCREEN_WIDTH);
   sprite->y = 0;
   }
   if (i == 1){
-    sprite->x = rand()%(SCREEN_WIDTH + repositionnement);
+    sprite->x = (rand()+repositionnement)%(SCREEN_WIDTH);
     sprite->y = SCREEN_HEIGHT;
   }
   if (i == 2){
     sprite->x = 0;
-    sprite->y = rand()%(SCREEN_HEIGHT + repositionnement);
+    sprite->y = (rand()+repositionnement)%(SCREEN_HEIGHT);
   }
   if (i == 3){
     sprite->x = SCREEN_WIDTH;
-    sprite->y = rand()%(SCREEN_HEIGHT + repositionnement);
+    sprite->y = (rand()+repositionnement)%(SCREEN_HEIGHT);
   }
   if (repositionnement == 0){
     *Random_Position_activated = true;
@@ -99,11 +99,12 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
 }
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
-    printf("nbBigAst : %d \n",*nbBigAst);
+    //printf("nbBigAst : %d \n",*nbBigAst);
     sprite->numero_object = *nbBigAst;
     SetUpPosition(sprite, sprite_picture);
   }
   if(type == 2){
+    //printf(nbNormAst : %d \n", *nbNormAst);
     sprite->numero_object = *nbNormAst;
     SetUpPosition(sprite, sprite_picture);
   }
