@@ -60,7 +60,7 @@
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background;
 int *nbBigAst, *nbNormAst, *nbSmallAst;
 bool *Random_Position_activated; //the function is activated?
-int *temps_actuel; //used with SDL_GetTick.
+int *temps_actuel; 
 
 struct Sprite_t{
   int type;
