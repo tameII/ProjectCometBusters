@@ -3,7 +3,7 @@ This is a project from two L1 informatique from fac des sciences et technologie 
 
 
 ----
-##CHANGELOG:
+CHANGELOG:
 ----
 
 Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )
@@ -14,8 +14,8 @@ la v.0.5 sera quand les astéroides seront bien implémentés.
 -
 Update v.0.435: (Mathieu Levy).
 
-*Dans struct sprite_t :
-'*Ajout de int numero_object:
+- Dans struct sprite_t :
+-- Ajout de int numero_object:
 ''*Permet de connaitre le numero de l'objet demandé.
 '''*est-ce vraiment utile ? comment s'en servir efficacement?
 ''*Ajout de nombre_max;
