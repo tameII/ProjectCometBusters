@@ -13,19 +13,19 @@ void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
     surface->clip_rect.y = sprite->y;
     break;
   case 1:
-    //printf("sprite type : %d \n",sprite->type);
+    //printf("in SUPos: sprite type : %d \n",sprite->type);
     Random_Position(sprite);
     surface->clip_rect.x = sprite->x;
     surface->clip_rect.y = sprite->y;
     break;
   case 2:
-    //printf("sprite type : %d \n",sprite->type);
+    //printf("in SUPos: sprite type : %d \n",sprite->type);
     Random_Position(sprite);
     surface->clip_rect.x = sprite->x;
     surface->clip_rect.y = sprite->y;
     break;
   case 3:
-    printf("in SU Position : sprite type : %d \n",sprite->type);
+    //printf("in SUPos : sprite type : %d \n",sprite->type);
     Random_Position(sprite);
     surface->clip_rect.x = sprite->x;
     surface->clip_rect.y = sprite->y;
@@ -41,7 +41,6 @@ void Random_Position (sprite_t *sprite)
   int i;
   int repositionnement = 0; //if an ast is called, the second after it's not at the same position
   if (*Random_Position_activated == true){
-    //printf ("true\n");
     repositionnement = *temps_actuel;
       *Random_Position_activated = false;
   }
@@ -78,7 +77,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
   sprite->vy += vitesse * (-sin(sprite->current  * 10 * M_PI / 180));  
 }
 
-void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num)
+void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite)
 {
   sprite->type = type;
   sprite->col = sprite_picture->clip_rect.x;
@@ -92,25 +91,27 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
   sprite->vy = 0;
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
-  //ship
+  sprite->nombre_max = nombre_max_sprite;
+  /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
     SetUpPosition(sprite, sprite_picture);
 }
-  //big_ast
-  if(type == 1){
+  /*Big, Normal, Small Ast*/
+  if(type == 1 ){
+    printf("nbBigAst : %d \n",*nbBigAst);
+    sprite->numero_object = *nbBigAst;
     SetUpPosition(sprite, sprite_picture);
   }
-  //norm_ast
   if(type == 2){
+    sprite->numero_object = *nbNormAst;
     SetUpPosition(sprite, sprite_picture);
   }
-  //small_ast
   if(type == 3){
-    printf("in sprite init :sprite type : %d \n",sprite->type);
+    sprite->numero_object = *nbSmallAst;
     SetUpPosition(sprite, sprite_picture);
   }
-  
+
 }
 /*the animation of the sprite turn */
 void sprite_turn_left(sprite_t *sprite)
@@ -155,7 +156,7 @@ void sprite_move(sprite_t *sprite)
     sprite->image.h = sprite->size;
     sprite->image.x = sprite->size * sprite->current;
     sprite->decompte += 1;
-    if (sprite->decompte > 100){
+    if (sprite->decompte > 80){
       sprite_turn_left(sprite);
       sprite->decompte = 0;
       

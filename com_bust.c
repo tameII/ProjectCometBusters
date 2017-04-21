@@ -1,10 +1,11 @@
 #include "physique.h"
 
+
 /*Create Small Ast*/
 void CreateSmallAst(sprite_t *small_ast)
 {
   if(*nbSmallAst < NB_MAX_SMALL_AST){
-    sprite_init(&small_ast[*nbSmallAst], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE);
+    sprite_init(&small_ast[*nbSmallAst], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
     sprite_boost(&small_ast[*nbSmallAst], VIT_SMALL_AST);
     *nbSmallAst += 1;
   }
@@ -15,7 +16,7 @@ void CreateSmallAst(sprite_t *small_ast)
 void CreateNormAst(sprite_t *norm_ast)
 {
   if (*nbNormAst < NB_MAX_NORM_AST){
-    sprite_init(&norm_ast[*nbNormAst], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE);
+    sprite_init(&norm_ast[*nbNormAst], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
     sprite_boost(&norm_ast[*nbNormAst], VIT_NORM_AST);
     *nbNormAst += 1;
   }
@@ -27,7 +28,7 @@ void CreateBigAst(sprite_t *big_ast)
 {
  
   if (*nbBigAst < NB_MAX_BIG_AST){
-    sprite_init(&big_ast[*nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE);
+    sprite_init(&big_ast[*nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
     sprite_boost(&big_ast[*nbBigAst], VIT_BIG_AST);
     *nbBigAst += 1;
   }
@@ -35,7 +36,7 @@ void CreateBigAst(sprite_t *big_ast)
 }
 
 
-/*Kill asteroid*/
+/*Kill, The cursor on the tab recule*/
 void kill(int *nb)
 {
   if (*nb>0){
@@ -43,6 +44,39 @@ void kill(int *nb)
     }
   
 }
+/*Kill the ast[numero], need to Init the bool at false at begun.*/
+void kill_ast(sprite_t *ast, int numero, bool killed)
+{
+  if (numero < 0){
+    printf("kill_ast : maaan, seriously ?  \n");
+    killed = true;
+  }
+  if (numero > (ast->nombre_max-1)){
+    printf("Kill_ast : Number asked is overatted. \n");
+    killed = true;
+  }
+  if (numero == (ast->nombre_max-1)){
+    switch (ast->type){
+    case 1:
+      kill(nbBigAst);
+      break;
+    case 2:
+      kill(nbNormAst);
+      break;
+    case 3:
+      kill(nbSmallAst);
+      break;
+    }
+    killed = true;
+  }
+  if (killed == false){
+  ast[numero] = ast[(numero+1)];
+  kill_ast(ast, numero+1, false);
+  }
+}
+
+
+
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
    - quit the game?
@@ -61,7 +95,7 @@ void HandleEvent(SDL_Event event,
     *quit = 1;
     break;
     
-    /* handle the keyboard + Create_Big_Comet*/
+    /* handle the keyboard*/
   case SDL_KEYDOWN:
     switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
@@ -78,6 +112,11 @@ void HandleEvent(SDL_Event event,
       *accel = CONS_ACCEL;
       break;
     case SDLK_DOWN:
+      break;
+    case SDLK_k:
+      printf("touch k pressed \n");
+      kill_ast(big_ast, 0, false);
+      SDL_Delay(100);
       break;
     case SDLK_u:
       printf("touch u pressed \n");
@@ -120,9 +159,10 @@ int main(int argc, char* argv[])
   
   int colorkey;
   int nombreBigAst = 0, nombreNormAst = 0, nombreSmallAst = 0;
-  nbBigAst = &nombreBigAst; /*pointeur général qui permet d'être utilisé partout.*/
+  nbBigAst = &nombreBigAst; /*pointeur général*/
   nbNormAst = &nombreNormAst;
   nbSmallAst = &nombreSmallAst;
+  /*Definition des différents sprites*/
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
   sprite_t norm_ast[NB_MAX_NORM_AST];
@@ -146,11 +186,10 @@ int main(int argc, char* argv[])
   downloadsprite(&colorkey);
  
   /*set up position of ship*/
-  sprite_init(&space_ship,0,spaceship,SPACE_SHIP_SIZE,NB_SPRITE);
+  sprite_init(&space_ship,0,spaceship,SPACE_SHIP_SIZE,NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
 
 
   int gameover = 0;
-  /* Define the float position of the ship */
   
   /* main loop: check events and re-draw the window until the end */
   while (!gameover)
@@ -171,8 +210,6 @@ int main(int argc, char* argv[])
       SDL_BlitSurface(background, NULL, screen, NULL);
       
       
-      
-      /* Draw the selected image of the sprite at the right position */
       {
 	/*position, mouvement et acceleration des sprites*/
 	sprite_boost(&space_ship, accel);
