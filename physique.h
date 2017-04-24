@@ -46,18 +46,26 @@
 #define VIT_BIG_AST     0.02
 /*Norm ast:*/
 #define NORM_AST_SIZE   32
-#define NB_MAX_NORM_AST     7
+#define NB_MAX_NORM_AST     15
 #define VIT_NORM_AST    0.05
 /*Small ast:*/
 #define SMALL_AST_SIZE  16
-#define NB_MAX_SMALL_AST    10
+#define NB_MAX_SMALL_AST    30
 #define VIT_SMALL_AST   0.1
 /*Number of type of asteroid => big, norm, small at this moment*/
 #define NB_TYPE_AST 3
 /*in the ast we have 32 pictures*/
 #define NB_AST_SPRITE 32
 
+//////////
+/*EXPLOSION:*/
+#define EXPLOSION_SIZE     64
+#define ANIM_EXPLOSION_NUM 12
+#define NB_MAX_EXPLOSION   1
+
+
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background;
+SDL_Surface *explosion_picture; //stocke l'image de l'explosion ;) 
 int *nbBigAst, *nbNormAst, *nbSmallAst;
 bool *Random_Position_activated; //the function is activated?
 int *temps_actuel; 
@@ -82,12 +90,17 @@ struct Sprite_t{
 
 typedef struct Sprite_t sprite_t;
 
+/*in com_bust.c*/
 
+/*in physique.c*/
+
+bool kill_ast_param(int nombre_max, int numero);
 
 void SetUpPosition(sprite_t *sprite, SDL_Surface *surface);
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
 
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast);
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite);
 void sprite_turn_left(sprite_t *sprite);
 void sprite_turn_right(sprite_t *sprite);

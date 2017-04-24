@@ -13,6 +13,23 @@ Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
 la v.0.5 sera quand les astéroides seront bien implémentés.  
 
 --------
+Update v.0.440: (Mathieu Levy, 24/04/2017:20h54)  
+
+- Add function CreateExplosion:  
+  -- With a new sprite.  
+  -- Funny a mettre en place.  
+  -- press e to create an explosion youhou  
+
+- Fixed DivideAst:  
+  -- Hope no more problem will appear.  
+  -- and now you have ONE explosion when you divide ast  
+- Fixed KillAst:  
+  --Hope the same.  
+  
+- Il n'y a pas beaucoup d'écrit aujourd'hui mais les erreurs étaient fort nombreuses et je n'ai pas pris le temps de noter chacune.  
+
+Que pensez-vous d'une file pour gérer l'affichage des explosions ?  
+ça ferait une bonne expérience.
 
 Update v.0.436: (Mathieu Levy, 21/04/2017:23h55)  
 
