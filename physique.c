@@ -34,7 +34,7 @@ void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
     break;
   }
 }
-
+ 
 /*Set a random position on the edge of the grid*/
 void Random_Position (sprite_t *sprite)
 {
@@ -244,21 +244,23 @@ SDL_Surface* download_sprite_(char *nomSprite)
   return nom;
 }
 /*init SDL-Surface with picture, set up colorkey for each.*/
-void downloadsprite(int *colorkey)
+void downloadsprite()
 {
+  int colorkey;
   explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
   small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
   norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
   spaceship = download_sprite_("greenship-v1.bmp");
   background = download_sprite_("backgroundlvl1.bmp");
-  *colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-  SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
-  *colorkey = SDL_MapRGB(screen->format, 0, 255, 255);
-    SDL_SetColorKey(big_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
-    SDL_SetColorKey(norm_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
-    SDL_SetColorKey(small_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
-    SDL_SetColorKey(explosion_picture, SDL_SRCCOLORKEY | SDL_RLEACCEL, *colorkey);
+
+  colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
+  SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+  colorkey = SDL_MapRGB(screen->format, 0, 255, 255);
+    SDL_SetColorKey(big_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+    SDL_SetColorKey(norm_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+    SDL_SetColorKey(small_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+    SDL_SetColorKey(explosion_picture, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
 }
 
 ///////////////////////////////////////////////////////////////////

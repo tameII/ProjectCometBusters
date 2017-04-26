@@ -92,7 +92,7 @@ typedef struct Sprite_t sprite_t;
 
 /*in com_bust.c*/
 
-/*in physique.c*/
+/*in physique.c*/ 
 
 bool kill_ast_param(int nombre_max, int numero);
 
@@ -109,6 +109,6 @@ void sprite_boost(sprite_t *sprite, float accel);
 void hyperespace(sprite_t *sprite);
 
 SDL_Surface* download_sprite_(char *nomSprite);
-void downloadsprite(int *colorkey);
+void downloadsprite();
 
 #endif

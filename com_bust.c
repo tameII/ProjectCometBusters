@@ -136,67 +136,78 @@ void kill_ast(sprite_t *ast, int numero)
 
 
 /*Invert direction of sprite 2 */
-void InvertDirection(sprite_t *sprite1, sprite_t *sprite2){
-  //int vx = sprite1->vx;
-  //int vy = sprite1->vy;
-  
+void InvertDirection(sprite_t *sprite1, sprite_t *sprite2)
+{
   sprite2->vx = -sprite1->vx;
   sprite2->vy = -sprite1->vy;
 }
 
-/*Set Up sprie 1 at position sprite 2 */
-void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2){
-  printf("\n sprite1x: %f |  sprite1y : %f \n",  sprite1->x, sprite1->y);
-  printf("sprite2x: %f |  sprite2y : %f \n",  sprite2->x, sprite2->y);
+/*Set Up sprite 1 at position sprite 2 */
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
+{
   sprite1->x = sprite2->x;
   sprite1->y = sprite2->y;
-  printf("\n Changement effectué.\n\n");
-  printf("sprite1-x: %f |  sprite1-y : %f \n",  sprite1->x, sprite1->y);
-  printf("sprite2-x: %f |  sprite2-y : %f \n",  sprite2->x, sprite2->y);
 }
-
+/*Fonction qui divise l'astéroide demandé en deux plus petit. (pour l'instant)*/
 void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded)
 {
-  int numero = ast->numero_object;
+  int numero = ast->numero_object; 
   int type = ast->type;
   int nb_Big_Ast = *nbBigAst;
   int nb_Norm_Ast = *nbNormAst;
-  //int nb_Small_Ast = *nbSmallAst;
-  
-  
-  printf("Divide Ast : numero = %d \n",numero);
-  if(type == 1 && nb_Big_Ast > 0){
-    CreateNormAst(norm_ast);
-    SetUpAtPosition(&norm_ast[nb_Norm_Ast],ast);
-    if (nb_Norm_Ast+1 < NB_MAX_NORM_AST){
-    CreateNormAst(norm_ast);
-    SetUpAtPosition(&norm_ast[nb_Norm_Ast+1],ast);
-    InvertDirection(&norm_ast[nb_Norm_Ast],&norm_ast[nb_Norm_Ast+1]);
-    }
+  int nb_Small_Ast = *nbSmallAst;
+ 
+  //printf("Divide Ast : numero = %d \n",numero);
 
+  /*Si on demande gros Ast, et il y en a 1 :  * 
+   * Alors on créé un Norm Ast qu'on place    * 
+   *à la pos du gros.                         *
+   *Si  on demande norm Ast, et il y en a 1 : *
+   *Alors on créé un Small Ast qu'on place    *
+   *à la pos du normal.                       */
+ 
+  if(type == 1 && nb_Big_Ast > 0){  
+    CreateNormAst(norm_ast);                                             //Créé un norm ast
+    SetUpAtPosition(&norm_ast[nb_Norm_Ast], ast);                        //Met le premier norm ast a la position du gros ast.
+    if (nb_Norm_Ast+1 < NB_MAX_NORM_AST){                                //Si on peut créer un norm ast.
+      CreateNormAst(norm_ast);                                           //Créé un norm ast
+      SetUpAtPosition(&norm_ast[nb_Norm_Ast+1], ast);                    //Met le second norm ast a la pos du gros ast.
+      InvertDirection(&norm_ast[nb_Norm_Ast], &norm_ast[nb_Norm_Ast+1]); //lance les deux ast dans une direction opposée
+    }
+    *explosionNeeded = CreateExplosion(explosion, ast);                  //Créé une explosion a la position "ast"
+    kill_ast(ast, numero);                                               //tue l'"ast".
+  }
+  if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
+    printf("DivideAst : type 2, createsmallAst");
+    CreateAst(small_ast);
+    SetUpAtPosition(&small_ast[nb_Small_Ast], ast);
+    if (nb_Small_Ast+1 < NB_MAX_SMALL_AST){
+      CreateAst(small_ast);
+      SetUpAtPosition(&small_ast[nb_Small_Ast+1], ast);
+      InvertDirection(&small_ast[nb_Small_Ast], &small_ast[nb_Small_Ast+1]);
+    }
     *explosionNeeded = CreateExplosion(explosion, ast);
     kill_ast(ast, numero);
   }
-  
 }
-
+/*Créé un astéroide a l'aide de la variable globale temps actuel*/
 void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
-      if (*temps_actuel%11000 == 0){
-	//printf("temps actuel = %d \n",*temps_actuel);
-	//printf("CreateAst : Create new big ast \n");
-	CreateBigAst(big_ast);
-      }
-      if (*temps_actuel%7000 == 0){
-	//printf("temps actuel = %d \n",*temps_actuel);
-	//printf("CreateAst : Create new norm ast \n");
-	CreateNormAst(norm_ast);
-      }
-      if(*temps_actuel%4000 == 0){
-	//printf("temps actuel = %d \n",*temps_actuel);
-	//printf("CreateAst : Create new small ast \n");
-	CreateSmallAst(small_ast);
-      }
+  if (*temps_actuel%11000 == 0){                       //toute les 11000 tours de boucle un Gros Ast apparait
+    //printf("temps actuel = %d \n",*temps_actuel);    //des printf pour avoir une idée de tout les cb de temps
+    //printf("CreateAst : Create new big ast \n");     //
+    CreateBigAst(big_ast);                             //
+  }
+  if (*temps_actuel%7000 == 0){                        //toute les 7000 tours de boucle  un Norm Ast apparait
+    //printf("temps actuel = %d \n",*temps_actuel);    //
+    //printf("CreateAst : Create new norm ast \n");    //
+    CreateNormAst(norm_ast);                           //
+  }
+  if(*temps_actuel%4000 == 0){                         //toute les 4000 tours de boucle un Small Ast apparait
+    //printf("temps actuel = %d \n",*temps_actuel);    //
+    //printf("CreateAst : Create new small ast \n");   //
+    CreateSmallAst(small_ast);                         //
+  }
 
 }
 
@@ -250,7 +261,8 @@ void HandleEvent(SDL_Event event,
       break;
     case SDLK_l:
       printf("touch l pressed \n");
-      DivideAst(&big_ast[0], big_ast, norm_ast, small_ast, explosion, explosionNeeded);
+      DivideAst(&big_ast[1], big_ast, norm_ast, small_ast, explosion, explosionNeeded);
+      DivideAst(&norm_ast[0], big_ast, norm_ast, small_ast, explosion, explosionNeeded);
       SDL_Delay(100);
       break;
     case SDLK_k:
@@ -320,7 +332,7 @@ int main(int argc, char* argv[])
   /*permet de ne pas poper les astéroide au meme endroit a peu près quand on appuie longtemps*/
   bool Random_PositionActivated;
   Random_Position_activated = &Random_PositionActivated;
-  int colorkey;
+
   int nombreBigAst = 0, nombreNormAst = 0, nombreSmallAst = 0;
   nbBigAst = &nombreBigAst; /*pointeur général*/
   nbNormAst = &nombreNormAst;
@@ -345,7 +357,7 @@ int main(int argc, char* argv[])
   SDL_EnableKeyRepeat(10, 10);
 
   /*Download pictures of all sprites*/
-  downloadsprite(&colorkey);
+  downloadsprite();
 
   /*Initialise all sprite*/
   init_all_sprite(&space_ship, big_ast, norm_ast, small_ast);
