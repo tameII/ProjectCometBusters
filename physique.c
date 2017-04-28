@@ -118,6 +118,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
 
+
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
@@ -162,7 +163,8 @@ void sprite_turn_right(sprite_t *sprite)
 void sprite_move(sprite_t *sprite)
 {
   sprite->x += sprite->vx;
-  
+  //sprite->y += sprite->vy;
+
   hyperespace(sprite);
   
   sprite->col = sprite->x;
@@ -190,6 +192,12 @@ void sprite_move(sprite_t *sprite)
       sprite->decompte = 0;   
     }
   }
+  
+  if (sprite->type == 4){
+    sprite->decompte += 1;
+
+}
+  
   if (sprite->type == 5){
     sprite->image.y = 0;
     sprite->image.w = sprite->size;
@@ -212,6 +220,10 @@ void sprite_boost(sprite_t *sprite, float accel)
       sprite->vx -= accel * cos(sprite->current * 10 * M_PI / 180);
     if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 10 * M_PI / 180)))
       sprite->vy -= accel * (-sin(sprite->current * 10 * M_PI / 180));
+  }
+  if (sprite->type ==4){
+    sprite->vx += accel * cos(sprite->current  * 10 * M_PI / 180);
+    sprite->vy += accel * (-sin(sprite->current  * 10 * M_PI / 180));  
   }
   if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){
     Random_Direction(sprite, accel);
@@ -253,6 +265,7 @@ void downloadsprite()
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
   spaceship = download_sprite_("greenship-v1.bmp");
   background = download_sprite_("backgroundlvl1.bmp");
+  bullet = download_sprite_("bullet02.bmp");
 
   colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
   SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
@@ -261,6 +274,8 @@ void downloadsprite()
     SDL_SetColorKey(norm_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
     SDL_SetColorKey(small_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
     SDL_SetColorKey(explosion_picture, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+  colorkey = SDL_MapRGB(screen->format, 255, 125, 125);
+    SDL_SetColorKey(bullet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
 }
 
 ///////////////////////////////////////////////////////////////////
