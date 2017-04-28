@@ -63,10 +63,16 @@
 #define ANIM_EXPLOSION_NUM 12
 #define NB_MAX_EXPLOSION   1
 
+/*Projectiles*/
+#define NB_MAX_PIOU 2
+#define PIOU_SIZE 8
+#define VIT_NORM_PIOU 2
 
-SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background;
+
+
+SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion ;) 
-int *nbBigAst, *nbNormAst, *nbSmallAst;
+int *nbBigAst, *nbNormAst, *nbSmallAst, *nbtirs;
 bool *Random_Position_activated; //the function is activated?
 int *temps_actuel; 
 
@@ -90,7 +96,6 @@ struct Sprite_t{
 
 typedef struct Sprite_t sprite_t;
 
-/*in com_bust.c*/
 
 /*in physique.c*/ 
 
