@@ -214,6 +214,7 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship){
     sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, 1, 1);
     sprite_boost(&tirs[*nbtirs], VIT_NORM_PIOU);
     SetUpAtPosition(tirs, space_ship);
+    printf("Piou !\n");
     *nbtirs += 1;
   }
 } 
@@ -234,8 +235,7 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship){
 
   
 
-void HandleEvent(SDL_Event event,
-		 int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded, sprite_t *tirs)
+void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded, sprite_t *tirs)
 {
   int i,j;
   switch (event.type) {
@@ -371,7 +371,7 @@ int main(int argc, char* argv[])
   /*Initialise all sprite*/
   init_all_sprite(&space_ship, big_ast, norm_ast, small_ast);
   sprite_init(&explosion,  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPLOSION);
-  sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, &space_ship.current, 1);
+  sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, space_ship.current, 1);
 
   int gameover = 0;
   bool explosionNeeded = true;
@@ -385,7 +385,7 @@ int main(int argc, char* argv[])
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, &tirs);
+	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, tirs);
       }
 
 
@@ -441,7 +441,7 @@ int main(int argc, char* argv[])
       for (i=0; i<*nbtirs; i++) {
 	if (*nbtirs>0){
 	  sprite_move(&tirs[i]);
-	  SDLBlitSurface(bullet, &tirs[i].image, screen, &tirs[i].position);
+	  SDL_BlitSurface(bullet, &tirs[i].image, screen, &tirs[i].position);
 	}
       }
       /* update the screen */

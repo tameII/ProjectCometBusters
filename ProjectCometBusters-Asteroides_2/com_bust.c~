@@ -207,6 +207,16 @@ bool CreateExplosion(sprite_t *explosion, sprite_t *sprite)
   
   return BOOOOOOOOOOM;
 }
+
+//creation of projectile
+void create_piou (sprite_t* tirs, sprite_t* space_ship){
+  if (*nbtirs<NB_MAX_PIOU){
+    sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, 1, 1);
+    sprite_boost(&tirs[*nbtirs], VIT_NORM_PIOU);
+    SetUpAtPosition(tirs, space_ship);
+    *nbtirs += 1;
+  }
+} 
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
    - quit the game?
@@ -219,9 +229,13 @@ bool CreateExplosion(sprite_t *explosion, sprite_t *sprite)
    - p to kill the last small, norm, big ast created
    - k to use kill_ast
    - l to divide an ast.
+   - t to create projectiles
 */
+
+  
+
 void HandleEvent(SDL_Event event,
-		 int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded)
+		 int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded, sprite_t *tirs)
 {
   int i,j;
   switch (event.type) {
@@ -301,6 +315,10 @@ void HandleEvent(SDL_Event event,
       printf("touch e pressed \n");
       *explosionNeeded = CreateExplosion(explosion, &big_ast[0]);
       SDL_Delay(10);
+    case SDLK_t:
+      printf("touch t pressed \n");
+      create_piou(tirs,space_ship);
+      SDL_Delay(100);
     default:
       break;
     }
@@ -321,16 +339,19 @@ int main(int argc, char* argv[])
   bool Random_PositionActivated;
   Random_Position_activated = &Random_PositionActivated;
   int colorkey;
-  int nombreBigAst = 0, nombreNormAst = 0, nombreSmallAst = 0;
+  int nombreBigAst = 0, nombreNormAst = 0, nombreSmallAst = 0, nombretirs = 0;
   nbBigAst = &nombreBigAst; /*pointeur général*/
   nbNormAst = &nombreNormAst;
   nbSmallAst = &nombreSmallAst;
+  nbtirs = &nombretirs;
   /*Definition des différents sprites*/
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
   sprite_t norm_ast[NB_MAX_NORM_AST];
   sprite_t small_ast[NB_MAX_SMALL_AST]; 
   sprite_t explosion;
+  sprite_t tirs[NB_MAX_PIOU];
+  
 
   /* initialize SDL */
   SDL_Init(SDL_INIT_VIDEO);
@@ -350,6 +371,7 @@ int main(int argc, char* argv[])
   /*Initialise all sprite*/
   init_all_sprite(&space_ship, big_ast, norm_ast, small_ast);
   sprite_init(&explosion,  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPLOSION);
+  sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, &space_ship.current, 1);
 
   int gameover = 0;
   bool explosionNeeded = true;
@@ -363,7 +385,7 @@ int main(int argc, char* argv[])
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded);
+	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, &tirs);
       }
 
 
@@ -415,7 +437,13 @@ int main(int argc, char* argv[])
 	  explosion.decompte = 0;
 	}
       }
-      
+      /*Draw projectile (piou)*/
+      for (i=0; i<*nbtirs; i++) {
+	if (*nbtirs>0){
+	  sprite_move(&tirs[i]);
+	  SDLBlitSurface(bullet, &tirs[i].image, screen, &tirs[i].position);
+	}
+      }
       /* update the screen */
       SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }
