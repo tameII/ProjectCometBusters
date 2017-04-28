@@ -1,77 +1,269 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL.h>
-
 #include "physique.h"
 
-/* Size of the window */
-#define SCREEN_WIDTH    640
-#define SCREEN_HEIGHT   480
-
-/* In the sprite, we have 36 images of a 32x32 picture */
-#define NB_SPRITE       36
-
-/* Size of ship: */
-#define SPRITE_SIZE     32
-/* Size of projectiles */
-#define PROJECT_SIZE    8
-/* Size and number of asteroids, je sais que c'est beaucoup pour l'instant :p */
-#define BIG_AST_SIZE    64
-#define NB_BIG_AST      5
-#define VIT_BIG_AST     0.02
-
-#define NORM_AST_SIZE   32
-#define NB_NORM_AST     10
-#define VIT_NORM_AST    0.05
-
-#define SMALL_AST_SIZE  16
-#define NB_SMALL_AST    20
-#define VIT_SMALL_AST   0.1
-/*in the ast, for now we have just 1 picture of 64*64*/
-#define NB_BIG_AST_SPRITE 1
-
-/* Nb of life at the start */
-#define MAX_LIFE        5
-/* Points added to the score */
-#define BIG_AST_POINT   20
-#define NORM_AST_POINT  50
-#define SMALL_AST_POINT 100
-
-/* Order of the different directions in the picture: */
-#define INIT_DIR        9
-#define ANGLE_DIR       10
-
-/* Speed of ship */
-#define CONS_ACCEL      0.01
+bool CreateExplosion(sprite_t *explosion, sprite_t *sprite);
 
 
-/*Create comet size 64*64*/
-void Create_Big_Comet(sprite_t *big_ast,SDL_Surface *big_comet, SDL_Rect *bigCometPosition )
+/*Create Small Ast*/
+void CreateSmallAst(sprite_t *small_ast)
 {
-
-  Random_Position(bigCometPosition);
-  big_comet->clip_rect.x = bigCometPosition->x;
-  big_comet->clip_rect.y = bigCometPosition->y;
+  if(*nbSmallAst < NB_MAX_SMALL_AST){
+    sprite_init(&small_ast[*nbSmallAst], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
+    sprite_boost(&small_ast[*nbSmallAst], VIT_SMALL_AST);
+    *nbSmallAst += 1;
+  }
   
-  sprite_init(big_ast,1,big_comet,BIG_AST_SIZE,NB_BIG_AST_SPRITE);
-  sprite_boost(big_ast, VIT_BIG_AST);
 }
+
+/*Create Norm Ast*/
+void CreateNormAst(sprite_t *norm_ast)
+{
+  if (*nbNormAst < NB_MAX_NORM_AST){
+    sprite_init(&norm_ast[*nbNormAst], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
+    sprite_boost(&norm_ast[*nbNormAst], VIT_NORM_AST);
+    *nbNormAst += 1;
+  }
+  
+}
+
+/*Create comet size 64*64,*/
+void CreateBigAst(sprite_t *big_ast)
+{
+ 
+  if (*nbBigAst < NB_MAX_BIG_AST){
+    sprite_init(&big_ast[*nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
+    sprite_boost(&big_ast[*nbBigAst], VIT_BIG_AST);
+    *nbBigAst += 1;
+  }
+  
+}
+
+/*Create an ast*/
+void CreateAst(sprite_t *ast){
+  if (ast->type == 1){
+    CreateBigAst(ast);
+  }
+  if (ast->type == 2){
+    CreateNormAst(ast);
+  }
+  if (ast->type == 3){
+    CreateSmallAst(ast);
+  }
+    
+}
+
+
+/*Kill, The cursor on the tab recule*/
+void kill(int *nb)
+{
+  if (*nb>0){
+    *nb -= 1;
+    }
+  
+}
+/*Donne le nombre d'astéroide présent sur l'écran (retourne un pointeur)*/
+int gimmeIsNb(sprite_t *ast)
+{
+  int type = ast->type;
+  
+  switch (type){
+  case 0:
+    return 1;
+    break;
+  case 1:
+    return *nbBigAst;
+    break;
+  case 2:
+    return *nbNormAst;
+    break;
+  case 3:
+    return *nbSmallAst;
+    break;
+  default:
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3. \n type asked :%d \n",type);
+    return 0;
+    break;
+  }
+}
+
+
+/*Kill the ast[numero]*/
+void kill_ast(sprite_t *ast, int numero)
+{
+  bool killed = false;
+  int type = ast->type;
+  int nombre_max = ast->nombre_max;
+  nombre_max -= 1;
+  int nbAst;
+  nbAst = gimmeIsNb(ast); 
+  if (nbAst > 0){
+  nbAst -= 1;
+  }
+  killed = kill_ast_param(nombre_max, numero);
+ 
+  while (killed == false){
+    //printf("kill_ast : numero : %d \n",numero);
+    //printf("kill ast : nbAst : %d  \n",nbAst);
+    //printf("kill ast : nb_max : %d \n",nombre_max);
+    if (numero >= nbAst){
+      switch (type) {
+      case 1:
+	kill(nbBigAst);
+	killed = true;
+	break;
+      case 2:
+	kill(nbNormAst);
+	killed = true;
+	break;
+      case 3:
+	kill(nbSmallAst);
+	killed = true;
+	break;
+      default:
+	printf("Kill_ast : wrong type. (you asked %d)",ast->type);
+	killed = true;
+	break;
+      }   
+    }
+    if (killed == false){
+      ast[numero] = ast[numero+1];
+      if (ast[numero].numero_object > 0){
+      ast[numero].numero_object -= 1;
+      }
+      numero += 1;
+    }
+  }
+  
+}
+
+
+/*Invert direction of sprite 2 */
+void InvertDirection(sprite_t *sprite1, sprite_t *sprite2){
+
+  sprite2->vx = -sprite1->vx;
+  sprite2->vy = -sprite1->vy;
+}
+
+/*Set Up sprie 1 at position sprite 2 */
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x;
+  sprite1->y = sprite2->y;
+}
+
+/*Fonction qui divise l'astéroide demandé en deux plus petit. (pour l'instant)*/
+void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded)
+{
+  int numero = ast->numero_object; 
+  int type = ast->type;
+  int nb_Big_Ast = *nbBigAst;
+  int nb_Norm_Ast = *nbNormAst;
+  int nb_Small_Ast = *nbSmallAst;
+ 
+  //printf("Divide Ast : numero = %d \n",numero);
+
+  /*Si on demande gros Ast, et il y en a 1 :  * 
+   * Alors on créé un Norm Ast qu'on place    * 
+   *à la pos du gros.                         *
+   *Si  on demande norm Ast, et il y en a 1 : *
+   *Alors on créé un Small Ast qu'on place    *
+   *à la pos du normal.                       */
+ 
+  if(type == 1 && nb_Big_Ast > 0){  
+    CreateNormAst(norm_ast);                                             //Créé un norm ast
+    SetUpAtPosition(&norm_ast[nb_Norm_Ast], ast);                        //Met le premier norm ast a la position du gros ast.
+    if (nb_Norm_Ast+1 < NB_MAX_NORM_AST){                                //Si on peut créer un second norm ast.
+      CreateNormAst(norm_ast);                                           //Créé un norm ast
+      SetUpAtPosition(&norm_ast[nb_Norm_Ast+1], ast);                    //Met le second norm ast a la pos du gros ast.
+      InvertDirection(&norm_ast[nb_Norm_Ast], &norm_ast[nb_Norm_Ast+1]); //lance les deux ast dans une direction opposée
+    }
+    *explosionNeeded = CreateExplosion(explosion, ast);                  //Créé une explosion a la position "ast"
+    kill_ast(ast, numero);                                               //tue l'"ast".
+  }
+  if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
+    printf("DivideAst : type 2, createsmallAst");
+    CreateAst(small_ast);
+    SetUpAtPosition(&small_ast[nb_Small_Ast], ast);
+    if (nb_Small_Ast+1 < NB_MAX_SMALL_AST){
+      CreateAst(small_ast);
+      SetUpAtPosition(&small_ast[nb_Small_Ast+1], ast);
+      InvertDirection(&small_ast[nb_Small_Ast], &small_ast[nb_Small_Ast+1]);
+    }
+    *explosionNeeded = CreateExplosion(explosion, ast);
+    kill_ast(ast, numero);
+  }
+}
+/*Créé un astéroide a l'aide de la variable globale temps actuel*/
+void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+{
+  if (*temps_actuel%11000 == 0){                       //toute les 11000 tours de boucle un Gros Ast apparait
+    //printf("temps actuel = %d \n",*temps_actuel);    //des printf pour avoir une idée de tout les cb de temps
+    //printf("CreateAst : Create new big ast \n");     //
+    CreateBigAst(big_ast);                             //
+  }
+  if (*temps_actuel%7000 == 0){                        //toute les 7000 tours de boucle  un Norm Ast apparait
+    //printf("temps actuel = %d \n",*temps_actuel);    //
+    //printf("CreateAst : Create new norm ast \n");    //
+    CreateNormAst(norm_ast);                           //
+  }
+  if(*temps_actuel%4000 == 0){                         //toute les 4000 tours de boucle un Small Ast apparait
+    //printf("temps actuel = %d \n",*temps_actuel);    //
+    //printf("CreateAst : Create new small ast \n");   //
+    CreateSmallAst(small_ast);                         //
+  }
+
+}
+
+
+
+bool CreateExplosion(sprite_t *explosion, sprite_t *sprite)
+{
+  bool BOOOOOOOOOOM = true;
+  SetUpAtPosition(explosion, sprite);
+  
+  return BOOOOOOOOOOM;
+}
+
+//creation of projectile
+void create_piou (sprite_t* tirs, sprite_t* space_ship){
+  if (*nbtirs<NB_MAX_PIOU){
+    sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, 1, 1);
+    printf("create_piou : tirs : current = %d \n",tirs->current);
+    printf("space_ship current: %d \n", space_ship->current);
+    tirs->current = space_ship->current;
+    printf("tir current :  %d \n",tirs->current);
+    sprite_boost(&tirs[*nbtirs], VIT_NORM_PIOU);
+    SetUpAtPosition(tirs, space_ship);
+    printf("Piou !\n");
+    *nbtirs += 1;
+  }
+} 
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
    - quit the game?
    - use left/right to change the orientation of the ship
    - use up to move on the ship to the right direction
+   - down is not defined right now
+   - o to create a new big asteroide
+   - i to create a new norm ast
+   - u to create a new small ast
+   - p to kill the last small, norm, big ast created
+   - k to use kill_ast
+   - l to divide an ast.
+   - t to create projectiles
 */
-void HandleEvent(SDL_Event event,
-		 int *quit, sprite_t *sprite,double *accel,sprite_t *big_ast,SDL_Surface *big_comet, SDL_Rect *bigCometPosition)
+
+  
+
+void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded, sprite_t *tirs)
 {
+  int i,j;
   switch (event.type) {
     /* close button clicked */
   case SDL_QUIT:
     *quit = 1;
     break;
     
-    /* handle the keyboard + Create_Big_Comet*/
+    /* handle the keyboard*/
   case SDL_KEYDOWN:
     switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
@@ -79,39 +271,108 @@ void HandleEvent(SDL_Event event,
       *quit = 1;
       break;
     case SDLK_LEFT:
-      sprite_turn_left(sprite);
+      sprite_turn_left(space_ship);
       break;
     case SDLK_RIGHT:
-      sprite_turn_right(sprite);
+      sprite_turn_right(space_ship);
       break;
     case SDLK_UP:
       *accel = CONS_ACCEL;
       break;
     case SDLK_DOWN:
       break;
+    case SDLK_l:
+      printf("touch l pressed \n");
+      DivideAst(&big_ast[0], big_ast, norm_ast, small_ast, explosion, explosionNeeded);
+      SDL_Delay(100);
+      break;
+    case SDLK_k:
+      printf("touch k pressed \n");
+      
+      srand(time(NULL));
+      i = rand()%(3);
+      if (i == 0){
+	j = rand()%(NB_MAX_BIG_AST-1);
+	kill_ast(big_ast, j);
+      }
+      if (i == 1){
+	j = rand()%(NB_MAX_NORM_AST);
+	kill_ast(norm_ast, j);
+      }
+      if (i == 2){
+	j = rand()%(NB_MAX_SMALL_AST);
+	kill_ast(small_ast, j);
+      }
+      printf("i : %d, j : %d \n",i,j);
+      
+      //kill_ast(big_ast, 0);
+      SDL_Delay(100);
+      break;
+    case SDLK_u:
+      printf("touch u pressed \n");
+      CreateAst(small_ast);
+      SDL_Delay(100);
+      break;
+    case SDLK_i:
+      printf("Touch i pressed \n");
+      CreateAst(norm_ast);
+      SDL_Delay(100);
+      break;
     case SDLK_o:
-      Create_Big_Comet(big_ast,big_comet, bigCometPosition);
-  
+      printf("Touch o pressed\n");
+      CreateAst(big_ast);
+      SDL_Delay(100); //delai de 100 ms pour pas faire ooooooooooo
+      break;
+    case SDLK_p:
+      printf("Touch p pressed \n");
+      kill(nbBigAst);
+      kill(nbNormAst);
+      kill(nbSmallAst);
+      kill(nbtirs);
+      SDL_Delay(100);
+      break;
+    case SDLK_e:
+      printf("touch e pressed \n");
+      *explosionNeeded = CreateExplosion(explosion, &big_ast[0]);
+      SDL_Delay(10);
+    case SDLK_t:
+      printf("touch t pressed \n");
+      create_piou(tirs,space_ship);
+      SDL_Delay(100);
     default:
       break;
     }
     break;
   }
+
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
-  SDL_Surface *screen, *temp, *sprite, *big_comet, *background;
+  /*timer du temps passé depuis l'activation de sdl avec SDL_GetTicks()*/
+  int tempsActuel = 0;
+  temps_actuel = &tempsActuel;
+  
+  /*permet de ne pas poper les astéroide au meme endroit a peu près quand on appuie longtemps*/
+  bool Random_PositionActivated;
+  Random_Position_activated = &Random_PositionActivated;
   int colorkey;
+  int nombreBigAst = 0, nombreNormAst = 0, nombreSmallAst = 0, nombretirs = 0;
+  nbBigAst = &nombreBigAst; /*pointeur général*/
+  nbNormAst = &nombreNormAst;
+  nbSmallAst = &nombreSmallAst;
+  nbtirs = &nombretirs;
+  /*Definition des différents sprites*/
   sprite_t space_ship;
-  sprite_t big_ast;
-  /* Information about the current situation of the ship: */
+  sprite_t big_ast[NB_MAX_BIG_AST];
+  sprite_t norm_ast[NB_MAX_NORM_AST];
+  sprite_t small_ast[NB_MAX_SMALL_AST]; 
+  sprite_t explosion;
+  sprite_t tirs[NB_MAX_PIOU];
   
-  /* Rectangle to store the position of the sprite in the window.
-   * Only the x and y coordinates are used. */
-  SDL_Rect spritePosition;
-  SDL_Rect bigCometPosition;
-  
+
   /* initialize SDL */
   SDL_Init(SDL_INIT_VIDEO);
   
@@ -124,92 +385,100 @@ int main(int argc, char* argv[])
   /* set keyboard repeat */
   SDL_EnableKeyRepeat(10, 10);
 
+  /*Download pictures of all sprites*/
+  downloadsprite(&colorkey);
 
-  /*load Big Comet*/
-  temp   = SDL_LoadBMP("meteore_64.bmp");
-  big_comet  = SDL_DisplayFormat(temp);
-  SDL_FreeSurface(temp);
-  /* setup comet colorkey and turn on RLE */
-  colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-  SDL_SetColorKey(big_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-
-   /* load sprite */
-  temp   = SDL_LoadBMP("greenship-v1.bmp");
-  sprite = SDL_DisplayFormat(temp);
-  SDL_FreeSurface(temp);
-  /* setup sprite colorkey and turn on RLE */
-  colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-  SDL_SetColorKey(sprite, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-  
-  /* load background */
-  temp  = SDL_LoadBMP("backgroundlvl1.bmp");
-  background = SDL_DisplayFormat(temp);
-  SDL_FreeSurface(temp);
-   
-
-  /* set sprite position in the middle of the window */
-  spritePosition.x = (SCREEN_WIDTH - SPRITE_SIZE) / 2;
-  sprite->clip_rect.x = spritePosition.x;
-  spritePosition.y = (SCREEN_HEIGHT - SPRITE_SIZE) / 2;
-  sprite->clip_rect.y = spritePosition.x;
-  sprite_init(&space_ship,0,sprite,SPRITE_SIZE,NB_SPRITE);
-
+  /*Initialise all sprite*/
+  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast);
+  sprite_init(&explosion,  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPLOSION);
+  sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, 1, 1);
 
   int gameover = 0;
-  /* Define the float position of the ship */
-  
+  bool explosionNeeded = true;
   /* main loop: check events and re-draw the window until the end */
   while (!gameover)
     {
-      double accel=0.0;
+      int i;
+      double accel = 0.0;
       SDL_Event event;
-      
+      *temps_actuel +=1;
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, &big_ast, big_comet, &bigCometPosition);
+	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, tirs);
       }
-      sprite_boost(&space_ship, accel);
-      sprite_move(&space_ship);
 
-      sprite_move(&big_ast);
-      /* collide with edges of screen */
-      spritePosition.x = space_ship.col;
-      spritePosition.y = space_ship.lig;
 
-      bigCometPosition.x = big_ast.col;
-      bigCometPosition.y = big_ast.lig;
-      
       /* draw the background */
       SDL_BlitSurface(background, NULL, screen, NULL);
       
       
-      
-      /* Draw the selected image of the sprite at the right position */
       {
-	/* Define the source rectangle for the BlitSurface */
-	SDL_Rect spriteImage;
-	spriteImage.y = 0;
-	spriteImage.w = space_ship.size;
-	spriteImage.h = space_ship.size;
-	/* choose image according to direction and animation flip: */
-	spriteImage.x = space_ship.size * space_ship.current;
-	
-	SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);
+	/*position, mouvement et acceleration des sprites*/
+	sprite_boost(&space_ship, accel);
+	sprite_move(&space_ship);
+
+	SDL_BlitSurface(spaceship, &space_ship.image, screen, &space_ship.position);
+      }
+      
+      /*Call new ast with time*/
+      //CreateAstWithTime(big_ast, norm_ast, small_ast);
+
+      /*draw Big Asteroid*/
+      for (i=0; i<*nbBigAst; i++){
+	if (*nbBigAst>0){
+	  sprite_move(&big_ast[i]);
+	  SDL_BlitSurface(big_comet, &big_ast[i].image, screen, &big_ast[i].position);
+	  
+	}
+      }
+      /*draw norm asteroid*/
+      for (i=0; i<*nbNormAst; i++){
+	if (*nbNormAst>0){
+	  sprite_move(&norm_ast[i]);
+	  SDL_BlitSurface(norm_comet, &norm_ast[i].image, screen, &norm_ast[i].position);
+	}
       }
 
-      /*draw Asteroid*/
-      SDL_BlitSurface(big_comet, NULL, screen, &bigCometPosition);
-      
+      /*draw small asteroid*/
+      for (i=0; i<*nbSmallAst; i++){
+	if (*nbSmallAst>0){
+	  sprite_move(&small_ast[i]);
+	  SDL_BlitSurface(small_comet, &small_ast[i].image, screen, &small_ast[i].position);	  
+	}
+      }
+
+      /*Draw EXPLOSION*/
+      if (explosionNeeded == true){
+	sprite_move(&explosion);
+	SDL_BlitSurface(explosion_picture, &explosion.image , screen, &explosion.position);
+	if (explosion.decompte >= 100*12+1){
+	  explosionNeeded = false;
+	  explosion.decompte = 0;
+	}
+      }
+      /*Draw projectile (piou)
+      for (i=0; i<*nbtirs; i++) {
+	if (*nbtirs>0){
+	  sprite_move(&tirs[i]);
+	  SDL_BlitSurface(bullet, &tirs[i].image, screen, &tirs[i].position);
+	}
+	}*/
+      sprite_move(&tirs[0]);
+      SDL_BlitSurface(bullet, NULL, screen, &tirs[0].position);
       /* update the screen */
-      SDL_UpdateRect(screen, 0, 0, 0, 0);
+      SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }
   
   /* clean up */
+  SDL_FreeSurface(small_comet);
+  SDL_FreeSurface(norm_comet);
   SDL_FreeSurface(big_comet);
-  SDL_FreeSurface(sprite);
+  SDL_FreeSurface(spaceship);
   SDL_FreeSurface(background);
+  SDL_FreeSurface(screen);
   SDL_Quit();
   
   return 0;
+  
 }
