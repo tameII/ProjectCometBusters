@@ -2,6 +2,38 @@
 
 bool CreateExplosion(sprite_t *explosion, sprite_t *sprite);
 
+void collision(sprite_t *big_ast, sprite_t *tirs)
+{
+  float xbig_ast = big_ast[0].x;
+  float ybig_ast = big_ast[0].y;
+  float xtirs = tirs[0].x;
+  float ytirs = tirs[0].y;
+  int i, j;
+  //int a,b,c,d;
+  //big_ast[0].x;
+  for (i=0; i<*nbtirs; i++) {
+    if (*nbtirs>0){
+      for (j=0; j<*nbBigAst; j++){
+	//printf("rentre dans boucle big ast\n");
+	if (*nbBigAst>0){
+	  if(big_ast[i].x > tirs[i].x + tirs[i].size && big_ast[i].x + big_ast[i].size < tirs[i].x ){
+	    if( big_ast[i].y > tirs[i].y + tirs[i].size && tirs[i].y > big_ast[i].y + big_ast[i].size){
+	      printf("TOUCHE\n");
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+//big_ast[i].x > tirs[i].x + tirs[i].size || big_ast[i].x + big_ast[i].size < tirs[i].x || big_ast[i].y > tirs[i].y + tirs[i].size || tirs[i].y > big_ast[i].y + big_ast[i].size
+/*Choisi un nombre aléatoire entre 0 et nb_max*/
+int ChooseRandomNumber(int i, int nb_max)
+{
+   srand(time(NULL));
+   i = rand()%(nb_max+1);
+   return i;
+}
 
 /*Create Small Ast*/
 void CreateSmallAst(sprite_t *small_ast)
@@ -52,7 +84,10 @@ void CreateAst(sprite_t *ast){
 }
 
 
-/*Kill, The cursor on the tab recule*/
+/*Kill, détruit le dernier sprite produit  */
+/*(en fait, il n'affiche plus sur l'écran  */
+/* le dernier sprite mais                  */
+/* ce sprite est toujours présent          */
 void kill(int *nb)
 {
   if (*nb>0){
@@ -86,25 +121,32 @@ int gimmeIsNb(sprite_t *ast)
 }
 
 
-/*Kill the ast[numero]*/
-void kill_ast(sprite_t *ast, int numero)
+/*Kill sprite[numero]: */
+/*Prend le tableau du sprite                         */
+/*Se place sur le tableau a l'aide du curseur numéro */
+/*Ex si numero2, alors on se place sur sprite[2]     */
+/*Puis on copie le sprite[3] dans sprite[2].Et etc.  */
+/*On décale tout vers la gauche                      */
+/*Et on supprime le dernier élement                  */
+/*Qui serait en deux fois sinon.                     */
+void kill_sprite(sprite_t *sprite, int numero)
 {
   bool killed = false;
-  int type = ast->type;
-  int nombre_max = ast->nombre_max;
+  int type = sprite->type;
+  int nombre_max = sprite->nombre_max;
   nombre_max -= 1;
-  int nbAst;
-  nbAst = gimmeIsNb(ast); 
-  if (nbAst > 0){
-  nbAst -= 1;
+  int nbSprite;
+  nbSprite = gimmeIsNb(sprite); 
+  if (nbSprite > 0){
+  nbSprite -= 1;
   }
-  killed = kill_ast_param(nombre_max, numero);
+  killed = kill_sprite_param(nombre_max, numero);
  
   while (killed == false){
     //printf("kill_ast : numero : %d \n",numero);
     //printf("kill ast : nbAst : %d  \n",nbAst);
     //printf("kill ast : nb_max : %d \n",nombre_max);
-    if (numero >= nbAst){
+    if (numero >= nbSprite){
       switch (type) {
       case 1:
 	kill(nbBigAst);
@@ -118,16 +160,19 @@ void kill_ast(sprite_t *ast, int numero)
 	kill(nbSmallAst);
 	killed = true;
 	break;
+      case 4:
+	kill(nbtirs);
+	killed = true;
       default:
-	printf("Kill_ast : wrong type. (you asked %d)",ast->type);
+	printf("Kill_ast : wrong type. (you asked %d)",sprite->type);
 	killed = true;
 	break;
       }   
     }
     if (killed == false){
-      ast[numero] = ast[numero+1];
-      if (ast[numero].numero_object > 0){
-      ast[numero].numero_object -= 1;
+      sprite[numero] = sprite[numero+1];
+      if (sprite[numero].numero_object > 0){
+      sprite[numero].numero_object -= 1;
       }
       numero += 1;
     }
@@ -135,23 +180,8 @@ void kill_ast(sprite_t *ast, int numero)
   
 }
 
-
-/*Invert direction of sprite 2 */
-void InvertDirection(sprite_t *sprite1, sprite_t *sprite2){
-
-  sprite2->vx = -sprite1->vx;
-  sprite2->vy = -sprite1->vy;
-}
-
-/*Set Up sprie 1 at position sprite 2 */
-void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
-{
-  sprite1->x = sprite2->x;
-  sprite1->y = sprite2->y;
-}
-
 /*Fonction qui divise l'astéroide demandé en deux plus petit. (pour l'instant)*/
-void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded)
+void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
   int numero = ast->numero_object; 
   int type = ast->type;
@@ -176,8 +206,8 @@ void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *s
       SetUpAtPosition(&norm_ast[nb_Norm_Ast+1], ast);                    //Met le second norm ast a la pos du gros ast.
       InvertDirection(&norm_ast[nb_Norm_Ast], &norm_ast[nb_Norm_Ast+1]); //lance les deux ast dans une direction opposée
     }
-    *explosionNeeded = CreateExplosion(explosion, ast);                  //Créé une explosion a la position "ast"
-    kill_ast(ast, numero);                                               //tue l'"ast".
+
+    kill_sprite(ast, numero);                                            //tue l'"ast".
   }
   if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
     printf("DivideAst : type 2, createsmallAst");
@@ -188,12 +218,17 @@ void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *s
       SetUpAtPosition(&small_ast[nb_Small_Ast+1], ast);
       InvertDirection(&small_ast[nb_Small_Ast], &small_ast[nb_Small_Ast+1]);
     }
-    *explosionNeeded = CreateExplosion(explosion, ast);
-    kill_ast(ast, numero);
+    kill_sprite(ast, numero);
+  }
+  if(type != 1 && type != 2){                               //Warning si on appelle un type différent de ceux autorisés.
+    kill_sprite(ast, numero);
+    printf("Warning : DivideAst : type %d asked, numero %d (type 1 or 2 autorised to divide, sprite killed anyway) \n",type, numero);
   }
 }
+
+
 /*Créé un astéroide a l'aide de la variable globale temps actuel*/
-void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+void CreateSpriteWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
   if (*temps_actuel%11000 == 0){                       //toute les 11000 tours de boucle un Gros Ast apparait
     //printf("temps actuel = %d \n",*temps_actuel);    //des printf pour avoir une idée de tout les cb de temps
@@ -215,6 +250,7 @@ void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_as
 
 
 
+
 bool CreateExplosion(sprite_t *explosion, sprite_t *sprite)
 {
   bool BOOOOOOOOOOM = true;
@@ -227,16 +263,18 @@ bool CreateExplosion(sprite_t *explosion, sprite_t *sprite)
 void create_piou (sprite_t* tirs, sprite_t* space_ship){
   if (*nbtirs<NB_MAX_PIOU){
     sprite_init(&tirs[*nbtirs], 4, bullet, PIOU_SIZE, 1, 1);
-    printf("create_piou : tirs : current = %d \n",tirs->current);
-    printf("space_ship current: %d \n", space_ship->current);
+    //printf("create_piou : tirs : current = %d \n",tirs->current);
+    //printf("space_ship current: %d \n", space_ship->current);
     tirs->current = space_ship->current;
-    printf("tir current :  %d \n",tirs->current);
+    //printf("tir current :  %d \n",tirs->current);
     sprite_boost(&tirs[*nbtirs], VIT_NORM_PIOU);
     SetUpAtPosition(tirs, space_ship);
-    printf("Piou !\n");
+    //printf("Piou !\n");
     *nbtirs += 1;
   }
 } 
+
+
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
    - quit the game?
@@ -253,10 +291,9 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship){
 */
 
   
-
-void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded, sprite_t *tirs)
+void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
 {
-  int i,j;
+  int i=0, j=0 ;
   switch (event.type) {
     /* close button clicked */
   case SDL_QUIT:
@@ -281,64 +318,65 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       break;
     case SDLK_DOWN:
       break;
-    case SDLK_l:
+    case SDLK_a:
+      CreateAst(small_ast);
+      CreateAst(norm_ast);
+      CreateAst(big_ast);
+      break;
+    case SDLK_l: //Divide an asteroid
       printf("touch l pressed \n");
-      DivideAst(&big_ast[0], big_ast, norm_ast, small_ast, explosion, explosionNeeded);
+      DivideAst(&big_ast[0], big_ast, norm_ast, small_ast);
       SDL_Delay(100);
       break;
-    case SDLK_k:
+    case SDLK_k:  //Kill a random astéroide
       printf("touch k pressed \n");
-      
-      srand(time(NULL));
-      i = rand()%(3);
+      i = ChooseRandomNumber(i, 3);
       if (i == 0){
-	j = rand()%(NB_MAX_BIG_AST-1);
-	kill_ast(big_ast, j);
+	j = ChooseRandomNumber(j, *nbBigAst);
+	kill_sprite(big_ast, j);
       }
       if (i == 1){
-	j = rand()%(NB_MAX_NORM_AST);
-	kill_ast(norm_ast, j);
+	j = ChooseRandomNumber(j,*nbNormAst);
+	kill_sprite(norm_ast, j);
       }
       if (i == 2){
-	j = rand()%(NB_MAX_SMALL_AST);
-	kill_ast(small_ast, j);
+	j = ChooseRandomNumber(j, *nbSmallAst);
+	kill_sprite(small_ast, j);
       }
-      printf("i : %d, j : %d \n",i,j);
-      
-      //kill_ast(big_ast, 0);
+      printf("i : %d, j : %d \n",i,j);   
       SDL_Delay(100);
       break;
-    case SDLK_u:
+    case SDLK_u:  //create a small ast
       printf("touch u pressed \n");
       CreateAst(small_ast);
       SDL_Delay(100);
       break;
-    case SDLK_i:
+    case SDLK_i: //create a norm ast
       printf("Touch i pressed \n");
       CreateAst(norm_ast);
       SDL_Delay(100);
       break;
-    case SDLK_o:
+    case SDLK_o: //create a big ast
       printf("Touch o pressed\n");
       CreateAst(big_ast);
       SDL_Delay(100); //delai de 100 ms pour pas faire ooooooooooo
       break;
-    case SDLK_p:
+    case SDLK_p: //Emergency, kill all thing on screen except ship (and explosion yet)
       printf("Touch p pressed \n");
       kill(nbBigAst);
       kill(nbNormAst);
       kill(nbSmallAst);
       kill(nbtirs);
-      SDL_Delay(100);
       break;
-    case SDLK_e:
+      /*case SDLK_e: 
       printf("touch e pressed \n");
       *explosionNeeded = CreateExplosion(explosion, &big_ast[0]);
-      SDL_Delay(10);
+      SDL_Delay(100);*/
     case SDLK_t:
-      printf("touch t pressed \n");
+      // printf("touch t pressed \n");
       create_piou(tirs,space_ship);
-      SDL_Delay(100);
+       SDL_Delay(100);
+      break;
     default:
       break;
     }
@@ -346,6 +384,8 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
   }
 
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -405,7 +445,7 @@ int main(int argc, char* argv[])
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, tirs);
+	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, tirs);
       }
 
 
@@ -463,18 +503,21 @@ int main(int argc, char* argv[])
 	  sprite_move(&tirs[i]);
 	  if (tirs[i].decompte > 100){
 	    kill(nbtirs);
-	    printf("meurt !!!");
 	  }
 	  SDL_BlitSurface(bullet, NULL  , screen, &tirs[i].position);
 	}
       }
-	//     }
+      if(tirs[i].x == big_ast[i].x && tirs[i].y == big_ast[i].y){
+	    kill_sprite(&big_ast[i], i);
+	  }
 
+      collision(big_ast, tirs);
       /* update the screen */
       SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }
   
   /* clean up */
+  SDL_FreeSurface(bullet);
   SDL_FreeSurface(small_comet);
   SDL_FreeSurface(norm_comet);
   SDL_FreeSurface(big_comet);

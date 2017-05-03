@@ -99,8 +99,8 @@ typedef struct Sprite_t sprite_t;
 
 /*in physique.c*/ 
 
-bool kill_ast_param(int nombre_max, int numero);
-
+void InvertDirection(sprite_t *sprite1, sprite_t *sprite2);
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2);
 void SetUpPosition(sprite_t *sprite, SDL_Surface *surface);
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
@@ -116,4 +116,5 @@ void hyperespace(sprite_t *sprite);
 SDL_Surface* download_sprite_(char *nomSprite);
 void downloadsprite();
 
+bool kill_sprite_param(int nombre_max, int numero);
 #endif

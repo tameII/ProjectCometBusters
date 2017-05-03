@@ -1,5 +1,18 @@
 #include "physique.h"
 
+/*Invert direction of sprite 2 */
+void InvertDirection(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite2->vx = -sprite1->vx;
+  sprite2->vy = -sprite1->vy;
+}
+
+/*Set Up sprite 1 at position sprite 2 */
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x;
+  sprite1->y = sprite2->y; 
+}
 
 /*Set Position of all Sprites*/
 void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
@@ -280,7 +293,7 @@ void downloadsprite()
 
 ///////////////////////////////////////////////////////////////////
 /*test if kill ast is possible*/
-bool kill_ast_param(int nombre_max, int numero)
+bool kill_sprite_param(int nombre_max, int numero)
 {
   bool killed = false;
   /*No need of more object than 100 on screen*/
