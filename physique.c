@@ -164,7 +164,7 @@ void sprite_move(sprite_t *sprite)
 {
   sprite->x += sprite->vx;
   //sprite->y += sprite->vy;
-
+ 
   hyperespace(sprite);
   
   sprite->col = sprite->x;
@@ -194,9 +194,11 @@ void sprite_move(sprite_t *sprite)
   }
   
   if (sprite->type == 4){
+   
+    sprite->image.y = 0;
+    sprite->image.x = 0;
     sprite->decompte += 1;
-
-}
+  }
   
   if (sprite->type == 5){
     sprite->image.y = 0;
@@ -263,18 +265,18 @@ void downloadsprite()
   small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
   norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
-  spaceship = download_sprite_("greenship-v1.bmp");
+  spaceship = download_sprite_("sprite(new).bmp");
   background = download_sprite_("backgroundlvl1.bmp");
   bullet = download_sprite_("bullet02.bmp");
 
   colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-  SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+    SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
   colorkey = SDL_MapRGB(screen->format, 0, 255, 255);
     SDL_SetColorKey(big_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
     SDL_SetColorKey(norm_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
     SDL_SetColorKey(small_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
     SDL_SetColorKey(explosion_picture, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-  colorkey = SDL_MapRGB(screen->format, 255, 125, 125);
+  colorkey = SDL_MapRGB(screen->format, 255, 125, 0);
     SDL_SetColorKey(bullet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
 }
 
@@ -289,7 +291,7 @@ bool kill_ast_param(int nombre_max, int numero)
     killed = true;
   }
   if (numero < 0){
-    printf("kill_ast : aaaw man, seriously ?  \n");
+    printf("kill_ast : aaaw man, seriously ?  (numero < 0)\n");
     killed = true;
   }
   if (numero > (nombre_max)){
@@ -301,3 +303,28 @@ bool kill_ast_param(int nombre_max, int numero)
   return killed;
   
 }
+///////////////////////////////////////////////////////////////////////
+int max(int a, int b)
+{
+  if(a>=b){
+    return a;
+  }
+  if(b>a){
+    return b;
+  }
+  printf("max : ERREUR");
+  return 0;
+}
+
+int min(int a, int b)
+{
+  if(a<=b){
+    return a;
+  }
+  if(b<a){
+    return b;
+  }
+  printf("min : ERREUR");
+  return 0;
+}
+

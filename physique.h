@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <math.h>
-#include <time.h>
+#include <time.h> 
 
 
 #define FROTTEMENT   0.0009
@@ -64,10 +64,10 @@
 #define NB_MAX_EXPLOSION   1
 
 /*Projectiles*/
-#define NB_MAX_PIOU 2
+#define NB_MAX_PIOU 10
 #define PIOU_SIZE 8
 #define VIT_NORM_PIOU 2
-
+#define PORTEE_PIOU 150
 
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet;
@@ -98,9 +98,6 @@ typedef struct Sprite_t sprite_t;
 
 
 /*in physique.c*/ 
-
-bool kill_ast_param(int nombre_max, int numero);
-
 void SetUpPosition(sprite_t *sprite, SDL_Surface *surface);
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
@@ -115,5 +112,11 @@ void hyperespace(sprite_t *sprite);
 
 SDL_Surface* download_sprite_(char *nomSprite);
 void downloadsprite();
+
+bool kill_ast_param(int nombre_max, int numero);
+
+int max(int a, int b);
+int min(int a, int b);
+
 
 #endif
