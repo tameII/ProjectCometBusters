@@ -25,7 +25,17 @@ Update v.0.440: (Mathieu Levy, 24/04/2017:20h54)
   -- and now you have ONE explosion when you divide ast  
 - Fixed KillAst:  
   --Hope the same.  
+
+- Add init_all_sprite :  
+ --init all sprite.  
+
+- Add a procedure Divide_ast_param ou un truc comme ça:  
+ -- purement esthetique.  
+ --permet d'alleger la lecture de divide ast  
+ --je l'ai calé dans physique.c pour l'instant, ça me saoulait avec toute les erreur toutes ses conditions annexes qui me brouillaient la vue.  
   
+
+
 - Il n'y a pas beaucoup d'écrit aujourd'hui mais les erreurs étaient fort nombreuses et je n'ai pas pris le temps de noter chacune.  
 
 Que pensez-vous d'une file pour gérer l'affichage des explosions ?  
