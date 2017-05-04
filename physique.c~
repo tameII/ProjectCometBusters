@@ -139,9 +139,6 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
     sprite->numero_object = *nbSmallAst;
     SetUpPosition(sprite, sprite_picture);
   }
-  if(type == 4){
-    sprite->numero_object = *nbtirs;
-  }
   if(type == 5){
     /*NOTHING*/printf("EXPLOSION MUAHAHAHHAHAHAHAH \n");
   }
