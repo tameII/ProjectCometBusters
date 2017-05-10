@@ -2,33 +2,23 @@
 
 
 /*Set Position of all Sprites*/
-void SetUpPosition(sprite_t *sprite, SDL_Surface *surface){
+void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
   
   /* set sprite position in the middle of the window */
   switch(sprite->type) {
   case 0:
     sprite->x = (SCREEN_WIDTH - SPACE_SHIP_SIZE) / 2;
-    surface->clip_rect.x = sprite->x;
     sprite->y = (SCREEN_HEIGHT - SPACE_SHIP_SIZE) / 2;
-    surface->clip_rect.y = sprite->y;
+    //surface->clip_rect.x = sprite->x;
+    // surface->clip_rect.y = sprite->y;
     break;
   case 1:
-    //printf("in SUPos: sprite type : %d \n",sprite->type);
-    Random_Position(sprite);
-    surface->clip_rect.x = sprite->x;
-    surface->clip_rect.y = sprite->y;
-    break;
   case 2:
-    //printf("in SUPos: sprite type : %d \n",sprite->type);
-    Random_Position(sprite);
-    surface->clip_rect.x = sprite->x;
-    surface->clip_rect.y = sprite->y;
-    break;
   case 3:
-    //printf("in SUPos : sprite type : %d \n",sprite->type);
+    // printf("in SUPos: sprite type : %d \n",sprite->type);
     Random_Position(sprite);
-    surface->clip_rect.x = sprite->x;
-    surface->clip_rect.y = sprite->y;
+    //surface->clip_rect.x = sprite->x;
+    //surface->clip_rect.y = sprite->y;
     break;
   default:
     break;
@@ -40,34 +30,37 @@ void Random_Position (sprite_t *sprite)
 {
   int i;
   int repositionnement = 0;
+  //int gros_nombre = 18749;
   /*if an ast is called, the second after it's not at the same position*/
-  if (*Random_Position_activated == true){
-    repositionnement = *temps_actuel+18749;
-      *Random_Position_activated = false;
+  /* if (Random_Position_activated == true){
+    repositionnement = temps_actuel+18749;
+      Random_Position_activated = false;
   }
-  
-  srand(time(NULL));
-  i = (rand()+repositionnement)%(4);
-  
+  */
+  srand(time(NULL)); 
+  i = (rand()+repositionnement)%(2);
+
   if (i == 0){
+    printf("I = zero maintenant \n");
     sprite->x = (rand()+repositionnement)%(SCREEN_WIDTH);
-  sprite->y = 0;
+    sprite->y = 0;
   }
-  if (i == 1){
+   if (i == 1){
+     printf("i = 1 là tavu \n");
     sprite->x = (rand()+repositionnement)%(SCREEN_WIDTH);
     sprite->y = SCREEN_HEIGHT;
-  }
-  if (i == 2){
-    sprite->x = 0;
+  } 
+  /*  if (i == 2){
+    sprite->x = 0 + gros_nombre;
     sprite->y = (rand()+repositionnement)%(SCREEN_HEIGHT);
   }
   if (i == 3){
-    sprite->x = SCREEN_WIDTH;
+    sprite->x = SCREEN_WIDTH - gros_nombre;
     sprite->y = (rand()+repositionnement)%(SCREEN_HEIGHT);
-  }
-  if (repositionnement == 0){
-    *Random_Position_activated = true;
-  }
+    }
+   if (repositionnement == 0){
+    Random_Position_activated = true;
+    }*/
   
 }
 /*Set a random direction at a constant speed */
@@ -101,13 +94,13 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
 }
 
 /*Main fonction to create new sprite*/
-void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite)
+void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite)
 {
   sprite->type = type;
-  sprite->col = sprite_picture->clip_rect.x;
-  sprite->lig = sprite_picture->clip_rect.y;
-  sprite->x = sprite_picture->clip_rect.x;
-  sprite->y = sprite_picture->clip_rect.y;
+  //sprite->col = sprite_picture->clip_rect.x;
+  //sprite->lig = sprite_picture->clip_rect.y;
+  //sprite->x = sprite_picture->clip_rect.x;
+  //sprite->y = sprite_picture->clip_rect.y;
   sprite->current = 0;
   sprite->size = sprite_size;
   sprite->nb_sprite = anim_sprite_num;
@@ -117,30 +110,33 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
-
+  sprite->sprite_picture = sprite_picture;
 
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
-    SetUpPosition(sprite, sprite_picture);
+    SetUpPosition(sprite); //, sprite_picture
 }
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
-    sprite->numero_object = *nbBigAst;
-    SetUpPosition(sprite, sprite_picture);
+    sprite->numero_object = nbBigAst;
+    SetUpPosition(sprite); //, sprite_picture
     //  printf("nbBigAst : %d \n",*nbBigAst);
     // printf("sprite.numero_object = %d \n", sprite->numero_object);
   }
   if(type == 2){
-    sprite->numero_object = *nbNormAst;
-    SetUpPosition(sprite, sprite_picture);
+    sprite->numero_object = nbNormAst;
+    SetUpPosition(sprite); //, sprite_picture
   }
   if(type == 3){
-    sprite->numero_object = *nbSmallAst;
-    SetUpPosition(sprite, sprite_picture);
+    sprite->numero_object = nbSmallAst;
+    SetUpPosition(sprite); //, sprite_picture
+  }
+  if(type == 4){
+    sprite->numero_object = nbtirs;
   }
   if(type == 5){
-    /*NOTHING*/printf("EXPLOSION MUAHAHAHHAHAHAHAH \n");
+    /*NOTHING printf("EXPLOSION MUAHAHAHHAHAHAHAH \n");*/
   }
 }
 /*the animation of the sprite turn */
@@ -163,7 +159,7 @@ void sprite_turn_right(sprite_t *sprite)
 void sprite_move(sprite_t *sprite)
 {
   sprite->x += sprite->vx;
-  //sprite->y += sprite->vy;
+  sprite->y += sprite->vy;
  
   hyperespace(sprite);
   
@@ -187,7 +183,7 @@ void sprite_move(sprite_t *sprite)
     sprite->image.h = sprite->size;
     sprite->image.x = sprite->size * sprite->current;
     sprite->decompte += 1;
-    if (sprite->decompte > 80){
+    if (sprite->decompte > 80){          //Un decompte qui permet de faire tourner le sprite
       sprite_turn_left(sprite);
       sprite->decompte = 0;   
     }
@@ -238,7 +234,6 @@ void hyperespace(sprite_t *sprite)
     sprite->x = sprite->x + SCREEN_WIDTH - sprite->size;
   else if(sprite->x > SCREEN_WIDTH - sprite->size)
     sprite->x =sprite->x - SCREEN_WIDTH + sprite->size;
-  sprite->y += sprite->vy;
   if(sprite->y < 0)
     sprite->y = sprite->y + SCREEN_HEIGHT - sprite->size;
   else if(sprite->y > SCREEN_HEIGHT - sprite->size)
