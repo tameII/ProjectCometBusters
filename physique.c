@@ -94,10 +94,11 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
   sprite->sprite_picture = sprite_picture;
-
+  sprite->life = BASE_LIFE;
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
+    sprite->life = MAX_LIFE_SHIP;
     SetUpPosition(sprite); //, sprite_picture
 }
   /*Big, Normal, Small Ast*/
