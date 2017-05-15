@@ -42,13 +42,14 @@
 #define BIG_AST_SIZE    64
 #define NB_MAX_BIG_AST      5
 #define VIT_BIG_AST     0.02     //0.02
+#define BIG_AST_LIFE    4
 /*Norm ast:*/
 #define NORM_AST_SIZE   32
-#define NB_MAX_NORM_AST     15
+#define NB_MAX_NORM_AST     5    //15
 #define VIT_NORM_AST    0.05     //0.05
 /*Small ast:*/
-#define SMALL_AST_SIZE  16
-#define NB_MAX_SMALL_AST    30
+#define SMALL_AST_SIZE  16   
+#define NB_MAX_SMALL_AST    5   //30
 #define VIT_SMALL_AST   0.1      //0.1 
 /*Number of type of asteroid => big, norm, small at this moment*/
 #define NB_TYPE_AST 3

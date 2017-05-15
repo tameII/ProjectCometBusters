@@ -1,6 +1,5 @@
 #include "physique.h"
  
-void collide_ship_param(sprite_t *space_ship, int nbSprite1,  sprite_t *sprite2, int nbSprite2, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover);
 ////////////////////////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER******************************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16,63 +15,58 @@ void collide_ship_param(sprite_t *space_ship, int nbSprite1,  sprite_t *sprite2,
   }
 }*/
 
-void dead_param(sprite_t *sprite, int numero, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
+void dead_ship_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
 {
   bool dead = false;
+  int nb = gimmeIsNb(sprite);
+ 
   if(sprite->life <= 0){
     dead = true;
-  } 
+  }
   if(dead){
-    DivideAst(sprite, numero, big_ast, norm_ast, small_ast);
-    kill_ast(sprite, numero);
+    DivideAst(sprite, nb, big_ast, norm_ast, small_ast);
+    kill_ast(sprite, nb);
   }
 }
-void dead(sprite_t space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
+void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs )
 {
-  int i;
-  for(i=0;i<=nbBigAst;i++){
-    dead_param(&big_ast[i], i, big_ast, norm_ast, small_ast, tirs);
-  }
-  for(i=0;i<=nbNormAst;i++){
-    dead_param(&norm_ast[i], i, big_ast, norm_ast, small_ast, tirs);
-  }
-  for(i=0;i<=nbSmallAst;i++){
-    dead_param(&small_ast[i], i, big_ast, norm_ast, small_ast, tirs);
-  }
-}
-/*/!\WARNING /!\ put ship and 1 in the two first argument, and the thing you want to collide in 3/4 */
-void collide_ship_param(sprite_t *space_ship, int nbSprite1,  sprite_t *sprite2, int nbSprite2, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover)
-{
-  int type = sprite2->type;
-  int j;
-  if(nbSprite2>0){
-    for(j=0; j<nbSprite2; j++){
-      if(compare_position(space_ship, &sprite2[j])){
-	if (space_ship->life <= 0){
-	printf("OMG \t OMG \t OMG \n");
-	*gameover = 1;
-	}
-	printf("Pfiou \n");
-	if(type == 1){
-	  space_ship->life -= 4;
-	  sprite2[j].life -= 1;
-	}
-	if(type == 2){
-	  space_ship->life -= 2;
-	  sprite2[j].life -= 1;
-}
-	if(type == 3){
-	  space_ship->life -= 1;
-	  sprite2[j].life -= 1;
-	}
+ int i;
+ //int nb = gimmeIsNb(sprite);
+ int nb = nbBigAst;
+ bool dead = false;
+  for(i=0;i<nb;i++){
+    if(sprite[i].life <= 0){
+      dead = true;    
+      if(dead){
+	DivideAst(sprite, i, big_ast, norm_ast, small_ast);
+	kill_ast(sprite, i);
       }
     }
   }
 }
 
+void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
+{
+  dead_tab_param(big_ast, big_ast, norm_ast, small_ast, tirs);
+  dead_tab_param(norm_ast, big_ast, norm_ast, small_ast, tirs);
+  // dead_tab_param(small_ast, big_ast, norm_ast, small_ast, tirs);
+  //dead_ship_param(space_ship, big_ast, norm_ast, small_ast, tirs);
+}
 
 
-void collide_param(sprite_t *sprite1, int nbSprite1,  sprite_t *sprite2, int nbSprite2, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+/*Collide pour le ship, /!\ ne pas utiliser de tableau dans sprite 1 !!! /!\ c'est le space_ship en sprite1*/
+void collide_ship_param(sprite_t *sprite1, int nbSprite1,  sprite_t *sprite2, int nbSprite2, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+{
+  int j;
+  for(j=0; j<nbSprite2; j++){
+    if(compare_position(sprite1, &sprite2[j])){
+      printf("Ship collide with sprite type : %d \n",sprite2[j].type);
+      kill_ast(sprite2, j);
+    }
+  }
+}
+
+void collide_tab_param(sprite_t *sprite1, int nbSprite1,  sprite_t *sprite2, int nbSprite2, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
   int i, j;
   if(nbSprite1>0 && nbSprite2>0){
@@ -91,12 +85,13 @@ void collide_param(sprite_t *sprite1, int nbSprite1,  sprite_t *sprite2, int nbS
 
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover)
 {
-  collide_param(tirs, nbtirs, big_ast, nbBigAst, tirs, big_ast, norm_ast, small_ast);
-  collide_param(tirs, nbtirs, norm_ast, nbNormAst, tirs, big_ast, norm_ast, small_ast);
-  collide_param(tirs, nbtirs, small_ast, nbSmallAst, tirs, big_ast, norm_ast, small_ast);
-  collide_ship_param(space_ship, 1, big_ast, nbBigAst, big_ast, norm_ast, small_ast, gameover);
-  collide_ship_param(space_ship, 1, norm_ast, nbNormAst, big_ast, norm_ast, small_ast, gameover);
-  collide_ship_param(space_ship, 1, small_ast, nbSmallAst, big_ast, norm_ast, small_ast, gameover);
+  collide_tab_param(tirs, nbtirs, big_ast, nbBigAst, tirs, big_ast, norm_ast, small_ast);
+  collide_tab_param(tirs, nbtirs, norm_ast, nbNormAst, tirs, big_ast, norm_ast, small_ast);
+  collide_tab_param(tirs, nbtirs, small_ast, nbSmallAst, tirs, big_ast, norm_ast, small_ast);
+  collide_ship_param(space_ship, gimmeIsNb(space_ship),  big_ast, gimmeIsNb(big_ast), tirs, big_ast, norm_ast, small_ast);
+  collide_ship_param(space_ship, gimmeIsNb(space_ship),  norm_ast, gimmeIsNb(norm_ast), tirs, big_ast, norm_ast, small_ast);
+  collide_ship_param(space_ship, gimmeIsNb(space_ship),  small_ast, gimmeIsNb(small_ast), tirs, big_ast, norm_ast, small_ast);
+
 }
 
 bool compare_position(sprite_t *sprite1, sprite_t *sprite2)
@@ -278,7 +273,7 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast,
   int nb_Big_Ast = nbBigAst;
   int nb_Norm_Ast = nbNormAst;
   int nb_Small_Ast = nbSmallAst;
-  printf("Divide Ast : ast type %d \t | nb_Big_ast : %d \t| nb_Norm_Ast : %d \n nb_Small_Ast %d \n",type, nb_Big_Ast, nb_Norm_Ast, nb_Small_Ast);
+  //printf("Divide Ast : ast type %d \t | nb_Big_ast : %d \t| nb_Norm_Ast : %d \n nb_Small_Ast %d \n",type, nb_Big_Ast, nb_Norm_Ast, nb_Small_Ast);
   
   
   if(type == 1 && nb_Big_Ast > 0){  
@@ -302,51 +297,7 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast,
   }
 }
 
-/*Fonction qui divise l'astéroide demandé en deux plus petit. (pour l'instant)*/
-/* void DivideAst(sprite_t *ast, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
-{
-  int numero = ast->numero_object; 
-  int type = ast->type;
-  int nb_Big_Ast = nbBigAst;
-  int nb_Norm_Ast = nbNormAst;
-  int nb_Small_Ast = nbSmallAst;
-*/
-  //printf("Divide Ast : numero = %d \n",numero);
 
-  /*Si on demande gros Ast, et il y en a 1 :  * 
-   * Alors on créé un Norm Ast qu'on place    * 
-   *à la pos du gros.                         *
-   *Si  on demande norm Ast, et il y en a 1 : *
-   *Alors on créé un Small Ast qu'on place    *
-   *à la pos du normal.                       */ /*
- 
-  if(type == 1 && nb_Big_Ast > 0){  
-    CreateNormAst(norm_ast);                                             //Créé un norm ast
-    SetUpAtPosition(&norm_ast[nb_Norm_Ast], ast);                        //Met le premier norm ast a la position du gros ast.
-    if (nb_Norm_Ast+1 < NB_MAX_NORM_AST){                                //Si on peut créer un second norm ast.
-      CreateNormAst(norm_ast);                                           //Créé un norm ast
-      SetUpAtPosition(&norm_ast[nb_Norm_Ast+1], ast);                    //Met le second norm ast a la pos du gros ast.
-      InvertDirection(&norm_ast[nb_Norm_Ast], &norm_ast[nb_Norm_Ast+1]); //lance les deux ast dans une direction opposée
-    }
-    kill_ast(ast, numero); //tue l'"ast".
-  }
-  if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
-    //printf("DivideAst : type 2, createsmallAst");
-    CreateAst(small_ast);
-    SetUpAtPosition(&small_ast[nb_Small_Ast], ast);
-    if (nb_Small_Ast+1 < NB_MAX_SMALL_AST){
-      CreateAst(small_ast);
-      SetUpAtPosition(&small_ast[nb_Small_Ast+1], ast);
-      InvertDirection(&small_ast[nb_Small_Ast], &small_ast[nb_Small_Ast+1]);
-    }
-    kill_ast(ast, numero);
-  }
-  if (type != 1 && type != 2){                                          //une sécurité (et une tentative pour généraliser cette fonction)
-    kill_ast(ast, numero);                                              //Je devrais plutot appeler divide dans kill m'enfin bref
-  }
-}
-
-*/
 /*Créé un astéroide a l'aide de la variable globale temps actuel*/
 void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
@@ -434,7 +385,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       break;
     case SDLK_DOWN:
       break;
-    case SDLK_k:
+    case SDLK_k:                                  //KIll a random ast
       printf("touch k pressed \n");
       i = rand()%(3);
        if (i == 0){
@@ -469,7 +420,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       CreateAst(big_ast);
       SDL_Delay(100); //delai de 100 ms pour pas faire ooooooooooo
       break;
-    case SDLK_p:
+    case SDLK_p:                                               //it kill everything it touche
       // printf("Touch p pressed \n");
       kill(&nbBigAst);
       kill(&nbNormAst);
@@ -477,17 +428,17 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       kill(&nbtirs);
       //SDL_Delay(100);
       break;
-    case SDLK_e:
+    case SDLK_e:                                                //BOOOM
       printf("touch e pressed \n");
       *explosionNeeded = CreateExplosion(explosion, &big_ast[0]);
       SDL_Delay(100);
       break;
-    case SDLK_t:
+    case SDLK_t:                                            // FIRE !!!!
       //printf("touch t pressed \n");
       create_piou(tirs,space_ship);
       //SDL_Delay(250);
       break;
-    case SDLK_y:
+    case SDLK_y:                                             //Create ALL type of ast very fast
       CreateAst(big_ast);
       CreateAst(norm_ast);
       CreateAst(small_ast);
@@ -502,6 +453,28 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       DivideAst(norm_ast, 1, big_ast, norm_ast, small_ast);
       SDL_Delay(100);
       break;
+    case SDLK_n:
+      printf("touch n pressed \n");
+      i = 1;
+      j = 1;
+      if(big_ast[i].life > 0){
+      big_ast[i].life -= j ;
+      }
+      SDL_Delay(100);
+      break;
+    case SDLK_b :
+     printf("bigAst[0].life = %d \n",big_ast[0].life);
+     printf("bigAst[1].life = %d \n",big_ast[1].life);
+     printf("bigAst[2].life = %d \n",big_ast[2].life);
+     printf("bigAst[3].life = %d \n",big_ast[3].life);
+     printf("bigAst[4].life = %d \n",big_ast[4].life);
+     printf("\n");
+     /* printf("normAst[0].life = %d \n ",norm_ast[0].life);
+     printf("normAst[1].life = %d \n ",norm_ast[1].life);
+     printf("normAst[2].life = %d \n ",norm_ast[2].life);
+     printf("normAst[3].life = %d \n ",norm_ast[3].life);
+     printf("normAst[4].life = %d \n ",norm_ast[4].life); */
+     SDL_Delay(100);
     default:
       break;
     }
@@ -521,7 +494,9 @@ int main(int argc, char* argv[])
   sprite_t small_ast[NB_MAX_SMALL_AST]; 
   sprite_t explosion;
   sprite_t tirs[NB_MAX_PIOU];
-  
+  /*nbSmallAst = 0;
+  nbNormAst = 0;
+  nbBigAst =  0;*/
   /*Initialize rand :*/
    srand(time(NULL)); 
 
@@ -610,8 +585,8 @@ int main(int argc, char* argv[])
       }
 
       /*Collision*/
-      collide(&space_ship, tirs, big_ast, norm_ast, small_ast,  &gameover);
-  
+      //collide(&space_ship, tirs, big_ast, norm_ast, small_ast,  &gameover);
+      dead(&space_ship, big_ast, norm_ast, small_ast, tirs);
       /* update the screen */
       SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }

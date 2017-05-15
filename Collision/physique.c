@@ -57,23 +57,24 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast){
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+{
   int i,j,k;
   /*init ship*/
   sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
   /*Init all ast at begun (big_small_norm)*/
-  for(i=0 ; i<NB_MAX_BIG_AST-1 ; i++){
+  for(i=0 ; i<NB_MAX_BIG_AST ; i++){
   sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
   }
-  for(j=0 ; j<NB_MAX_NORM_AST-1 ; j++){
+  for(j=0 ; j<NB_MAX_NORM_AST ; j++){
     sprite_init(&norm_ast[j], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
   }
-  for(k=0 ; k<NB_MAX_SMALL_AST-1 ; k++){
+  for(k=0 ; k<NB_MAX_SMALL_AST ; k++){
   sprite_init(&small_ast[k], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
   }
 
-  
+					    
 }
 
 /*Main fonction to create new sprite*/
@@ -105,6 +106,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   if(type == 1 ){
     sprite->numero_object = nbBigAst;
     SetUpPosition(sprite); //, sprite_picture
+    sprite->life = BIG_AST_LIFE;
     //  printf("nbBigAst : %d \n",*nbBigAst);
     // printf("sprite.numero_object = %d \n", sprite->numero_object);
   }
