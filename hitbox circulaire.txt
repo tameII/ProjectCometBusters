@@ -13,3 +13,6 @@ prendre le centre du carré.
 
 centre -> moitié longueur coté carré = rayon du cercle
 le centre est le point central du cercle aussi.
+
+
+bref c'est un cercle inscrit quoi. plus fin mais pas encore assez je pense.

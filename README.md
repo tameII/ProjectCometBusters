@@ -11,8 +11,113 @@ Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
 (et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).  
 
 la v.0.5 sera quand les astéroides seront bien implémentés.  
-
+Désolé pour le franglais :/ .  
 --------
+Update v.0.5: (Mathieu Levy, 15/06/2017:19h52)  
+Précédemment j'avais arreté de remplir ce changelog.  
+Après discussion nous avons décidé de continuer le changelog.  
+Du coup y a pas mal de changement, j'espère que ce changelog  
+sera exhaustif.
+- Les fonctions concernant l'explosion sont *********.  
+ -- je les ai mis en commentaire, on peut faire joujou avec e.  
+ -- en fait plus maintenant j'ai même retiré l'affichage.  
+ -- A recommencer.
+
+- IN PHYSIQUE.H:  
+- Début de header correct  
+
+- Ajout d'un pointeur SDL_Surface  
+ --Pour l'instant inutile.  
+ --On doit encore adapter tout ça  
+ --l'important c'est que l'on puisse  
+ --avancer ailleurs pour l'instant  
+
+- Appel correct des pointeurs et des non pointeurs généraux  
+ --Pour les SDL_Surface se serait pas propre, du coup faut changer  
+ --c'est pour ça l'ajout dans la structure  
+ --Mais moi je trouve ça cool quand même les pointeurs généraux.  
+
+- Add "int life" in the struct sprite_t  
+ --Vie de chaque sprite, de base 1.  
+
+- IN PHYSIQUE.C:  
+- Update init_all_sprite:  
+ --Pour le tir. (bientôt explosions)  
+
+- Update de sprite_init:  
+ --J'ai supprimé des trucs qui ne servaient a rien.  
+ --ça marche très bien sans après une batterie de test.  
+ --c'etait clip_rect  
+
+- add various_information:  
+ --press b to know various information like:  
+ --vie de TOUT les astéroides présents sur l'écran  
+ --le nombre de big/norm/small ast, de tirs, et le temps_actuel.  
+ --Je n'ai pas (encore) de formule pour convertir  
+ --temps_actuel en temps réel (Pour reglage)  
+ --Par exemple, utiliser ça pour donner des objectif:  
+ --survivre 5 minutes...etc.  
+
+- improve sprite_move:  
+ --Par l'ajout de la procédure sprite_image:  
+  --Qui determine la position du rectangle dans l'image.  
+
+- improve downloadsprite:  
+ --Par la création de set_colorkey_().
+ --Prend un SDL_Surface, Red, Green, Blue et *screen.
+
+
+- IN COM_BUST.C:  
+- Fixed DivideAst:  
+ --Divise seulement les astéroides big(type 1) et norm(type 2)  
+ --Ne fait plus appel a kill.  
+ --c'est vraiment prise de tête sinon  
+ ça peut être utile, mais je juge que l'interêt est faible.  
+
+- Add procedure move_all_sprite:  
+ --Qui prend un tableau de sprite.  
+ --appelle sprite_move pour chaque membre du tableau.  
+
+- add procedure draw_all_sprite:  
+ --Qui prend un tableaux de sprite.
+ --appelle SDL_BlitSurface pour chaque membre du tableau  
+
+- add function compare_position:  
+ --Prend deux sprites et rend un booleen.  
+ --compare les pos' grace a compare_position_param.  
+
+- add function compare_position_param:  
+ --Qui prend 2 pts x1 et y1, 2pts x2 et y2, leurs size  
+a1 et a2.  
+ --Si les deux carrés se touchent rend vrai.  
+
+-add procedure collide:  
+ --Appelle les procedures collide_tab_param  
+et collide_ship_param pour chaque type d'ast.  
+ --collide_tab_param pour comparer tir/ast (deux tableaux)  
+  --si compare_position entre tir/ast alors:  
+  --Les deux ont -1 hp.  
+ --collide_ship_param pour comparer ship/ast(1 sprite,un tab)  
+  --Si compare_position entre ship/ast alors:  
+   --Les deux ont -1 hp.  
+ --J'ai séparé les deux fonction pour moduler plus simplement  
+les interaction vaisseaux/autre et interaction tirs/ast.  
+ --Cette procedure collide est appelée juste avant le refresh.  
+
+- add procedure dead:  
+ -- appelée juste après collide.  
+ --Fait appel a dead_tab_param pour big/norm/small_ast et tirs.  
+ --Fait appel a dead_ship_param pour space_ship.  
+
+- Procedure dead_tab_param:  
+ --pour tout les sprite du tab, si life du sprite[i] <= 0:  
+ --dead = true, si dead alors on divise l'ast et on le kill_ast.  
+ --d'ailleurs la fonction kill_ast va etre renommée kill_sprite.  
+
+- Procedure dead_ship_param:  
+ --si life du sprite <= 0 alors gameover.  
+ --Pour tester j'ai mis 150 vie sinon tu meurs vite.  
+
 Update v.0.440: (Mathieu Levy, 24/04/2017:20h54)  
 
 - Add function CreateExplosion:  

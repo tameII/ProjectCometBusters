@@ -554,26 +554,26 @@ int main(int argc, char* argv[])
       CreateAstWithTime(big_ast, norm_ast, small_ast);
 
       /*draw Big Asteroid*/
-      move_all_sprite(big_ast, nbBigAst);
-      draw_sprite(big_comet,big_ast, nbBigAst);	  
+      move_all_sprite(big_ast);
+      draw_all_sprite(big_comet,big_ast);	  
 
       /*draw norm asteroid*/
-      move_all_sprite(norm_ast, nbNormAst);
-      draw_sprite(norm_comet, norm_ast, nbNormAst);
+      move_all_sprite(norm_ast);
+      draw_all_sprite(norm_comet, norm_ast);
 
       /*draw small asteroid*/
-      move_all_sprite(small_ast, nbSmallAst);
-      draw_sprite(small_comet, small_ast, nbSmallAst);	  
+      move_all_sprite(small_ast);
+      draw_all_sprite(small_comet, small_ast);	  
 
-      /*Draw EXPLOSION*/
+      /*Draw EXPLOSION*/ /* /!\ DONT USE IT YET /!\ !!!!!!
        if (explosionNeeded == true){
 	sprite_move(&explosion);
-	draw_sprite(explosion_picture, &explosion, 1);
+	draw_all_sprite(explosion_picture, &explosion);
 	if (explosion.decompte >= 100*12+1){
 	  explosionNeeded = false;
 	  explosion.decompte = 0;
 	}
-       }
+	}*/
       /*Draw projectile (piou)*/
       for (i=0; i<nbtirs; i++) {
 	if (nbtirs>0){
@@ -607,9 +607,10 @@ int main(int argc, char* argv[])
   
 }
 /*Appelle sprite move pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
-void move_all_sprite(sprite_t *sprite, int nb_sprite)
+void move_all_sprite(sprite_t *sprite)
 {
   int i;
+  int nb_sprite = gimmeIsNb(sprite);
   for (i=0; i<nb_sprite; i++){
     if (nb_sprite>0){
       sprite_move(&sprite[i]);
@@ -617,9 +618,10 @@ void move_all_sprite(sprite_t *sprite, int nb_sprite)
   }
 }
 /*Appelle SDL_BlitSurface pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
-void draw_sprite(SDL_Surface *picture, sprite_t *sprite, int nb_sprite)
+void draw_all_sprite(SDL_Surface *picture, sprite_t *sprite)
 {
   int i;
+  int nb_sprite = gimmeIsNb(sprite);
   for (i=0; i<nb_sprite; i++){
     if (nb_sprite>0){
       SDL_BlitSurface(picture, &sprite[i].image, screen, &sprite[i].position);
