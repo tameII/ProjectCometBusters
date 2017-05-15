@@ -9,16 +9,12 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
   case 0:
     sprite->x = (SCREEN_WIDTH - SPACE_SHIP_SIZE) / 2;
     sprite->y = (SCREEN_HEIGHT - SPACE_SHIP_SIZE) / 2;
-    //surface->clip_rect.x = sprite->x;
-    // surface->clip_rect.y = sprite->y;
     break;
   case 1:
   case 2:
   case 3:
     // printf("in SUPos: sprite type : %d \n",sprite->type);
     Random_Position(sprite);
-    //surface->clip_rect.x = sprite->x;
-    //surface->clip_rect.y = sprite->y;
     break;
   default:
     break;
@@ -29,44 +25,31 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
 void Random_Position (sprite_t *sprite)
 {
   int i;
-  int repositionnement = 0;
-  //int gros_nombre = 18749;
-  /*if an ast is called, the second after it's not at the same position*/
-  /* if (Random_Position_activated == true){
-    repositionnement = temps_actuel+18749;
-      Random_Position_activated = false;
-  }
-  */
-  srand(time(NULL)); 
-  i = (rand()+repositionnement)%(2);
+  i = rand()%(4);
 
   if (i == 0){
-    printf("I = zero maintenant \n");
-    sprite->x = (rand()+repositionnement)%(SCREEN_WIDTH);
+    sprite->x = rand()%(SCREEN_WIDTH);
     sprite->y = 0;
   }
-   if (i == 1){
-     printf("i = 1 là tavu \n");
-    sprite->x = (rand()+repositionnement)%(SCREEN_WIDTH);
-    sprite->y = SCREEN_HEIGHT;
-  } 
-  /*  if (i == 2){
-    sprite->x = 0 + gros_nombre;
-    sprite->y = (rand()+repositionnement)%(SCREEN_HEIGHT);
+  if (i == 1){
+    sprite->x = 0;
+    sprite->y = rand()%(SCREEN_HEIGHT);
   }
+  
+  if (i == 2){
+    sprite->x = rand()%(SCREEN_WIDTH);
+    sprite->y = SCREEN_HEIGHT - sprite->size;
+  }  
+
   if (i == 3){
-    sprite->x = SCREEN_WIDTH - gros_nombre;
-    sprite->y = (rand()+repositionnement)%(SCREEN_HEIGHT);
-    }
-   if (repositionnement == 0){
-    Random_Position_activated = true;
-    }*/
+    sprite->x = SCREEN_WIDTH - sprite->size;
+    sprite->y = rand()%(SCREEN_HEIGHT);
+  }
   
 }
 /*Set a random direction at a constant speed */
 void Random_Direction(sprite_t *sprite, float vitesse)
 {
-  srand(time(NULL));
   sprite->current = rand()%(36);
   sprite->vx += vitesse * cos(sprite->current  * 10 * M_PI / 180);
   sprite->vy += vitesse * (-sin(sprite->current  * 10 * M_PI / 180));  
@@ -74,23 +57,24 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast){
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+{
   int i,j,k;
   /*init ship*/
   sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
   /*Init all ast at begun (big_small_norm)*/
-  for(i=0 ; i<NB_MAX_BIG_AST-1 ; i++){
+  for(i=0 ; i<NB_MAX_BIG_AST ; i++){
   sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
   }
-  for(j=0 ; j<NB_MAX_NORM_AST-1 ; j++){
+  for(j=0 ; j<NB_MAX_NORM_AST ; j++){
     sprite_init(&norm_ast[j], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
   }
-  for(k=0 ; k<NB_MAX_SMALL_AST-1 ; k++){
+  for(k=0 ; k<NB_MAX_SMALL_AST ; k++){
   sprite_init(&small_ast[k], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
   }
 
-  
+					    
 }
 
 /*Main fonction to create new sprite*/
@@ -111,16 +95,18 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
   sprite->sprite_picture = sprite_picture;
-
+  sprite->life = BASE_LIFE;
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
+    sprite->life = MAX_LIFE_SHIP;
     SetUpPosition(sprite); //, sprite_picture
 }
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
     sprite->numero_object = nbBigAst;
     SetUpPosition(sprite); //, sprite_picture
+    sprite->life = BIG_AST_LIFE;
     //  printf("nbBigAst : %d \n",*nbBigAst);
     // printf("sprite.numero_object = %d \n", sprite->numero_object);
   }
@@ -155,59 +141,45 @@ void sprite_turn_right(sprite_t *sprite)
     sprite->current = sprite->nb_sprite - 1;
 }
 
-/*Move of the sprite (+ hyperespace)*/
-void sprite_move(sprite_t *sprite)
+void sprite_image(sprite_t *sprite)
 {
-  sprite->x += sprite->vx;
-  sprite->y += sprite->vy;
- 
-  hyperespace(sprite);
-  
-  sprite->col = sprite->x;
-  sprite->lig = sprite->y;
-  sprite->position.x = sprite->col;
-  sprite->position.y = sprite->lig;
-
-  if (sprite->type == 0){
   /* Define the source rectangle for the BlitSurface */
   sprite->image.y = 0;
   sprite->image.w = sprite->size;
   sprite->image.h = sprite->size;
   /* choose image according to direction and animation flip: */
   sprite->image.x = sprite->size * sprite->current;
-  }
+}
 
-  if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){
-    sprite->image.y = 0;
-    sprite->image.w = sprite->size;
-    sprite->image.h = sprite->size;
-    sprite->image.x = sprite->size * sprite->current;
-    sprite->decompte += 1;
+/*Move of the sprite (+ hyperespace)*/
+void sprite_move(sprite_t *sprite)
+{
+  sprite->x += sprite->vx;
+  sprite->y += sprite->vy;
+  
+  hyperespace(sprite);
+  
+  sprite->col = sprite->x;
+  sprite->lig = sprite->y;
+  sprite->position.x = sprite->col;
+  sprite->position.y = sprite->lig;
+  
+  sprite_image(sprite);
+  
+  sprite->decompte += 1;
+  
+  if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){ 
     if (sprite->decompte > 80){          //Un decompte qui permet de faire tourner le sprite
       sprite_turn_left(sprite);
       sprite->decompte = 0;   
     }
   }
-  
-  if (sprite->type == 4){
-   
-    sprite->image.y = 0;
-    sprite->image.x = 0;
-    sprite->decompte += 1;
-  }
-  
   if (sprite->type == 5){
-    sprite->image.y = 0;
-    sprite->image.w = sprite->size;
-    sprite->image.h = sprite->size;
-    sprite->image.x = sprite->size * sprite->current;
-    sprite->decompte += 1;
-    if (sprite->decompte %100 == 0){
+    if (sprite->decompte %100 == 0){  /*Permet d'animer l'explosion (utilisation du modulo car sinon plus complexe d'arreter la fameuse explosion)*/
       sprite_turn_left(sprite);   
     }
-  }
+  }  
 }
-
 /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
@@ -241,6 +213,14 @@ void hyperespace(sprite_t *sprite)
   
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*auxiliary function : set colorkey*/
+void set_colorkey_(SDL_Surface *sprite_picture, int R, int G, int B, SDL_Surface *screen)
+{
+  int colorkey;
+  colorkey = SDL_MapRGB(screen->format, R, G, B);
+  SDL_SetColorKey(sprite_picture, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+}
+
 /*auxiliary fonction to downloadsprite*/
 SDL_Surface* download_sprite_(char *nomSprite)
 {
@@ -255,24 +235,22 @@ SDL_Surface* download_sprite_(char *nomSprite)
 /*init SDL-Surface with picture, set up colorkey for each.*/
 void downloadsprite()
 {
-  int colorkey; 
+  /*Load all sprite_picture*/
   explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
   small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
   norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
-  spaceship = download_sprite_("sprite(new).bmp");
+  spaceship = download_sprite_("sprite(new)v2.bmp");
   background = download_sprite_("backgroundlvl1.bmp");
   bullet = download_sprite_("bullet02.bmp");
 
-  colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-    SDL_SetColorKey(spaceship, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-  colorkey = SDL_MapRGB(screen->format, 0, 255, 255);
-    SDL_SetColorKey(big_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-    SDL_SetColorKey(norm_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-    SDL_SetColorKey(small_comet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-    SDL_SetColorKey(explosion_picture, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-  colorkey = SDL_MapRGB(screen->format, 255, 125, 0);
-    SDL_SetColorKey(bullet, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+  /*Set all colorkey*/
+  set_colorkey_(spaceship, 255, 0, 255, screen);
+  set_colorkey_(big_comet, 0, 255, 255, screen);
+  set_colorkey_(norm_comet, 0, 255, 255, screen);
+  set_colorkey_(small_comet, 0, 255, 255, screen);
+  set_colorkey_(explosion_picture, 0, 255, 255, screen);
+  set_colorkey_(bullet, 255, 125, 0, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
