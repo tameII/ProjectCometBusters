@@ -71,7 +71,7 @@
 #define PORTEE_PIOU 150   //150
 
 
-SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet;
+SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion 
 int nbBigAst, nbNormAst, nbSmallAst, nbtirs;
 bool Random_Position_activated; //the function is activated?
@@ -130,7 +130,7 @@ bool compare_position(sprite_t *sprite1, sprite_t *sprite2);
 void kill_ast(sprite_t *ast, int numero);
 void draw_all_sprite(SDL_Surface *picture,sprite_t *sprite);
 void move_all_sprite(sprite_t *sprite);
-//void collide_param(sprite_t *sprite1, int nbSprite1,  sprite_t *sprite2, int nbSprite2);
+void collide_param(sprite_t *sprite1,  sprite_t *sprite2);
 void collide(sprite_t *ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover);
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast);
 int gimmeIsNb(sprite_t *sprite);

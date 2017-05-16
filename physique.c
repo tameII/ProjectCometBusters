@@ -263,10 +263,12 @@ void downloadsprite()
   norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
   spaceship = download_sprite_("sprite(new)v2.bmp");
+  spaceship2 = download_sprite_("sprite(new).bmp");
   background = download_sprite_("backgroundlvl1.bmp");
   bullet = download_sprite_("bullet02.bmp");
 
   /*Set all colorkey*/
+  set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(big_comet, 0, 255, 255, screen);
   set_colorkey_(norm_comet, 0, 255, 255, screen);
