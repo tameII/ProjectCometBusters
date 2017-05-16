@@ -12,9 +12,9 @@ Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
 
 la v.1.0 sera quand on aura un menu et le boss.  
 Désolé pour le franglais :/ .  
---------
+--
 Update v.0.5: (Mathieu Levy, 15/06/2017:19h52)
----
+-------------
 Astéroides bien implémentés
 Précédemment j'avais arreté de remplir ce changelog.  
 Après discussion nous avons décidé de continuer le changelog.  
@@ -121,7 +121,7 @@ les interaction vaisseaux/autre et interaction tirs/ast.
  --Pour tester j'ai mis 150 vie sinon tu meurs vite.  
 
 Update v.0.440: (Mathieu Levy, 24/04/2017:20h54)  
-
+-------------
 - Add function CreateExplosion:  
   -- With a new sprite.  
   -- Funny a mettre en place.  
@@ -149,7 +149,7 @@ Que pensez-vous d'une file pour gérer l'affichage des explosions ?
 ça ferait une bonne expérience.
 
 Update v.0.436: (Mathieu Levy, 21/04/2017:23h55)  
-
+-------------
 - the global variable *temps_actuel:  
  -- is isn't used with SDL_GetTick for the time being.  
 
@@ -181,7 +181,7 @@ Update v.0.436: (Mathieu Levy, 21/04/2017:23h55)
 
 
 Update v.0.435: (Mathieu Levy, 21/04/2017).
-
+-------------
 - Dans struct sprite_t :  
 -- Ajout de int numero_object:  
 --Permet de connaitre le numero de l'objet demandé.  
@@ -214,6 +214,7 @@ Update v.0.435: (Mathieu Levy, 21/04/2017).
 
 --
 Update v.0.430: (Mathieu Levy)  
+-------------
 Allelujah
 
 -Ajout de la procédure CreateSmallAst:  
@@ -239,7 +240,7 @@ Allelujah
 
 --
 Update v.0.425: (Mathieu Levy)
-
+-------------
 -Ajout d'une procédure hyperespace:  
 --Qui prend un sprite_t.  
 --Si le sprite rencontre un bord de l'écran il est tp.  
@@ -279,7 +280,7 @@ Update v.0.425: (Mathieu Levy)
 
 --
 Update v.0.420: (Mathieu Levy)
-
+-------------
 
 -Ajout d'une procédure SetUpPosition:  
 --Qui prend un sprite_t et un SDL_Surface.  
