@@ -13,7 +13,8 @@ Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.
 la v.1.0 sera quand on aura un menu et le boss.  
 Désolé pour le franglais :/ .  
 --------
-Update v.0.5: (Mathieu Levy, 15/06/2017:19h52)  
+Update v.0.5: (Mathieu Levy, 15/06/2017:19h52)
+-
 Astéroides bien implémentés
 Précédemment j'avais arreté de remplir ce changelog.  
 Après discussion nous avons décidé de continuer le changelog.  
