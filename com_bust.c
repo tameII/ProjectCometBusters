@@ -276,7 +276,12 @@ void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
   sprite1->x = sprite2->x;
   sprite1->y = sprite2->y;
 }
-
+/*Set up sprite1 at middle sprite2 ?*/
+void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x + (sprite2->size)/2 - (sprite1->size)/2;
+  sprite1->y = sprite2->y + (sprite2->size)/2 - (sprite1->size)/2;
+}
 
 /*Fonction qui fait apparaitre deux plus petit astéroide seulement si le type est 1 ou 2*/
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
@@ -347,11 +352,20 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship)
     sprite_init(&tirs[nbtirs], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
     tirs[nbtirs].current = space_ship->current;
     sprite_boost(&tirs[nbtirs], VIT_NORM_PIOU);
-    SetUpAtPosition(&tirs[nbtirs], space_ship);
+    SetUpAtMiddle(&tirs[nbtirs], space_ship);
     //printf("Piou !\n");
     nbtirs += 1;
   }
 }
+
+/* void change_sprite_ship (sprite_t *space_ship){ */
+/*   if (space_ship->image == spaceship){          */
+/*     space_ship->image = spaceship2;             */
+/*   }                                             */
+/*   else {                                        */
+/*     space_ship->image = spaceship;              */
+/*   }                                             */
+/* }                                               */
 
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
@@ -387,7 +401,8 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
     case SDLK_q:
       *quit = 1;
       break;
-    case SDLK_LEFT:
+      /*
+	case SDLK_LEFT:
       sprite_turn_left(space_ship);
       break;
     case SDLK_RIGHT:
@@ -397,7 +412,13 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       *accel = CONS_ACCEL;
       break;
     case SDLK_DOWN:
-      break;
+    break;
+    case SDLK_t:                                            // FIRE !!!!
+      //printf("touch t pressed \n");
+      create_piou(tirs,space_ship);
+      //SDL_Delay(250);
+      break;       
+      */
     case SDLK_k:                                  //KIll a random ast
       printf("touch k pressed \n");
       i = rand()%(3);
@@ -446,11 +467,6 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       *explosionNeeded = CreateExplosion(explosion, &big_ast[0]);
       SDL_Delay(100);
       break;
-    case SDLK_t:                                            // FIRE !!!!
-      //printf("touch t pressed \n");
-      create_piou(tirs,space_ship);
-      //SDL_Delay(250);
-      break;
     case SDLK_y:                                             //Create ALL type of ast very fast
       CreateAst(big_ast);
       CreateAst(norm_ast);
@@ -466,7 +482,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       DivideAst(norm_ast, 1, big_ast, norm_ast, small_ast);
       SDL_Delay(100);
       break;
-    case SDLK_n:
+    case SDLK_n:                      //ast -1life
       printf("touch n pressed \n");
       i = 0; //numero ast demandé
       j = 1; //nombre de vie retirée
@@ -485,6 +501,81 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
   }
 
 }
+
+void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *quit, int Table_move[5], sprite_t *tirs, bool *can_piou){
+  switch(event.type){
+  case SDL_QUIT:
+    *quit = 1;
+    break;
+    /* activation des action en appuyant sur les touches*/
+  case SDL_KEYDOWN:
+    switch (event.key.keysym.sym)
+      {
+      /* case SLDK_ESCAPE: */
+      /* 	*quit = 1; */
+      /* 	break; */
+      case SDLK_UP:
+	Table_move[0] = 1;
+	break;
+      case SDLK_DOWN:
+	Table_move[1] = 1;
+	break;
+      case SDLK_LEFT:
+	Table_move[2] = 1;
+	break;
+      case SDLK_RIGHT:
+	Table_move[3] = 1;
+	break;
+      case SDLK_SPACE:
+	Table_move[4] = 1;
+	break;
+      default:
+	break;
+      }
+    break;
+    /*déactivation des actions en arretant d'appuyer*/
+  case SDL_KEYUP:
+    switch (event.key.keysym.sym)
+      {
+      case SDLK_UP:
+	Table_move[0] = 0;
+	break;
+      case SDLK_DOWN:
+	Table_move[1] = 0;
+	break;
+      case SDLK_LEFT:
+	Table_move[2] = 0;
+	break;
+      case SDLK_RIGHT:
+	Table_move[3] = 0;
+      break;
+      case SDLK_SPACE:
+	Table_move[4] = 0;
+	*can_piou = true;
+	break;
+      default:
+	break;
+      }
+    break;
+  }
+  if(Table_move[0] == 1){
+    *accel = CONS_ACCEL;
+  }
+  if(Table_move[1] == 1){
+   *accel = -CONS_ACCEL;
+   }
+  if(Table_move[2] == 1){
+    sprite_turn_left(space_ship);
+  }
+  if(Table_move[3] == 1){
+    sprite_turn_right(space_ship);
+  }
+  if(Table_move[4] ==1 && *can_piou == true){
+    create_piou(tirs, space_ship);
+    *can_piou = false;
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -523,7 +614,11 @@ int main(int argc, char* argv[])
 
   int gameover = 0;
   bool explosionNeeded = true;
- 
+
+    // char key[SDLK_LAST] = {0};
+  int Table_move[5]={0,0,0,0,0};
+  bool can_piou = true;
+  
   /* main loop: check events and re-draw the window until the end */
   while (!gameover)
     {
@@ -535,7 +630,9 @@ int main(int argc, char* argv[])
        * of the sprite. */
       if (SDL_PollEvent(&event)) {
 	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, tirs);
+	HandleEvent2(event, &space_ship, &accel, &gameover, Table_move, tirs, &can_piou);
       }
+      
 
 
       /* draw the background */
@@ -599,6 +696,7 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(norm_comet);
   SDL_FreeSurface(big_comet);
   SDL_FreeSurface(spaceship);
+  SDL_FreeSurface(spaceship2);
   SDL_FreeSurface(background);
   SDL_FreeSurface(screen);
   SDL_Quit();
