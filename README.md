@@ -10,10 +10,11 @@ Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale
 Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.  
 (et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).  
 
-la v.0.5 sera quand les astéroides seront bien implémentés.  
+la v.1.0 sera quand on aura un menu et le boss.  
 Désolé pour le franglais :/ .  
 --------
 Update v.0.5: (Mathieu Levy, 15/06/2017:19h52)  
+Astéroides bien implémentés
 Précédemment j'avais arreté de remplir ce changelog.  
 Après discussion nous avons décidé de continuer le changelog.  
 Du coup y a pas mal de changement, j'espère que ce changelog  
