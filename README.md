@@ -4,7 +4,7 @@ This is a project from two L1 informatique from fac des sciences et technologie 
 
 ----
 CHANGELOG:
-----
+--
 
 Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )  
 Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.  
