@@ -1,5 +1,24 @@
 #include "physique.h"
 
+/*Give various information, press b in game to know what.*/
+void various_information(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+{
+  int i;
+  for(i=0;i<gimmeIsNb(big_ast);i++){
+    printf("big_ast[%d].life = %d \n", i, big_ast[i].life);
+  }
+  printf("\n");
+  for(i=0;i<gimmeIsNb(norm_ast);i++){
+    printf("norm_ast[%d].life = %d \n", i, norm_ast[i].life);
+  }
+  printf("\n");
+  for(i=0;i<gimmeIsNb(small_ast);i++){
+    printf("small_ast[%d].life = %d \n", i, small_ast[i].life);
+  }
+  printf("\n");
+  printf("nbBigAst: %d |nbNormAst: %d |nbSmallAst: %d |", nbBigAst, nbNormAst, nbSmallAst);
+  printf("nbtirs: %d |temps_actuel: %d |\n", nbtirs, temps_actuel);
+}
 
 /*Set Position of all Sprites*/
 void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
@@ -57,23 +76,27 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast){
-  int i,j,k;
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
+{
+  int i;
   /*init ship*/
   sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
   /*Init all ast at begun (big_small_norm)*/
-  for(i=0 ; i<NB_MAX_BIG_AST-1 ; i++){
+  for(i=0 ; i<NB_MAX_BIG_AST ; i++){
   sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
   }
-  for(j=0 ; j<NB_MAX_NORM_AST-1 ; j++){
-    sprite_init(&norm_ast[j], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
+  for(i=0 ; i<NB_MAX_NORM_AST ; i++){
+    sprite_init(&norm_ast[i], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
   }
-  for(k=0 ; k<NB_MAX_SMALL_AST-1 ; k++){
-  sprite_init(&small_ast[k], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
+  for(i=0 ; i<NB_MAX_SMALL_AST ; i++){
+  sprite_init(&small_ast[i], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
+  }
+  for(i=0 ; i<NB_MAX_PIOU ; i++){
+  sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
   }
 
-  
+					    
 }
 
 /*Main fonction to create new sprite*/
@@ -104,17 +127,18 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
     sprite->numero_object = nbBigAst;
-    SetUpPosition(sprite); //, sprite_picture
-    //  printf("nbBigAst : %d \n",*nbBigAst);
-    // printf("sprite.numero_object = %d \n", sprite->numero_object);
+    SetUpPosition(sprite); 
+    sprite->life = BIG_AST_LIFE;
   }
   if(type == 2){
     sprite->numero_object = nbNormAst;
-    SetUpPosition(sprite); //, sprite_picture
+    sprite->life = NORM_AST_LIFE;
+    SetUpPosition(sprite); 
   }
   if(type == 3){
     sprite->numero_object = nbSmallAst;
-    SetUpPosition(sprite); //, sprite_picture
+    sprite->life = SMALL_AST_LIFE;
+    SetUpPosition(sprite);
   }
   if(type == 4){
     sprite->numero_object = nbtirs;
@@ -253,7 +277,7 @@ void downloadsprite()
 
 ///////////////////////////////////////////////////////////////////
 /*test if kill ast is possible*/
-bool kill_ast_param(int nombre_max, int numero)
+bool kill_ast_param(int nombre_max, int numero, int type)
 {
   bool killed = false;
   /*No need of more object than 100 on screen*/
@@ -267,7 +291,7 @@ bool kill_ast_param(int nombre_max, int numero)
   }
   if (numero > (nombre_max)){
     printf("kill_ast : Numero asked is overated, max is: %d \n",nombre_max);
-    printf("kill_ast : You asked numero :%d \n",numero);
+    printf("kill_ast : You asked numero :%d \t|type : %d \n",numero, type);
     killed = true;
   }
   
