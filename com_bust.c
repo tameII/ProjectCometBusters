@@ -576,11 +576,12 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
   }
 }
 
-
+ 
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
+
   /*Definition des différents sprites*/
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
@@ -619,6 +620,7 @@ int main(int argc, char* argv[])
   int Table_move[5]={0,0,0,0,0};
   bool can_piou = true;
   
+
   /* main loop: check events and re-draw the window until the end */
   while (!gameover)
     {
@@ -682,7 +684,7 @@ int main(int argc, char* argv[])
 	  SDL_BlitSurface(bullet, NULL , screen, &tirs[i].position);
 	}
       }
-
+      af_lettre_test(lettres_pictures, screen);
       /*Collision*/
       collide(&space_ship, tirs, big_ast, norm_ast, small_ast,  &gameover);
       dead(&space_ship, big_ast, norm_ast, small_ast, tirs, &gameover);

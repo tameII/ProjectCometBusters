@@ -8,7 +8,7 @@
 #include <math.h>
 #include <time.h> 
 
-
+ 
 #define FROTTEMENT   0.0009
 
 /* Size of the window */
@@ -41,12 +41,12 @@
 #define BIG_AST_SIZE    64
 #define NB_MAX_BIG_AST      5
 #define VIT_BIG_AST     0.02     //0.02
-#define BIG_AST_LIFE    4
+#define BIG_AST_LIFE    2        //4
 /*Norm ast:*/
 #define NORM_AST_SIZE   32
 #define NB_MAX_NORM_AST     15    //15
 #define VIT_NORM_AST    0.05     //0.05
-#define NORM_AST_LIFE   2        //2
+#define NORM_AST_LIFE   1        //2
 /*Small ast:*/
 #define SMALL_AST_SIZE  16   
 #define NB_MAX_SMALL_AST    30   //30
@@ -73,6 +73,7 @@
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion 
+SDL_Surface *lettres_pictures;
 int nbBigAst, nbNormAst, nbSmallAst, nbtirs;
 bool Random_Position_activated; //the function is activated?
 int temps_actuel; 
@@ -122,6 +123,10 @@ bool kill_ast_param(int nombre_max, int numero, int type);
 
 int max(int a, int b);
 int min(int a, int b);
+
+
+void af_lettre(char lettre, int col, int lig, SDL_Surface *lettre_picture, SDL_Surface *screen);
+void af_lettre_test(SDL_Surface *lettre_picture, SDL_Surface *screen);
 
 /*in com_bust.c*/
 bool CreateExplosion(sprite_t *explosion, sprite_t *sprite);
