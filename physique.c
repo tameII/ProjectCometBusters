@@ -1,8 +1,8 @@
 #include "physique.h"
-
+  
 /*Give various information, press b in game to know what.*/
 void various_information(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
-{ 
+{
   int i;
   for(i=0;i<gimmeIsNb(big_ast);i++){
     printf("big_ast[%d].life = %d \n", i, big_ast[i].life);
@@ -76,7 +76,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion)
 {
   int i;
   /*init ship*/
@@ -95,7 +95,9 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
   for(i=0 ; i<NB_MAX_PIOU ; i++){
   sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
   }
-
+  for(i=0 ; i<NB_MAX_EXPL ; i++){
+    sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
+  }
 					    
 }
 
@@ -103,10 +105,6 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
 void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite)
 {
   sprite->type = type;
-  //sprite->col = sprite_picture->clip_rect.x;
-  //sprite->lig = sprite_picture->clip_rect.y;
-  //sprite->x = sprite_picture->clip_rect.x;
-  //sprite->y = sprite_picture->clip_rect.y;
   sprite->current = 0;
   sprite->size = sprite_size;
   sprite->nb_sprite = anim_sprite_num;
@@ -122,7 +120,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   if(type == 0){
     sprite->current = INIT_DIR;
     sprite->life = MAX_LIFE_SHIP;
-    SetUpPosition(sprite); //, sprite_picture
+    SetUpPosition(sprite); //,sprite_picture
 }
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
@@ -144,7 +142,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
     sprite->numero_object = nbtirs;
   }
   if(type == 5){
-    /*NOTHING printf("EXPLOSION MUAHAHAHHAHAHAHAH \n");*/
+    //  sprite->numero_object = nbExplosion;
   }
 }
 /*the animation of the sprite turn */
@@ -202,7 +200,7 @@ void sprite_move(sprite_t *sprite)
     }
   }  
 }
-/*Acceleration of the sprite (it can be a const)*/
+  /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
   if (sprite->type == 0){
@@ -264,17 +262,18 @@ void downloadsprite()
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
   spaceship = download_sprite_("sprite(new)v2.bmp");
   spaceship2 = download_sprite_("sprite(new).bmp");
-  background = download_sprite_("backgroundlvl1.bmp");
+  background = download_sprite_("espace.bmp");
   bullet = download_sprite_("bullet02.bmp");
-  lettres_pictures = download_sprite_("police_sonic.bmp");
+  lettres_pictures = download_sprite_("police_sonicv_2.bmp");
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
-  set_colorkey_(spaceship, 255, 0, 255, screen);
+  set_colorkey_(spaceship2, 255, 0, 255, screen);
   set_colorkey_(big_comet, 0, 255, 255, screen);
   set_colorkey_(norm_comet, 0, 255, 255, screen);
   set_colorkey_(small_comet, 0, 255, 255, screen);
   set_colorkey_(explosion_picture, 0, 255, 255, screen);
   set_colorkey_(bullet, 255, 125, 0, screen);
+  set_colorkey_(lettres_pictures, 255, 0, 27, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
