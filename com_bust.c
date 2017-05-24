@@ -1,5 +1,7 @@
 #include "physique.h"
   
+
+void SetUpAtRight(sprite_t *sprite1, sprite_t *sprite2);
 //////////////////////////////////////////////////////////////////////////////////////////////// 
 /******************************FIN HEADER******************************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +34,7 @@ void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero)
 
 }
 
-/*Test si le ship est mort, fonctionne pour tout sprite unique. (bon en vrai que pour le ship pour l'instant, mais peut être update)*/
+/*Test si le ship est mort, fonctionne pour tout sprite unique.)*/
 void dead_ship_param(sprite_t *sprite, int  *gameover, int *score_total)
 {
   bool dead = false;
@@ -42,13 +44,13 @@ void dead_ship_param(sprite_t *sprite, int  *gameover, int *score_total)
   } 
   if(dead){
     printf("OMG OMG OMG \n");
-    // sprite->life += 1;  //c'est juste pour faciliter les test (j'ai trouvé mieux, j'augmente la vie du vaisseau)
     printf("Commandant ! voici votre score : %d \n", *score_total);
     *gameover = 1; 
   }
 }
 /*Teste si chaque element du tableau est mort.fonctionne pour tout tableau.*/
-void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, int *score_total)
+void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast,
+		    sprite_t *small_ast, sprite_t *explosion, int *score_total)
 {
   int i;
   int type = sprite->type;
@@ -69,7 +71,9 @@ void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast, spr
   }
 }
 /*Appelle les fonctions permettant de savoir si u sprite est mort, et de le tuer si c'est le cas (oui oui)*/
-void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion, int *gameover, int *score_total)
+void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
+	  sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
+	  int *gameover, int *score_total)
 {
   dead_tab_param(big_ast, big_ast, norm_ast, small_ast, explosion, score_total);
   dead_tab_param(norm_ast, big_ast, norm_ast, small_ast, explosion, score_total);
@@ -80,7 +84,8 @@ void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t 
 
 
 /*Collide pour le ship, /!\ ne pas utiliser de tableau dans sprite 1 !!! /!\ c'est le space_ship en sprite1*/
-void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne, int *decompte)
+void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne,
+			int *decompte)
 {
   int j;
   int nb2 = gimmeIsNb(sprite2);
@@ -115,7 +120,9 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2)
 /*Verifie si le tirs ou space_ship est en contact avec big/norm/small_ast*/
 /*Faites appel a collide_tab_param dans le cas de deux tableau,          */
 /*et collide_ship_param dans le cas d'un sprite un tableau               */
-void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover, bool *cogne, int *decompte)
+void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast, 
+	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover, 
+	     bool *cogne, int *decompte)
 {
   collide_tab_param(tirs, big_ast);
   collide_tab_param(tirs, norm_ast);
@@ -146,6 +153,25 @@ bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
   return collision;
 }
 */
+void CreateLife(sprite_t *vie_ship)
+{
+   
+  if (nbVie < MAX_LIFE_SHIP){
+    sprite_init(&vie_ship[nbVie], 6, vie_picture, VIE_SIZE, ANIM_VIE_NUM, MAX_LIFE_SHIP);
+    if(nbVie>1){
+      SetUpAtRight(&vie_ship[nbVie],&vie_ship[nbVie-1]);
+      }
+    nbVie += 1;
+  }
+  vie_ship[nbVie].col = vie_ship[nbVie].x;
+  vie_ship[nbVie].lig = vie_ship[nbVie].y;
+  vie_ship[nbVie].position.x = vie_ship[nbVie].col;
+  vie_ship[nbVie].position.y = vie_ship[nbVie].lig;
+  sprite_image(&vie_ship[nbVie]);
+  hyperespace(&vie_ship[nbVie]);
+
+}
+
 
 /*Create Small Ast, appel de sprite_init avec les carac' du small_ast,*/
 /* puis donne une vitesse aléatoire avec sprite_boost                 */
@@ -228,9 +254,11 @@ int gimmeIsNb(sprite_t *sprite)
     break;
   case 5:
     return nbExplosion;
-    break; 
+    break;
+  case 6:
+    return nbVie;
   default:
-    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5. \nType asked: %d \n",type);
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 6. \nType asked: %d \n",type);
     return 0;
     break;
   }
@@ -277,7 +305,11 @@ void kill_ast(sprite_t *ast, int numero)
 	case 5:
 	  kill(&nbExplosion);
 	  killed = true;
-	  break; 
+	  break;
+	case 6:
+	  kill(&nbVie);
+	  killed = true;
+	  break;
 	default:
 	  printf("Kill_ast : wrong type. (you asked %d)",ast->type);
 	  killed = true;
@@ -315,7 +347,13 @@ void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2)
   sprite1->x = sprite2->x + (sprite2->size)/2 - (sprite1->size)/2;
   sprite1->y = sprite2->y + (sprite2->size)/2 - (sprite1->size)/2;
 }
+/*Set up sprite 1 just a right of sprite 2*/
+void SetUpAtRight(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x + sprite2->size;
+  sprite1->y = sprite2->y;
 
+}
 /*Fonction qui fait apparaitre deux plus petit astéroide seulement si le type est 1 ou 2*/
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
@@ -377,7 +415,7 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship)
 {
   if (nbtirs<NB_MAX_PIOU){
     sprite_init(&tirs[nbtirs], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
-    tirs[nbtirs].current = space_ship->current/2;
+    tirs[nbtirs].current = space_ship->current;
     sprite_boost(&tirs[nbtirs], VIT_NORM_PIOU);
     SetUpAtMiddle(&tirs[nbtirs], space_ship);
     //printf("Piou !\n");
@@ -415,7 +453,7 @@ void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship, SDL_Surface * 
 
   
 
-void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion, bool *play)
+void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion, bool *play, sprite_t *vie_ship)
 {
   int i,j;
   switch (event.type) {
@@ -509,6 +547,16 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
     case SDLK_c :
       change_sprite_ship(space_ship, spaceship, spaceship2);
       break;
+    case SDLK_h :
+      kill_ast(vie_ship, 0);
+      printf("nbVie : %d \n",nbVie);
+      SDL_Delay(100);
+      break;
+    case SDLK_g :
+      CreateLife(vie_ship);
+      printf("nbVie : %d \n",nbVie);
+      SDL_Delay(100);
+      break;
     default:
       break;
     }
@@ -580,10 +628,10 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
     *accel = -CONS_ACCEL;
   }
   if(Table_move[2] == 1){
-    ship_turn_left(space_ship);
+    sprite_turn_left(space_ship);
   }
   if(Table_move[3] == 1){
-    ship_turn_right(space_ship);
+    sprite_turn_right(space_ship);
   }
   if(Table_move[4] ==1 && *can_piou == true){
     create_piou(tirs, space_ship);
@@ -638,9 +686,10 @@ int main(int argc, char* argv[])
   sprite_t small_ast[NB_MAX_SMALL_AST]; 
   sprite_t tirs[NB_MAX_PIOU];
   sprite_t explosion[NB_MAX_EXPL];
-
+  sprite_t vie_ship[MAX_LIFE_SHIP];
   int ScoreTotal;
   int *score_total;
+  int m = MAX_LIFE_SHIP;
   score_total = &ScoreTotal;
 
 
@@ -663,7 +712,7 @@ int main(int argc, char* argv[])
   downloadsprite();
  
   /*Initialise all sprite*/
-  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion);
+  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion, vie_ship);
 
   int gameover = 0;
   int ending = 0;
@@ -672,7 +721,9 @@ int main(int argc, char* argv[])
   int Table_move[5]={0,0,0,0,0};
   bool can_piou = true;
   cogne = false;
-  
+  for(m=0;m<MAX_LIFE_SHIP;m++){
+    CreateLife(vie_ship);
+    }
 
   /*Menu :*/
   while (!gameover){
@@ -698,7 +749,7 @@ int main(int argc, char* argv[])
 	  /* look for an event; possibly update the position and the shape
 	   * of the sprite. */
 	  if (SDL_PollEvent(&event)) {
-	    HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, tirs, explosion, &play);
+	    HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, tirs, explosion, &play, vie_ship);
 	    HandleEvent2(event, &space_ship, &accel, &gameover, Table_move, tirs, &can_piou);
 	  }
       
@@ -742,7 +793,10 @@ int main(int argc, char* argv[])
 	      }
 	    }
 	  }
-      
+	  /*Draw vie_ship:*/
+	  draw_all_sprite(vie_picture, vie_ship);
+
+	  
 	  /*Draw projectile (piou)*/
 	  for (i=0; i<nbtirs; i++) {
 	    if (nbtirs>0){
@@ -792,9 +846,9 @@ int main(int argc, char* argv[])
     }
     /*End of while menu*/
   }
-   
+  
   /* clean up */
-  SDL_FreeSurface(vie);
+  SDL_FreeSurface(vie_picture);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(small_comet);
   SDL_FreeSurface(norm_comet);

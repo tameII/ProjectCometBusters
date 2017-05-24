@@ -70,13 +70,18 @@
 #define VIT_NORM_PIOU 2   //2
 #define PORTEE_PIOU 150   //150
 
+/*Sprite Vie vaisseau :*/
+#define VIE_SIZE 32
+#define ANIM_VIE_NUM 1
+
+/*Invincibilité*/
 #define DUREE_INV_APP_DEGATS 1000
 
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion
-SDL_Surface *vie; //NBRE DE VIE
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion;
+SDL_Surface *vie_picture; //NBRE DE VIE
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbVie;
 bool cogne;
 int temps_actuel; 
 int decompte;
@@ -111,16 +116,14 @@ void SetUpPosition(sprite_t *sprite); //, SDL_Surface *surface
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
 
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion);
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion, sprite_t *vie_ship);
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite);
 void sprite_turn_left(sprite_t *sprite);
 void sprite_turn_right(sprite_t *sprite);
+void sprite_image(sprite_t *sprite);
 void sprite_move(sprite_t *sprite); 
 void sprite_boost(sprite_t *sprite, float accel);
 void hyperespace(sprite_t *sprite);
-void ship_turn_left(sprite_t *sprite);
-void ship_turn_right(sprite_t *sprite);
-void ship_image(sprite_t *sprite);
 
 SDL_Surface* download_sprite_(char *nomSprite);
 void downloadsprite();
