@@ -2,7 +2,7 @@
 
 /*Give various information, press b in game to know what.*/
 void various_information(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
-{
+{ 
   int i;
   for(i=0;i<gimmeIsNb(big_ast);i++){
     printf("big_ast[%d].life = %d \n", i, big_ast[i].life);
@@ -266,7 +266,7 @@ void downloadsprite()
   spaceship2 = download_sprite_("sprite(new).bmp");
   background = download_sprite_("backgroundlvl1.bmp");
   bullet = download_sprite_("bullet02.bmp");
-
+  lettres_pictures = download_sprite_("police_sonic.bmp");
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship, 255, 0, 255, screen);
@@ -325,3 +325,19 @@ int min(int a, int b)
   return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////
+/*LETTRES DU JEU*/
+/*EN CHANTIER*/
+/*Affiche la lettre demandé si possible, a la colonne et ligne spécifiée*/
+void af_lettre(char lettre, int col, int lig, SDL_Surface *lettre_picture, SDL_Surface *screen)
+{
+  printf("af_lettre: %c |col: %d |lig: %d \n",lettre , col, lig);
+  //SDL_Rect pos_lettre_image;
+  //SDL_Rect pos_lettre_screen;
+  //pos_lettre_screen
+  SDL_BlitSurface(lettre_picture, NULL, screen, NULL);
+}
+
+void af_lettre_test(SDL_Surface *lettre_picture, SDL_Surface *screen){
+  af_lettre('a', 50, 50, lettre_picture, screen);
+}
