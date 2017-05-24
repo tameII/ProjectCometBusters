@@ -1,5 +1,5 @@
 #include "physique.h"
-
+  
 /*Give various information, press b in game to know what.*/
 void various_information(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
@@ -76,7 +76,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs)
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion)
 {
   int i;
   /*init ship*/
@@ -95,7 +95,9 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
   for(i=0 ; i<NB_MAX_PIOU ; i++){
   sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
   }
-
+  for(i=0 ; i<NB_MAX_EXPL ; i++){
+    sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
+  }
 					    
 }
 
@@ -103,10 +105,6 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
 void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite)
 {
   sprite->type = type;
-  //sprite->col = sprite_picture->clip_rect.x;
-  //sprite->lig = sprite_picture->clip_rect.y;
-  //sprite->x = sprite_picture->clip_rect.x;
-  //sprite->y = sprite_picture->clip_rect.y;
   sprite->current = 0;
   sprite->size = sprite_size;
   sprite->nb_sprite = anim_sprite_num;
@@ -122,7 +120,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   if(type == 0){
     sprite->current = INIT_DIR;
     sprite->life = MAX_LIFE_SHIP;
-    SetUpPosition(sprite); //, sprite_picture
+    SetUpPosition(sprite); //,sprite_picture
 }
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
@@ -144,7 +142,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
     sprite->numero_object = nbtirs;
   }
   if(type == 5){
-    /*NOTHING printf("EXPLOSION MUAHAHAHHAHAHAHAH \n");*/
+    //  sprite->numero_object = nbExplosion;
   }
 }
 /*the animation of the sprite turn */
@@ -202,7 +200,7 @@ void sprite_move(sprite_t *sprite)
     }
   }  
 }
-/*Acceleration of the sprite (it can be a const)*/
+  /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
   if (sprite->type == 0){
@@ -257,6 +255,7 @@ SDL_Surface* download_sprite_(char *nomSprite)
 /*init SDL-Surface with picture, set up colorkey for each.*/
 void downloadsprite()
 {
+
   /*Load all sprite_picture*/
   explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
   small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
@@ -264,12 +263,13 @@ void downloadsprite()
   big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
   spaceship = download_sprite_("sprite(new)v2.bmp");
   spaceship2 = download_sprite_("sprite(new).bmp");
-  background = download_sprite_("backgroundlvl1.bmp");
+  background = download_sprite_("espace.bmp");
   bullet = download_sprite_("bullet02.bmp");
+
 
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
-  set_colorkey_(spaceship, 255, 0, 255, screen);
+  set_colorkey_(spaceship2, 255, 0, 255, screen);
   set_colorkey_(big_comet, 0, 255, 255, screen);
   set_colorkey_(norm_comet, 0, 255, 255, screen);
   set_colorkey_(small_comet, 0, 255, 255, screen);
@@ -325,3 +325,101 @@ int min(int a, int b)
   return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////
+
+bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, int * cu, int * cv) 
+{
+  /* rough test using the bounding boxes (bb) only */
+  bool test = !(sprite2.x > sprite1.x + sprite1.size ||
+		sprite2.x + sprite2.size < sprite1.x ||
+		sprite2.y > sprite1.y + sprite1.sprite_picture->h ||
+		sprite2.y + sprite2.sprite_picture->h < sprite1.y);
+
+  /* if the rough test succeeded, a fine test is performed using the colorkeys (transparency colors) of the sprites (may be optimized!) */
+  if (test) {
+    Uint32 *bmp1 = (Uint32*)malloc(sizeof(Uint32) * sprite1.size * sprite1.sprite_picture->h), *sprite_it, *bmp_it;
+    Uint32 *bmp2 = (Uint32*)malloc(sizeof(Uint32) * sprite2.size * sprite2.sprite_picture->h);
+    int u, v, v1 = 0; 
+
+    /* lock the video memory and copy the sprite bitmaps into cpu memory */
+    // printf("SDL_MUSTLOCK(sprite1->sprite) : %d\n", SDL_MUSTLOCK(sprite1->sprite));
+    SDL_LockSurface(sprite1.sprite_picture);
+    SDL_LockSurface(sprite2.sprite_picture);
+    bmp_it = bmp1;
+    sprite_it = (Uint32*)(sprite1.sprite_picture->pixels) +  sprite1.current/2 * sprite1.size;
+    for (v = 0; v < sprite1.sprite_picture->h; v++) {
+      for (u = 0; u < sprite1.size; u++) {
+	*bmp_it++ = *sprite_it++;
+      }
+      sprite_it += (sprite1.sprite_picture->w - sprite1.size);
+    }
+    bmp_it = bmp2;
+    sprite_it = (Uint32*)(sprite2.sprite_picture->pixels) +  sprite2.current/2 * sprite2.size;
+    for (v = 0; v < sprite2.sprite_picture->h; v++) {
+      for (u = 0; u < sprite2.size; u++) {
+	*bmp_it++ = *sprite_it++;
+      }
+      sprite_it += (sprite2.sprite_picture->w - sprite2.size);
+    }
+    SDL_UnlockSurface(sprite1.sprite_picture);
+    SDL_UnlockSurface(sprite2.sprite_picture);
+
+    bmp_it = bmp1;
+    test = false;
+
+    /* for each pixel p1 in bmp1, until test = true... */
+    while (!test && v1 < sprite1.sprite_picture->h) {
+      int u1 = 0;
+      while (!test && u1 < sprite1.size) {
+	/* get the screen coordinates of pixel p1 */
+	int screen_u = u1 + sprite1.x;
+	int screen_v = v1 + sprite1.y;
+
+	/* if the screen coordinates of p1 are inside the bb of sprite2... */
+	if (screen_u >= sprite2.x &&
+	    screen_u < sprite2.x + sprite2.size &&
+	    screen_v >= sprite2.y &&
+	    screen_v < sprite2.y + sprite2.sprite_picture->h) {
+	  Uint32 pixel1 = *bmp_it;
+	  unsigned int col1;
+	  Uint8 r, g, b;
+	  
+	  /* get the color col1 of p1*/
+	  SDL_GetRGB(pixel1, format, &r, &g, &b);
+	  col1 = SDL_MapRGB(format, r, g, b);
+
+	  /* if col1 is a NON transparent color... */
+	  if (col1 != sprite1.sprite_picture->format->colorkey) {
+	    Uint32 pixel2;
+	    unsigned int col2;
+	    Uint8 r, g, b;
+	    int u2, v2;
+
+	    /* get the local coordinates of pixel p2 in sprite2 corresponding to the screen coordinates of p1 */
+	    u2 = screen_u - sprite2.x;
+	    v2 = screen_v - sprite2.y;
+	    
+	    /* get the color col2 of p2 */
+	    pixel2 = *(bmp2 + u2 + v2 * sprite2.size);
+	    SDL_GetRGB(pixel2, format, &r, &g, &b);
+	    col2 = SDL_MapRGB(format, r, g, b);
+	    
+	    /* if col2 is also a non transparent color, a collision occurs  */
+	    if (col2 != sprite2.sprite_picture->format->colorkey) {
+	      test = true;
+	      *cu = screen_u; 
+	      *cv = screen_v;
+	    }
+	  }
+	}
+	u1++;
+	bmp_it++;
+      }
+      v1++;
+    }
+    free(bmp1);
+    free(bmp2);
+  }
+  
+  return test;
+}

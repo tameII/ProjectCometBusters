@@ -1,19 +1,19 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
-
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL.h>
 #include <math.h>
 #include <time.h> 
-
-
+ 
+ 
 #define FROTTEMENT   0.0009
 
 /* Size of the window */
-#define SCREEN_WIDTH    640
-#define SCREEN_HEIGHT   480
+#define SCREEN_WIDTH    1024
+#define SCREEN_HEIGHT   761
 
 /* Points added to the score */
 #define BIG_AST_POINT   20
@@ -35,7 +35,7 @@
 #define SPACE_SHIP_SIZE     32
 #define NB_MAX_SHIP         1
 /* Nb of life at the start */
-#define MAX_LIFE_SHIP        15  //150 lol
+#define MAX_LIFE_SHIP        5  //150 lol
 
 /* Size and number of asteroids */
 #define BIG_AST_SIZE    64
@@ -62,7 +62,7 @@
 /*EXPLOSION:*/
 #define EXPLOSION_SIZE     64
 #define ANIM_EXPLOSION_NUM 12
-#define NB_MAX_EXPLOSION   1
+#define NB_MAX_EXPL   50
 
 /*Projectiles*/
 #define NB_MAX_PIOU 10
@@ -70,12 +70,16 @@
 #define VIT_NORM_PIOU 2   //2
 #define PORTEE_PIOU 150   //150
 
+#define DUREE_INV_APP_DEGATS 1000
+
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
-SDL_Surface *explosion_picture; //stocke l'image de l'explosion 
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs;
+SDL_Surface *explosion_picture; //stocke l'image de l'explosion
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion;  //nombre explosion
 bool Random_Position_activated; //the function is activated?
+bool cogne;
 int temps_actuel; 
+int decompte;
 
 struct Sprite_t{
   int type;
@@ -107,7 +111,7 @@ void SetUpPosition(sprite_t *sprite); //, SDL_Surface *surface
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
 
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs);
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion);
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite);
 void sprite_turn_left(sprite_t *sprite);
 void sprite_turn_right(sprite_t *sprite);
@@ -123,16 +127,26 @@ bool kill_ast_param(int nombre_max, int numero, int type);
 int max(int a, int b);
 int min(int a, int b);
 
+bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, int * cu, int * cv);
+
+
+
 /*in com_bust.c*/
-bool CreateExplosion(sprite_t *explosion, sprite_t *sprite);
+void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero);
 bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2);
 bool compare_position(sprite_t *sprite1, sprite_t *sprite2);
 void kill_ast(sprite_t *ast, int numero);
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2);
 void draw_all_sprite(SDL_Surface *picture,sprite_t *sprite);
 void move_all_sprite(sprite_t *sprite);
-void collide_param(sprite_t *sprite1,  sprite_t *sprite2);
-void collide(sprite_t *ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover);
+
+void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne, int *decompte);
+void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2);
+void collide(sprite_t *ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover, bool *cogne, int *decompte);
+
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast);
 int gimmeIsNb(sprite_t *sprite);
 
+
 #endif
+ 
