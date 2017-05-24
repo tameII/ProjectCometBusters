@@ -161,6 +161,30 @@ void sprite_turn_right(sprite_t *sprite)
     sprite->current = sprite->nb_sprite - 1;
 }
 
+void ship_turn_left(sprite_t *sprite)
+{
+  sprite->current += 1;
+  if(sprite->current >= sprite->nb_sprite*2)
+    sprite->current = 0;
+}
+
+void ship_turn_right(sprite_t *sprite)
+{
+  sprite->current -= 1;
+  if(sprite->current < 0)
+    sprite->current = sprite->nb_sprite*2 - 1;
+}
+
+void ship_image(sprite_t *sprite)
+{
+  /* Define the source rectangle for the BlitSurface */
+  sprite->image.y = 0;
+  sprite->image.w = sprite->size;
+  sprite->image.h = sprite->size;
+  /* choose image according to direction and animation flip: */
+  sprite->image.x = sprite->size * (sprite->current / 2);
+}
+
 void sprite_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -174,6 +198,7 @@ void sprite_image(sprite_t *sprite)
 /*Move of the sprite (+ hyperespace)*/
 void sprite_move(sprite_t *sprite)
 {
+
   sprite->x += sprite->vx;
   sprite->y += sprite->vy;
   
@@ -184,8 +209,14 @@ void sprite_move(sprite_t *sprite)
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
   
-  sprite_image(sprite);
-  
+  if (sprite->type == 0)
+    {
+      ship_image(sprite);
+    }
+  else
+    {
+      sprite_image(sprite);
+    }
   sprite->decompte += 1;
   
   if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){ 
@@ -197,19 +228,19 @@ void sprite_move(sprite_t *sprite)
   if (sprite->type == 5){
     if (sprite->decompte %100 == 0){  /*Permet d'animer l'explosion (utilisation du modulo car sinon plus complexe d'arreter la fameuse explosion)*/
       sprite_turn_left(sprite);   
-    }
+   }
   }  
 }
-  /*Acceleration of the sprite (it can be a const)*/
+/*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
   if (sprite->type == 0){
-    sprite->vx += accel * cos(sprite->current * 10 * M_PI / 180) - FROTTEMENT * sprite->vx;
-    sprite->vy += accel * (-sin(sprite->current * 10 * M_PI / 180)) - FROTTEMENT * sprite->vy;
-    if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->current * 10 * M_PI / 180)) && accel > 0)
-      sprite->vx -= accel * cos(sprite->current * 10 * M_PI / 180);
-    if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 10 * M_PI / 180)))
-      sprite->vy -= accel * (-sin(sprite->current * 10 * M_PI / 180));
+    sprite->vx += accel * cos(sprite->current * 5 * M_PI / 180) - FROTTEMENT * sprite->vx;
+    sprite->vy += accel * (-sin(sprite->current * 5 * M_PI / 180)) - FROTTEMENT * sprite->vy;
+    if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->current * 5 * M_PI / 180)) && accel > 0)
+      sprite->vx -= accel * cos(sprite->current * 5 * M_PI / 180);
+    if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 5 * M_PI / 180)))
+      sprite->vy -= accel * (-sin(sprite->current * 5 * M_PI / 180));
   }
   if (sprite->type ==4){
     sprite->vx += accel * cos(sprite->current  * 10 * M_PI / 180);
@@ -255,6 +286,7 @@ SDL_Surface* download_sprite_(char *nomSprite)
 /*init SDL-Surface with picture, set up colorkey for each.*/
 void downloadsprite()
 {
+  printf("entree download");
 
   /*Load all sprite_picture*/
   explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");

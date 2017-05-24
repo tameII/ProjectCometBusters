@@ -377,7 +377,7 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship)
 {
   if (nbtirs<NB_MAX_PIOU){
     sprite_init(&tirs[nbtirs], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
-    tirs[nbtirs].current = space_ship->current;
+    tirs[nbtirs].current = space_ship->current/2;
     sprite_boost(&tirs[nbtirs], VIT_NORM_PIOU);
     SetUpAtMiddle(&tirs[nbtirs], space_ship);
     //printf("Piou !\n");
@@ -580,10 +580,10 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
     *accel = -CONS_ACCEL;
   }
   if(Table_move[2] == 1){
-    sprite_turn_left(space_ship);
+    ship_turn_left(space_ship);
   }
   if(Table_move[3] == 1){
-    sprite_turn_right(space_ship);
+    ship_turn_right(space_ship);
   }
   if(Table_move[4] ==1 && *can_piou == true){
     create_piou(tirs, space_ship);
@@ -792,7 +792,7 @@ int main(int argc, char* argv[])
     }
     /*End of while menu*/
   }
-  
+   
   /* clean up */
   SDL_FreeSurface(vie);
   SDL_FreeSurface(bullet);

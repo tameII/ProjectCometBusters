@@ -118,6 +118,9 @@ void sprite_turn_right(sprite_t *sprite);
 void sprite_move(sprite_t *sprite); 
 void sprite_boost(sprite_t *sprite, float accel);
 void hyperespace(sprite_t *sprite);
+void ship_turn_left(sprite_t *sprite);
+void ship_turn_right(sprite_t *sprite);
+void ship_image(sprite_t *sprite);
 
 SDL_Surface* download_sprite_(char *nomSprite);
 void downloadsprite();
