@@ -591,19 +591,22 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
   }
 }
 
-void HandleEventMenu(SDL_Event event, int *quit, bool *play)
+void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending)
 {
   switch (event.type) {
     /* close button clicked */
   case SDL_QUIT:
-    *quit = 1;
+    *gameover = 1;
+      *ending = 1;
     break;
   case SDL_KEYUP:
     switch (event.key.keysym.sym)
       {
       case SDLK_ESCAPE:
       case SDLK_q:
-	*quit = 1;
+	*gameover = 1;
+	  *ending = 1;
+
 	break;
       case SDLK_UP:
 	printf("UP MA GUEULE\n");
@@ -612,6 +615,9 @@ void HandleEventMenu(SDL_Event event, int *quit, bool *play)
 	printf("DESCENT GROS\n");
 	break;
       case SDLK_RETURN:
+	if(*play == true && *gameover == 1){
+	  *ending = 1;
+	}
 	*play = true;
 	break;
       default:
@@ -670,13 +676,17 @@ int main(int argc, char* argv[])
 
   /*Menu :*/
   while (!gameover){
+
+    /*MENU :*/
     if(!play){
-      /*Insert function of menu here (blitsurface...)*/
-      SDL_Event event;
-      if (SDL_PollEvent(&event)) {
-	HandleEventMenu(event, &gameover, &play);
+      SDL_Event event2;
+      if (SDL_PollEvent(&event2)) {
+	HandleEventMenu(event2, &gameover, &play, &ending);
+	SDL_BlitSurface(background, NULL, screen, NULL);
+	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
     }
+    /*JEU:*/
     if(play){
       /* main loop: check events and re-draw the window until the end */
       while (!gameover)
@@ -763,21 +773,28 @@ int main(int argc, char* argv[])
 	    }
 	  /* update the screen */
 	  SDL_UpdateRect(screen, 0, 0, 0, 0);
-
 	  /*End of while of the game */
 	}
       /*End of if(play)*/
     }
     if(gameover){
       while(!ending){
-	printf("GAMEOVER\n");  
-	ending = 1;     //Il se termine immediatement pour l'instant bien sur (boucle infini sinon)
+	
+	      /*Insert function of menu here (blitsurface...)*/
+	
+	SDL_Event event3;
+	if (SDL_PollEvent(&event3)) {
+	  HandleEventMenu(event3, &gameover, &play, &ending);
+	}
+	SDL_BlitSurface(background, NULL, screen, NULL);
+	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
     }
     /*End of while menu*/
   }
   
   /* clean up */
+  SDL_FreeSurface(vie);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(small_comet);
   SDL_FreeSurface(norm_comet);

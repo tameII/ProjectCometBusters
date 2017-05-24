@@ -265,7 +265,7 @@ void downloadsprite()
   spaceship2 = download_sprite_("sprite(new).bmp");
   background = download_sprite_("espace.bmp");
   bullet = download_sprite_("bullet02.bmp");
-
+  vie = download_sprite_("PackDeSoin.bmp");
 
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
@@ -275,6 +275,7 @@ void downloadsprite()
   set_colorkey_(small_comet, 0, 255, 255, screen);
   set_colorkey_(explosion_picture, 0, 255, 255, screen);
   set_colorkey_(bullet, 255, 125, 0, screen);
+  set_colorkey_(vie, 0, 0, 0, screen);
 }
 
 ///////////////////////////////////////////////////////////////////

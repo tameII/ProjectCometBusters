@@ -16,9 +16,9 @@
 #define SCREEN_HEIGHT   761
 
 /* Points added to the score */
-#define BIG_AST_POINT   20
-#define NORM_AST_POINT  50
-#define SMALL_AST_POINT 100
+#define BIG_AST_POINT   250   
+#define NORM_AST_POINT  500
+#define SMALL_AST_POINT 1225
 /*Base life for all sprite*/
 #define BASE_LIFE       1
 /* Order of the different directions in the picture: */
@@ -75,8 +75,8 @@
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion;  //nombre explosion
-bool Random_Position_activated; //the function is activated?
+SDL_Surface *vie; //NBRE DE VIE
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion;
 bool cogne;
 int temps_actuel; 
 int decompte;
