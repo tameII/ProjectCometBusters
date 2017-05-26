@@ -3,6 +3,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
 //////////////////////////////////////////////////////////////////////////////
+/*Create bombe atomique qui fait apparaitre a un endroit aleatoire une BOMBE ATOMIQUE OUH YEAH*/
+void CreateAtomicBomb(sprite_t *bonus_atomic_bomb){
+  if(nbAtomicBomb < 1){
+    sprite_init(bonus_atomic_bomb, 21, atomic_bomb_picture, ATOMIC_BOMB_SIZE, 
+		NB_ATOMIC_BOMB_SPRITE, NB_MAX_ATOMIC_BOMB);
+	      }
+  nbAtomicBomb += 1;
+}
+//    sprite_init(&big_ast[nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
 void kill_all_sprite_param(sprite_t *sprite, int nb_max)
 {
   int i;
@@ -18,13 +27,14 @@ void kill_all_sprite(sprite_t *space_ship,sprite_t *big_ast, sprite_t *norm_ast,
 		     int *animationFinale, bool *bomb_triggered)
 {
 
-  if(space_ship->life == 0){
+  if(space_ship->life <= 0){
     *animationFinale += 1;
     kill_all_sprite_param(big_ast, NB_MAX_BIG_AST);
     kill_all_sprite_param(norm_ast, NB_MAX_NORM_AST);
     kill_all_sprite_param(small_ast, NB_MAX_SMALL_AST);
     kill_all_sprite_param(tirs, NB_MAX_PIOU);
     SetUpPosition(space_ship);
+    cogne = false;
     if( *animationFinale >= DECOMPTE_FIN){
       *gameover = 1;                                             // GAME OVER ICI !!!
     } 
@@ -271,9 +281,12 @@ int gimmeIsNb(sprite_t *sprite)
     break;
   case 5:
     return nbExplosion;
-    break; 
+    break;
+  case 21:
+    return nbAtomicBomb;
+    break;
   default:
-    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5. \nType asked: %d \n",type);
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21. \nType asked: %d \n",type);
     return 0;
     break;
   }
@@ -379,7 +392,6 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast,
     }
   }
   if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
-    //printf("DivideAst : type 2, createsmallAst");
     CreateAst(small_ast);
     SetUpAtPosition(&small_ast[nb_Small_Ast], &ast[numero]);
     if (nb_Small_Ast+1 < NB_MAX_SMALL_AST){
@@ -705,7 +717,7 @@ int main(int argc, char* argv[])
   sprite_t explosion[NB_MAX_EXPL];
 
   /*bonus et affichage:*/
-
+  sprite_t bonus_atomic_bomb;
   
   int ScoreTotal;
   int *score_total;
@@ -748,13 +760,12 @@ int main(int argc, char* argv[])
   bool bomb_triggered = false;
   *score_total = 0;  //score_total = 0;
   cogne = false;
-
+  CreateAtomicBomb(&bonus_atomic_bomb);
   /*Les variables utilisée avec SDL_TTF       *
    *  (les autres sont plus haut dans le main)*/
   char affichage_score[25] = ""; /* Tableau de char suffisamment grand */
-  char *text = "Hello, world!";
   SDL_Color color = { 255, 255, 255 };
-  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, text,
+  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);
 
   /*Menu :*/
@@ -769,7 +780,6 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(background, NULL, screen, NULL);
 	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
 	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
-	SDL_BlitSurface(textSurface, NULL, screen, NULL);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
     }
@@ -807,7 +817,13 @@ int main(int argc, char* argv[])
 
 	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image, screen, &space_ship.position);
 	  }
-      
+	  /*Affichage des bonus:*/
+	  /*Atomic_bomb*/
+	  if(gimmeIsNb(&bonus_atomic_bomb) == 1){
+	  SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
+			  NULL, screen, &bonus_atomic_bomb.position);
+	  }
+	  
 	  /*Call new ast with time*/
 	  CreateAstWithTime(big_ast, norm_ast, small_ast);
 	  /*draw Big Asteroid*/
@@ -871,6 +887,7 @@ int main(int argc, char* argv[])
 	  SDL_BlitSurface(textSurface, NULL, screen, NULL);
 	  SDL_FreeSurface(textSurface);
 
+
 	  /* update the screen */
 	  SDL_UpdateRect(screen, 0, 0, 0, 0);
 	  /*End of while of the game */
@@ -886,6 +903,9 @@ int main(int argc, char* argv[])
       kill_all_number();
       temps_actuel = 0;
       printf("Commandant ! voici votre score : %d \n", *score_total);
+      *score_total = 0;
+      droitDeScorer = true;
+
       while(!ending){
 	
 	      /*Insert function of menu here (blitsurface...)*/

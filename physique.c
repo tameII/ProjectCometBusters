@@ -72,11 +72,22 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     sprite->position.x = sprite->col;
     sprite->position.y = sprite->lig;
     break;
+  case 21:
+    Random_Position_Partout(sprite);
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
+    break;
   default:
     break;
   }
 }
- 
+void Random_Position_Partout(sprite_t *sprite)
+{
+    sprite->x = rand()%(SCREEN_WIDTH);
+    sprite->y = rand()%(SCREEN_HEIGHT);
+}
 /*Set a random position on the edge of the grid*/
 void Random_Position (sprite_t *sprite)
 {
@@ -191,7 +202,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 10 || type == 11){
+  if(type == 10 || type == 11 ||type == 12 || type == 21){
     SetUpPosition(sprite);
   }
 }
@@ -352,6 +363,8 @@ void downloadsprite()
   menu_quitter_selec = download_sprite_("Quitter_selec.bmp");
   menu_game_over = download_sprite_("Game_over.bmp");
   menu_return = download_sprite_("Return_menu.bmp");
+  atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
+
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);
@@ -368,6 +381,9 @@ void downloadsprite()
   set_colorkey_(menu_quitter, 255, 255, 255, screen);
   set_colorkey_(menu_game_over, 255, 255, 255, screen);
   set_colorkey_(menu_return, 255, 255, 255, screen);
+
+  //Bonus:
+  set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
 }
 
 ///////////////////////////////////////////////////////////////////

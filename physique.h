@@ -10,7 +10,6 @@
 #include <time.h> 
    
  
-#define FROTTEMENT   0.0009
 
 /* Size of the window */
 #define SCREEN_WIDTH    1024
@@ -59,7 +58,7 @@
 #define SPACE_SHIP_SIZE     32
 #define NB_MAX_SHIP         1
 /* Nb of life at the start */
-#define MAX_LIFE_SHIP        2  //150 lol 
+#define MAX_LIFE_SHIP        2  
 
 /* Size and number of asteroids */
 #define BIG_AST_SIZE    64
@@ -94,7 +93,22 @@
 #define VIT_NORM_PIOU 2   //2
 #define PORTEE_PIOU 150   //150
 
+
+/*BONUS:*/
+/*Atomic_bomb*/
+#define ATOMIC_BOMB_SIZE 32
+#define NB_ATOMIC_BOMB_SPRITE 1
+#define NB_MAX_ATOMIC_BOMB 1
+
+/*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
+#define FROTTEMENT   0.0009
+
+
+/*ATOMIC_BOMB_SIZE, 
+		NB_ATOMIC_BOMB_SPRITE, NB_MAX_ATOMIC_BOMB*/
+
+
 
 
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
@@ -102,7 +116,8 @@ SDL_Surface *explosion_picture; //stocke l'image de l'explosion
 SDL_Surface *vie; //NBRE DE VIE
 SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
 SDL_Surface *menu_game_over, *menu_return;
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion;
+SDL_Surface *atomic_bomb_picture;
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb;
 bool cogne;
 int temps_actuel; 
 int decompte;
@@ -135,6 +150,7 @@ void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm
 			 sprite_t *small_ast, int *score);
 
 void SetUpPosition(sprite_t *sprite); //, SDL_Surface *surface
+void Random_Position_Partout(sprite_t *sprite);
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
 
