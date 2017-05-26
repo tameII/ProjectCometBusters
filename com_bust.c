@@ -1,23 +1,97 @@
 #include "physique.h"
- 
-////////////////////////////////////////////////////////////////////////////////////////////////
-/******************************FIN HEADER******************************************************/
-////////////////////////////////////////////////////////////////////////////////////////////////
-/*void explosion()
-{
-  sprite_t explosion;
-  sprite_init(&explosion,  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPLOSION);
-  sprite_move(&explosion);
-  draw_sprite(explosion_picture, &explosion, 1);
-  if (explosion.decompte >= 100*12+1){
-    //explosionNeeded = false;
-    explosion.decompte = 0;
-  }
-}*/
+#include <SDL_ttf.h> 
 
+
+
+
+void kill(int *nb);
+///////////////////////////////////////////////////////////////////////////////
+/******************************FIN HEADER*************************************/
+//////////////////////////////////////////////////////////////////////////////
+/*Create bombe atomique qui fait apparaitre a un endroit aleatoire une BOMBE ATOMIQUE OUH YEAH*/
+void CreateAtomicBomb(sprite_t *bonus_atomic_bomb){
+  if(nbAtomicBomb < 1){
+    sprite_init(bonus_atomic_bomb, 21, atomic_bomb_picture, ATOMIC_BOMB_SIZE, 
+		NB_ATOMIC_BOMB_SPRITE, NB_MAX_ATOMIC_BOMB);
+	      
+    nbAtomicBomb += 1;
+  }
+}
+//    sprite_init(&big_ast[nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
+void kill_all_sprite_param(sprite_t *sprite, int nb_max)
+{
+  int i;
+  for(i=0; i<nb_max;i++){
+    sprite[i].life = 0;
+  }
+}
+/*Fonction qui fait exploser TOUT les sprites sur l'ecran*/
+/*Servira pour la bombe atomique et pour la fin du jeu
+En fait ça met a zero toute les vie de chaque sprite si le space_ship->life = 0*/
+void kill_all_sprite(sprite_t *space_ship,sprite_t *big_ast, sprite_t *norm_ast,
+		     sprite_t *small_ast, sprite_t *tirs, int *gameover,
+		     int *animationFinale, bool *bomb_triggered)
+{
+
+  if(space_ship->life <= 0){
+    *animationFinale += 1;
+    kill_all_sprite_param(big_ast, NB_MAX_BIG_AST);
+    kill_all_sprite_param(norm_ast, NB_MAX_NORM_AST);
+    kill_all_sprite_param(small_ast, NB_MAX_SMALL_AST);
+    kill_all_sprite_param(tirs, NB_MAX_PIOU);
+    SetUpPosition(space_ship);
+    cogne = false;
+    if( *animationFinale >= DECOMPTE_FIN){
+      *gameover = 1;                                             // GAME OVER ICI !!!
+    } 
+  }
+  if(*bomb_triggered == true){
+    kill_all_sprite_param(big_ast, NB_MAX_BIG_AST);
+    kill_all_sprite_param(norm_ast, NB_MAX_NORM_AST);
+    kill_all_sprite_param(small_ast, NB_MAX_SMALL_AST);
+    *bomb_triggered = false;
+    }
+}
+
+/*Fonction qui fait disparaitre tout les sprites tableau de l'ecran*/
+void kill_all_number()
+{
+  nbBigAst = 0;
+  nbNormAst = 0;
+  nbSmallAst = 0;
+  nbtirs = 0;
+  nbExplosion = 0;
+}
+
+void ajout_score(int *score, int point)
+{
+  *score += point;
+}
+void score(int *score, int type)
+{
+    if(type == 1){
+      ajout_score(score, BIG_AST_POINT);
+    }
+    if(type == 2){
+      ajout_score(score, NORM_AST_POINT);
+    }
+    if(type == 3){
+      ajout_score(score, SMALL_AST_POINT);
+    }
+} 
+/*Create explosion size 64*64*/
+void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero)
+{
+  if (nbExplosion < NB_MAX_EXPL){
+    sprite_init(&explosion[nbExplosion], 5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
+    SetUpAtPosition(&explosion[nbExplosion], &sprite[numero] );
+    nbExplosion += 1;
+  }
+
+}
 
 /*Test si le ship est mort, fonctionne pour tout sprite unique. (bon en vrai que pour le ship pour l'instant, mais peut être update)*/
-void dead_ship_param(sprite_t *sprite, int  *gameover)
+void dead_ship_param(sprite_t *sprite, int  *gameover, int *score_total, bool *droitDeScorer)
 {
   bool dead = false;
  
@@ -25,21 +99,28 @@ void dead_ship_param(sprite_t *sprite, int  *gameover)
     dead = true;
   } 
   if(dead){
-    printf("OMG OMG OMG \n");
-    // sprite->life += 1;  //c'est juste pour faciliter les test (j'ai trouvé mieux, j'augmente la vie du vaisseau)
-    *gameover = 1; 
+    *droitDeScorer = false;
   }
 }
 /*Teste si chaque element du tableau est mort.fonctionne pour tout tableau.*/
-void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast,
+		    sprite_t *small_ast, sprite_t *explosion, int *score_total,
+		    bool *droitDeScorer)
 {
- int i;
- int nb = gimmeIsNb(sprite);
- bool dead = false;
+  int i;
+  int type = sprite->type;
+  int nb = gimmeIsNb(sprite);
+  bool dead = false;
   for(i=0;i<nb;i++){
     if(sprite[i].life <= 0){
       dead = true;    
       if(dead){
+	if (type == 1 || type == 2 || type == 3){
+	  CreateExplosion(explosion, sprite, i);
+	  if(*droitDeScorer){
+	  score(score_total, type);
+	  }
+	}
 	DivideAst(sprite, i, big_ast, norm_ast, small_ast);
 	kill_ast(sprite, i);
       }
@@ -47,18 +128,27 @@ void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast, spr
   }
 }
 /*Appelle les fonctions permettant de savoir si u sprite est mort, et de le tuer si c'est le cas (oui oui)*/
-void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, int *gameover)
+void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion, int *gameover, int *score_total, bool *droitDeScorer)
 {
-  dead_tab_param(big_ast, big_ast, norm_ast, small_ast);
-  dead_tab_param(norm_ast, big_ast, norm_ast, small_ast);
-  dead_tab_param(small_ast, big_ast, norm_ast, small_ast);
-  dead_tab_param(tirs, big_ast, norm_ast, small_ast);
-  dead_ship_param(space_ship, gameover);
+  dead_ship_param(space_ship, gameover, score_total, droitDeScorer);
+  dead_tab_param(big_ast, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
+  dead_tab_param(norm_ast, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
+  dead_tab_param(small_ast, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
+  dead_tab_param(tirs, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
+
+}
+void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2, bool *bomb_triggered)
+{
+  if(sprite2->type == 21){
+    if(compare_position(sprite1, sprite2)){
+      *bomb_triggered = true;
+      kill(&nbAtomicBomb);
+	}
+  }
 }
 
-
 /*Collide pour le ship, /!\ ne pas utiliser de tableau dans sprite 1 !!! /!\ c'est le space_ship en sprite1*/
-void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2)
+void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne, int *decompte)
 {
   int j;
   int nb2 = gimmeIsNb(sprite2);
@@ -66,6 +156,8 @@ void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2)
     if(compare_position(sprite1, &sprite2[j])){
       sprite1->life -= 1;
       sprite2[j].life -= 1;
+      *cogne = true;
+      *decompte = DUREE_INV_APP_DEGATS;
       //printf("Ship collide with sprite type : %d \n",sprite2[j].type);
     }
   }
@@ -91,35 +183,41 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2)
 /*Verifie si le tirs ou space_ship est en contact avec big/norm/small_ast*/
 /*Faites appel a collide_tab_param dans le cas de deux tableau,          */
 /*et collide_ship_param dans le cas d'un sprite un tableau               */
-void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover)
+void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
+	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
+	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
+	     bool *bomb_triggered)
 {
   collide_tab_param(tirs, big_ast);
   collide_tab_param(tirs, norm_ast);
   collide_tab_param(tirs, small_ast);
    
-  collide_ship_param(space_ship, big_ast);
-  collide_ship_param(space_ship, norm_ast);
-  collide_ship_param(space_ship, small_ast);
+  collide_ship_param(space_ship, big_ast, cogne, decompte);
+  collide_ship_param(space_ship, norm_ast, cogne, decompte);
+  collide_ship_param(space_ship, small_ast, cogne, decompte);
+
+  collide_ship_bonus_param(space_ship, bonus_atomic_bomb, bomb_triggered);
 }
 
 /*Prend deux sprites, rend true si les deux sprites sont en contact très grossier*/
 bool compare_position(sprite_t *sprite1, sprite_t *sprite2)
 {
-  return compare_position_param(sprite1->col, sprite1->lig, sprite1->size, sprite2->col, sprite2->lig, sprite2->size);
+  int cu = 0;
+  int cv = 0;
+  return collide_test(*sprite1, *sprite2, sprite1->sprite_picture->format ,&cu, &cv);
 }
 
 /*Fonction Collision pour un carré, prend des points x et y et ajoute leurs longueur a    */
-/*Puis compare les position des deux carrés et rend un booleen (vrai = carrés se touchent)*/
+/*Puis compare les position des deux carrés et rend un booleen (vrai = carrés se touchent)*//*
 bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
 {
   bool collision = false;
   if(min(x1+a1, x2+a2)>max(x1, x2) && min(y1+a1, y2+a2)>max(y1, y2)){
-      collision = true;
-      //printf("BOOM \n");
+    collision = true;
   }
   return collision;
 }
-
+*/
 
 /*Create Small Ast, appel de sprite_init avec les carac' du small_ast,*/
 /* puis donne une vitesse aléatoire avec sprite_boost                 */
@@ -176,7 +274,7 @@ void kill(int *nb)
 {
   if (*nb>0){
     *nb -= 1;
-    }
+  }
   
 }
 /*Donne le nombre d'astéroide présent sur l'écran */
@@ -200,8 +298,14 @@ int gimmeIsNb(sprite_t *sprite)
   case 4:
     return nbtirs;
     break;
+  case 5:
+    return nbExplosion;
+    break;
+  case 21:
+    return nbAtomicBomb;
+    break;
   default:
-    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4. \n type asked :%d \n",type);
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21. \nType asked: %d \n",type);
     return 0;
     break;
   }
@@ -236,7 +340,7 @@ void kill_ast(sprite_t *ast, int numero)
 	case 2:
 	  kill(&nbNormAst);
 	  killed = true;
-	break;
+	  break;
 	case 3:
 	  kill(&nbSmallAst);
 	  killed = true;
@@ -244,7 +348,11 @@ void kill_ast(sprite_t *ast, int numero)
 	case 4:
 	  kill(&nbtirs);
 	  killed = true;
-	break;
+	  break;
+	case 5:
+	  kill(&nbExplosion);
+	  killed = true;
+	  break; 
 	default:
 	  printf("Kill_ast : wrong type. (you asked %d)",ast->type);
 	  killed = true;
@@ -252,11 +360,11 @@ void kill_ast(sprite_t *ast, int numero)
 	}   
       }
       if (killed == false){
-      ast[numero] = ast[numero+1];
-      if (ast[numero].numero_object > 0){
-	ast[numero].numero_object -= 1;
-      }
-      numero += 1;
+	ast[numero] = ast[numero+1];
+	if (ast[numero].numero_object > 0){
+	  ast[numero].numero_object -= 1;
+	}
+	numero += 1;
       }
     }
   }
@@ -303,7 +411,6 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast,
     }
   }
   if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
-    //printf("DivideAst : type 2, createsmallAst");
     CreateAst(small_ast);
     SetUpAtPosition(&small_ast[nb_Small_Ast], &ast[numero]);
     if (nb_Small_Ast+1 < NB_MAX_SMALL_AST){
@@ -318,39 +425,34 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast,
 /*Créé un astéroide a l'aide de la variable globale temps actuel*/
 void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
 {
-  if (temps_actuel%1000 == 0){                       //toute les 11000 tours de boucle un Gros Ast apparait
-    //printf("temps actuel = %d \n",*temps_actuel);    //des printf pour avoir une idée de tout les cb de temps
-    //printf("CreateAst : Create new big ast \n");     //
-    CreateBigAst(big_ast);                             //
+  if (temps_actuel%1000 == 0){                       //toute les 1000 tours de boucle un Gros Ast apparait
+    CreateBigAst(big_ast);                          
   }
   if (temps_actuel%4000 == 0){                        //toute les 7000 tours de boucle  un Norm Ast apparait
-    //printf("temps actuel = %d \n",*temps_actuel);    //
-    //printf("CreateAst : Create new norm ast \n");    //
-    CreateNormAst(norm_ast);                           //
+    CreateNormAst(norm_ast);                          
   }
   if(temps_actuel%3000 == 0){                         //toute les 4000 tours de boucle un Small Ast apparait
-    //printf("temps actuel = %d \n",*temps_actuel);    //
-    //printf("CreateAst : Create new small ast \n");   //
-    CreateSmallAst(small_ast);                         //
+    CreateSmallAst(small_ast);                        
   }
 
 }
-
-
-bool CreateExplosion(sprite_t *explosion, sprite_t *sprite)
+void CreateBonusWithTime(sprite_t *bonus_atomic_bomb)
 {
-  bool BOOOOOOOOOOM = true;
-  SetUpAtPosition(explosion, sprite);
-  
-  return BOOOOOOOOOOM;
+  int i;
+
+   i = rand()%(CHANCE_D_APPARITION_ATOMIC_BOMBE);
+   if(i == 0){
+     CreateAtomicBomb(bonus_atomic_bomb);
+   }
 }
+
 
 //creation of projectile
 void create_piou (sprite_t* tirs, sprite_t* space_ship)
 {
   if (nbtirs<NB_MAX_PIOU){
     sprite_init(&tirs[nbtirs], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
-    tirs[nbtirs].current = space_ship->current;
+    tirs[nbtirs].current = space_ship->current/2;
     sprite_boost(&tirs[nbtirs], VIT_NORM_PIOU);
     SetUpAtMiddle(&tirs[nbtirs], space_ship);
     //printf("Piou !\n");
@@ -358,15 +460,34 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship)
   }
 }
 
-/* void change_sprite_ship (sprite_t *space_ship){ */
-/*   if (space_ship->image == spaceship){          */
-/*     space_ship->image = spaceship2;             */
-/*   }                                             */
-/*   else {                                        */
-/*     space_ship->image = spaceship;              */
-/*   }                                             */
-/* }                                               */
+void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship, SDL_Surface * spaceship2)
+{
+  if(ship->sprite_picture == spaceship)
+    {
+      ship->sprite_picture = spaceship2;
+    }
+  else
+    {
+      ship->sprite_picture = spaceship;
+    }
+}
 
+void HandleMenuReturn(sprite_t *jouer, sprite_t *quitter, bool *play, int *gameover, int *ending, int *finmenu)
+{
+  if(jouer->sprite_picture == menu_jouer_selec){
+     *play = true;
+     *gameover = 0;
+     *ending = 1;
+  }
+  else if(quitter->sprite_picture == menu_quitter_selec){
+    *ending = 1;
+    *gameover = 1;
+    *finmenu = 1;
+  }
+  else{
+    /*Autres options*/
+  }
+}
 /////////////////////////////////////////////////////////////////
 /* Handle events coming from the user:
    - quit the game?
@@ -385,7 +506,10 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship)
 
   
 
-void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *explosion, bool *explosionNeeded, sprite_t *tirs)
+void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel,
+		 sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast,
+		 sprite_t *tirs, sprite_t *explosion, bool *play,
+		 int *score_total, bool *bomb_triggered)
 {
   int i,j;
   switch (event.type) {
@@ -401,28 +525,10 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
     case SDLK_q:
       *quit = 1;
       break;
-      /*
-	case SDLK_LEFT:
-      sprite_turn_left(space_ship);
-      break;
-    case SDLK_RIGHT:
-      sprite_turn_right(space_ship);
-      break;
-    case SDLK_UP:
-      *accel = CONS_ACCEL;
-      break;
-    case SDLK_DOWN:
-    break;
-    case SDLK_t:                                            // FIRE !!!!
-      //printf("touch t pressed \n");
-      create_piou(tirs,space_ship);
-      //SDL_Delay(250);
-      break;       
-      */
     case SDLK_k:                                  //KIll a random ast
       printf("touch k pressed \n");
       i = rand()%(3);
-       if (i == 0){
+      if (i == 0){
 	j = rand()%(NB_MAX_BIG_AST-1);
 	kill_ast(big_ast, j);
       }
@@ -464,7 +570,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       break;
     case SDLK_e:                                                //BOOOM
       printf("touch e pressed \n");
-      *explosionNeeded = CreateExplosion(explosion, &big_ast[0]);
+      CreateExplosion(explosion, big_ast, 0);
       SDL_Delay(100);
       break;
     case SDLK_y:                                             //Create ALL type of ast very fast
@@ -491,9 +597,16 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       }
       SDL_Delay(100);
       break;
+    case SDLK_v :
+      various_information(space_ship, big_ast, norm_ast, small_ast, score_total);
+      SDL_Delay(100);
+      break;
+    case SDLK_c :
+      change_sprite_ship(space_ship, spaceship, spaceship2);
+      break;
     case SDLK_b :
-      various_information(big_ast, norm_ast, small_ast);
-     SDL_Delay(100);
+      *bomb_triggered = true;
+      break;
     default:
       break;
     }
@@ -511,9 +624,9 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
   case SDL_KEYDOWN:
     switch (event.key.keysym.sym)
       {
-      /* case SLDK_ESCAPE: */
-      /* 	*quit = 1; */
-      /* 	break; */
+	/* case SLDK_ESCAPE: */
+	/* 	*quit = 1; */
+	/* 	break; */
       case SDLK_UP:
 	Table_move[0] = 1;
 	break;
@@ -548,7 +661,7 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
 	break;
       case SDLK_RIGHT:
 	Table_move[3] = 0;
-      break;
+	break;
       case SDLK_SPACE:
 	Table_move[4] = 0;
 	*can_piou = true;
@@ -562,13 +675,13 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
     *accel = CONS_ACCEL;
   }
   if(Table_move[1] == 1){
-   *accel = -CONS_ACCEL;
-   }
+    *accel = -CONS_ACCEL;
+  }
   if(Table_move[2] == 1){
-    sprite_turn_left(space_ship);
+    ship_turn_left(space_ship);
   }
   if(Table_move[3] == 1){
-    sprite_turn_right(space_ship);
+    ship_turn_right(space_ship);
   }
   if(Table_move[4] ==1 && *can_piou == true){
     create_piou(tirs, space_ship);
@@ -576,25 +689,77 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
   }
 }
 
-
+void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
+		     int *finmenu, sprite_t *jouer, sprite_t *quitter)
+{
+  switch (event.type) {
+    /* close button clicked */
+  case SDL_QUIT:
+    *gameover = 1;
+      *ending = 1;
+      *finmenu = 1;
+    break;
+  case SDL_KEYUP:
+    switch (event.key.keysym.sym)
+      {
+      case SDLK_ESCAPE:
+      case SDLK_q:
+	*gameover = 1;
+	  *ending = 1;
+	  *finmenu = 1;
+	break;
+      case SDLK_UP:
+      case SDLK_DOWN:
+	change_sprite_ship (jouer, menu_jouer, menu_jouer_selec );
+	change_sprite_ship (quitter, menu_quitter, menu_quitter_selec );
+	break;
+      case SDLK_RETURN:
+	HandleMenuReturn(jouer, quitter, play, gameover, ending, finmenu);
+	break;
+      default:
+	break;
+      }
+  default:
+    break;
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
   /*Definition des différents sprites*/
+  sprite_t jouer;      //type 10
+  sprite_t quitter;    //type 11
+  sprite_t game_over;  //type 12
+  sprite_t return_menu; //type 13
+  //sprite_t credit; //type 14 ?
+
+  //les highscore avec SDL ttf ?
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
   sprite_t norm_ast[NB_MAX_NORM_AST];
   sprite_t small_ast[NB_MAX_SMALL_AST]; 
-  sprite_t explosion;
   sprite_t tirs[NB_MAX_PIOU];
+  sprite_t explosion[NB_MAX_EXPL];
+
+  /*bonus et affichage:*/
+  sprite_t PV[MAX_LIFE_SHIP]; //type 20
+  sprite_t bonus_atomic_bomb; //type 21
+  
+  int ScoreTotal;
+  int *score_total;
+  score_total = &ScoreTotal;
 
   /*Initialize rand :*/
-   srand(time(NULL)); 
+  srand(time(NULL)); 
 
   /* initialize SDL */
   SDL_Init(SDL_INIT_VIDEO);
-  
+  TTF_Init();
+
+  /* Load the font. */
+  TTF_Font *font = TTF_OpenFont("04B_30__.TTF", 32);
+
   /* set the title bar */
   SDL_WM_SetCaption("Comet Buster", "Comet Buster");
   
@@ -608,89 +773,201 @@ int main(int argc, char* argv[])
   downloadsprite();
  
   /*Initialise all sprite*/
-  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast, tirs);
-  sprite_init(&explosion,  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPLOSION);
-
-
+  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast,
+		  tirs, explosion, &game_over,
+		  &return_menu, &jouer, &quitter, PV);
   int gameover = 0;
-  bool explosionNeeded = true;
-
-    // char key[SDLK_LAST] = {0};
+  int ending = 0;
+  int finmenu = 0;
+  bool play = false;
+  bool droitDeScorer = true;
+  int animationFinale = 0;
   int Table_move[5]={0,0,0,0,0};
   bool can_piou = true;
-  
-  /* main loop: check events and re-draw the window until the end */
-  while (!gameover)
-    {
-      int i;
-      double accel = 0.0;
-      SDL_Event event;
-      temps_actuel +=1;
-      /* look for an event; possibly update the position and the shape
-       * of the sprite. */
-      if (SDL_PollEvent(&event)) {
-	HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast, small_ast, &explosion,  &explosionNeeded, tirs);
-	HandleEvent2(event, &space_ship, &accel, &gameover, Table_move, tirs, &can_piou);
+  bool bomb_triggered = false;
+  *score_total = 0;  //score_total = 0;
+  cogne = false;
+  //CreateAtomicBomb(&bonus_atomic_bomb);
+  /*Les variables utilisée avec SDL_TTF       *
+   *  (les autres sont plus haut dans le main)*/
+  char affichage_score[25] = "Comet Buster !!!"; /* Tableau de char suffisamment grand */
+  SDL_Color color = { 255, 255, 255 };
+  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
+						  color);
+
+  /*Menu :*/
+  while (!finmenu){
+
+    /*MENU :*/
+    if(!play){
+      SDL_Event event2;
+      if (SDL_PollEvent(&event2)) {
+	HandleEventMenu(event2, &gameover, &play, &ending, &finmenu, &jouer, &quitter);
+	
+	SDL_BlitSurface(background, NULL, screen, NULL);
+	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
+	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
+	SDL_BlitSurface(textSurface, NULL, screen, NULL);
+	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
-      
-
-
-      /* draw the background */
-      SDL_BlitSurface(background, NULL, screen, NULL);
-      
-      
-      {
-	/*position, mouvement et acceleration des sprites*/
-	sprite_boost(&space_ship, accel);
-	sprite_move(&space_ship);
-
-	SDL_BlitSurface(spaceship, &space_ship.image, screen, &space_ship.position);
-      }
-      
-      /*Call new ast with time*/
-      CreateAstWithTime(big_ast, norm_ast, small_ast);
-
-      /*draw Big Asteroid*/
-      move_all_sprite(big_ast);
-      draw_all_sprite(big_comet,big_ast);	  
-
-      /*draw norm asteroid*/
-      move_all_sprite(norm_ast);
-      draw_all_sprite(norm_comet, norm_ast);
-
-      /*draw small asteroid*/
-      move_all_sprite(small_ast);
-      draw_all_sprite(small_comet, small_ast);	  
-
-      /*Draw EXPLOSION*/ /* /!\ DONT USE IT YET /!\ !!!!!!
-       if (explosionNeeded == true){
-	sprite_move(&explosion);
-	draw_all_sprite(explosion_picture, &explosion);
-	if (explosion.decompte >= 100*12+1){
-	  explosionNeeded = false;
-	  explosion.decompte = 0;
-	}
-	}*/
-      /*Draw projectile (piou)*/
-      for (i=0; i<nbtirs; i++) {
-	if (nbtirs>0){
-	  sprite_move(&tirs[i]);
-	  if (tirs[i].decompte > PORTEE_PIOU){
-	    tirs[i].life -= 1;
-	    tirs[i].decompte = 0;
-	  }
-	  SDL_BlitSurface(bullet, NULL , screen, &tirs[i].position);
-	}
-      }
-
-      /*Collision*/
-      collide(&space_ship, tirs, big_ast, norm_ast, small_ast,  &gameover);
-      dead(&space_ship, big_ast, norm_ast, small_ast, tirs, &gameover);
-      /* update the screen */
-      SDL_UpdateRect(screen, 0, 0, 0, 0); 
     }
-  
+    /*JEU:*/
+    if(play){
+      /* main loop: check events and re-draw the window until the end */
+      while (!gameover)
+	{
+	  int i;
+	  double accel = 0.0;
+	  SDL_Event event;
+	  temps_actuel +=1;
+	  /* look for an event; possibly update the position and the shape
+	   * of the sprite. */
+	  if (SDL_PollEvent(&event)) {
+	    HandleEvent(event, &gameover, &space_ship, &accel, big_ast, norm_ast,
+			small_ast, tirs, explosion, &play, score_total,
+			&bomb_triggered);
+	    HandleEvent2(event, &space_ship, &accel, &gameover, Table_move, tirs, &can_piou);
+	  }
+      
+	  kill_all_sprite(&space_ship, big_ast, norm_ast,
+			  small_ast, tirs, &gameover, &animationFinale, 
+			  &bomb_triggered);
+	  //Si le vaisseau a plus de vie ça tue
+	  	  
+	  /*Call new ast and bonus */
+	  CreateAstWithTime(big_ast, norm_ast, small_ast);
+	  CreateBonusWithTime(&bonus_atomic_bomb);
+ 
+
+	  /* draw the background */
+	  SDL_BlitSurface(background, NULL, screen, NULL);
+      
+      
+	  {
+	    /*position, mouvement et acceleration des sprites*/
+	    sprite_boost(&space_ship, accel);
+	    sprite_move(&space_ship);
+
+	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image, screen, &space_ship.position);
+	  }
+	  /*Affichage des bonus:*/
+	  /*Atomic_bomb*/
+	  if(gimmeIsNb(&bonus_atomic_bomb) == 1){
+	  SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
+			  NULL, screen, &bonus_atomic_bomb.position);
+	  }
+
+	  /*draw Big Asteroid*/
+	  move_all_sprite(big_ast);
+	  draw_all_sprite(big_comet,big_ast);	  
+
+	  /*draw norm asteroid*/
+	  move_all_sprite(norm_ast);
+	  draw_all_sprite(norm_comet, norm_ast);
+
+	  /*draw small asteroid*/
+	  move_all_sprite(small_ast);
+	  draw_all_sprite(small_comet, small_ast);	  
+
+	  /*Draw EXPLOSION*/ 
+	  move_all_sprite(explosion);
+	  draw_all_sprite(explosion_picture, explosion);
+	  for (i=0; i<nbExplosion; i++){
+	    if (nbExplosion>0){
+	      if (explosion[i].decompte >= 100*12+1){
+		explosion[i].decompte = 0;
+		kill_ast(explosion, i);
+	      }
+	    }
+	  }
+      
+	  /*Draw projectile (piou)*/
+	  for (i=0; i<nbtirs; i++) {
+	    if (nbtirs>0){
+	      sprite_move(&tirs[i]);
+	      if (tirs[i].decompte > PORTEE_PIOU){
+		tirs[i].life -= 1;
+		tirs[i].decompte = 0;
+	      }
+	      SDL_BlitSurface(bullet, NULL , screen, &tirs[i].position);
+	    }
+	  }
+  /*Draw PV*/
+	  for (i = 0; i<space_ship.life ; i++)
+	    {
+	      SDL_BlitSurface(vie, NULL, screen, &PV[i].position);
+	    }
+	  /*Collision*/
+	  if (cogne == false)
+	    {
+	      collide(&space_ship, tirs, big_ast, norm_ast, small_ast, &gameover,
+		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered);
+	      dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
+		   &gameover, score_total, &droitDeScorer);
+	    }
+	  else
+	    {
+	      decompte--;
+	      change_sprite_ship(&space_ship, spaceship, spaceship2);
+	      can_piou = false;
+	      if (decompte <1)
+		{
+		  cogne = false;
+		}
+	    }
+   
+	  sprintf(affichage_score, "Score : %d", *score_total);
+	  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
+						  color);
+	  SDL_BlitSurface(textSurface, NULL, screen, NULL);
+	  SDL_FreeSurface(textSurface);
+
+
+	  /* update the screen */
+	  SDL_UpdateRect(screen, 0, 0, 0, 0);
+	  /*End of while of the game */
+	}
+       
+      ending = 0; //debut d'ecran de gameover
+      /*End of if(play)*/
+    }
+    if(gameover){
+      play = false;
+      space_ship.life = MAX_LIFE_SHIP;
+      SetUpPosition(&space_ship);
+      kill_all_number();
+      temps_actuel = 0;
+      printf("Commandant ! voici votre score : %d \n", *score_total);
+      *score_total = 0;
+      droitDeScorer = true;
+
+      while(!ending){
+	
+	      /*Insert function of menu here (blitsurface...)*/
+	
+	SDL_Event event3;
+	if (SDL_PollEvent(&event3)) {
+	  HandleEventMenu(event3, &gameover, &play, &ending, &finmenu, &jouer, &quitter);
+	}
+	SDL_BlitSurface(background, NULL, screen, NULL);
+	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
+	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
+	SDL_BlitSurface(game_over.sprite_picture, NULL, screen, &game_over.position);
+	SDL_UpdateRect(screen, 0, 0, 0, 0);
+      }
+    }
+    /*End of while menu*/
+  }
+   
   /* clean up */
+  SDL_FreeSurface(textSurface);
+  SDL_FreeSurface(menu_jouer);
+  SDL_FreeSurface(menu_jouer_selec);
+  SDL_FreeSurface(menu_quitter);
+  SDL_FreeSurface(menu_quitter_selec);
+  SDL_FreeSurface(menu_return);
+  SDL_FreeSurface(menu_game_over);
+  SDL_FreeSurface(vie);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(small_comet);
   SDL_FreeSurface(norm_comet);
@@ -699,11 +976,18 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(spaceship2);
   SDL_FreeSurface(background);
   SDL_FreeSurface(screen);
+
+  /* Free the font. */
+  TTF_CloseFont(font);
+
+  /* Cleanup SDL and SDL_ttf. */
   SDL_Quit();
-  
+  TTF_Quit();
+
   return 0;
   
 }
+
 /*Appelle sprite move pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
 void move_all_sprite(sprite_t *sprite)
 {
