@@ -1,10 +1,25 @@
 #include "physique.h"
 #include <SDL_ttf.h> 
+
+
+
+
+void kill(int *nb);
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
 //////////////////////////////////////////////////////////////////////////////
+/*Create bombe atomique qui fait apparaitre a un endroit aleatoire une BOMBE ATOMIQUE OUH YEAH*/
+void CreateAtomicBomb(sprite_t *bonus_atomic_bomb){
+  if(nbAtomicBomb < 1){
+    sprite_init(bonus_atomic_bomb, 21, atomic_bomb_picture, ATOMIC_BOMB_SIZE, 
+		NB_ATOMIC_BOMB_SPRITE, NB_MAX_ATOMIC_BOMB);
+	      
+    nbAtomicBomb += 1;
+  }
+}
+//    sprite_init(&big_ast[nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
 void kill_all_sprite_param(sprite_t *sprite, int nb_max)
-{ 
+{
   int i;
   for(i=0; i<nb_max;i++){
     sprite[i].life = 0;
@@ -25,6 +40,7 @@ void kill_all_sprite(sprite_t *space_ship,sprite_t *big_ast, sprite_t *norm_ast,
     kill_all_sprite_param(small_ast, NB_MAX_SMALL_AST);
     kill_all_sprite_param(tirs, NB_MAX_PIOU);
     SetUpPosition(space_ship);
+    cogne = false;
     if( *animationFinale >= DECOMPTE_FIN){
       *gameover = 1;                                             // GAME OVER ICI !!!
     } 
@@ -36,7 +52,7 @@ void kill_all_sprite(sprite_t *space_ship,sprite_t *big_ast, sprite_t *norm_ast,
     *bomb_triggered = false;
     }
 }
- 
+
 /*Fonction qui fait disparaitre tout les sprites tableau de l'ecran*/
 void kill_all_number()
 {
@@ -121,7 +137,15 @@ void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t 
   dead_tab_param(tirs, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
 
 }
-
+void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2, bool *bomb_triggered)
+{
+  if(sprite2->type == 21){
+    if(compare_position(sprite1, sprite2)){
+      *bomb_triggered = true;
+      kill(&nbAtomicBomb);
+	}
+  }
+}
 
 /*Collide pour le ship, /!\ ne pas utiliser de tableau dans sprite 1 !!! /!\ c'est le space_ship en sprite1*/
 void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne, int *decompte)
@@ -159,7 +183,10 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2)
 /*Verifie si le tirs ou space_ship est en contact avec big/norm/small_ast*/
 /*Faites appel a collide_tab_param dans le cas de deux tableau,          */
 /*et collide_ship_param dans le cas d'un sprite un tableau               */
-void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *gameover, bool *cogne, int *decompte)
+void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
+	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
+	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
+	     bool *bomb_triggered)
 {
   collide_tab_param(tirs, big_ast);
   collide_tab_param(tirs, norm_ast);
@@ -168,6 +195,8 @@ void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast, sprite_t *
   collide_ship_param(space_ship, big_ast, cogne, decompte);
   collide_ship_param(space_ship, norm_ast, cogne, decompte);
   collide_ship_param(space_ship, small_ast, cogne, decompte);
+
+  collide_ship_bonus_param(space_ship, bonus_atomic_bomb, bomb_triggered);
 }
 
 /*Prend deux sprites, rend true si les deux sprites sont en contact très grossier*/
@@ -271,9 +300,12 @@ int gimmeIsNb(sprite_t *sprite)
     break;
   case 5:
     return nbExplosion;
-    break; 
+    break;
+  case 21:
+    return nbAtomicBomb;
+    break;
   default:
-    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5. \nType asked: %d \n",type);
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21. \nType asked: %d \n",type);
     return 0;
     break;
   }
@@ -379,7 +411,6 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast, sprite_t *norm_ast,
     }
   }
   if(type == 2 && nb_Norm_Ast > 0){                                      //Pareil mais pour un norm ast.
-    //printf("DivideAst : type 2, createsmallAst");
     CreateAst(small_ast);
     SetUpAtPosition(&small_ast[nb_Small_Ast], &ast[numero]);
     if (nb_Small_Ast+1 < NB_MAX_SMALL_AST){
@@ -405,8 +436,15 @@ void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_as
   }
 
 }
+void CreateBonusWithTime(sprite_t *bonus_atomic_bomb)
+{
+  int i;
 
- 
+   i = rand()%(CHANCE_D_APPARITION_ATOMIC_BOMBE);
+   if(i == 0){
+     CreateAtomicBomb(bonus_atomic_bomb);
+   }
+}
 
 
 //creation of projectile
@@ -695,7 +733,7 @@ int main(int argc, char* argv[])
   sprite_t game_over;  //type 12
   sprite_t return_menu; //type 13
   //sprite_t credit; //type 14 ?
-  sprite_t PV[MAX_LIFE_SHIP];//type 20
+
   //les highscore avec SDL ttf ?
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
@@ -705,7 +743,7 @@ int main(int argc, char* argv[])
   sprite_t explosion[NB_MAX_EXPL];
 
   /*bonus et affichage:*/
-
+  sprite_t bonus_atomic_bomb;
   
   int ScoreTotal;
   int *score_total;
@@ -736,7 +774,7 @@ int main(int argc, char* argv[])
   /*Initialise all sprite*/
   init_all_sprite(&space_ship, big_ast, norm_ast, small_ast,
 		  tirs, explosion, &game_over,
-		  &return_menu, &jouer, &quitter, PV);
+		  &return_menu, &jouer, &quitter);
   int gameover = 0;
   int ending = 0;
   int finmenu = 0;
@@ -748,13 +786,12 @@ int main(int argc, char* argv[])
   bool bomb_triggered = false;
   *score_total = 0;  //score_total = 0;
   cogne = false;
-
+  //CreateAtomicBomb(&bonus_atomic_bomb);
   /*Les variables utilisée avec SDL_TTF       *
    *  (les autres sont plus haut dans le main)*/
   char affichage_score[25] = ""; /* Tableau de char suffisamment grand */
-  char *text = "Hello, world!";
   SDL_Color color = { 255, 255, 255 };
-  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, text,
+  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);
 
   /*Menu :*/
@@ -769,7 +806,6 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(background, NULL, screen, NULL);
 	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
 	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
-	SDL_BlitSurface(textSurface, NULL, screen, NULL);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
     }
@@ -795,6 +831,11 @@ int main(int argc, char* argv[])
 			  small_ast, tirs, &gameover, &animationFinale, 
 			  &bomb_triggered);
 	  //Si le vaisseau a plus de vie ça tue
+	  	  
+	  /*Call new ast and bonus */
+	  CreateAstWithTime(big_ast, norm_ast, small_ast);
+	  CreateBonusWithTime(&bonus_atomic_bomb);
+ 
 
 	  /* draw the background */
 	  SDL_BlitSurface(background, NULL, screen, NULL);
@@ -807,9 +848,13 @@ int main(int argc, char* argv[])
 
 	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image, screen, &space_ship.position);
 	  }
-      
-	  /*Call new ast with time*/
-	  CreateAstWithTime(big_ast, norm_ast, small_ast);
+	  /*Affichage des bonus:*/
+	  /*Atomic_bomb*/
+	  if(gimmeIsNb(&bonus_atomic_bomb) == 1){
+	  SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
+			  NULL, screen, &bonus_atomic_bomb.position);
+	  }
+
 	  /*draw Big Asteroid*/
 	  move_all_sprite(big_ast);
 	  draw_all_sprite(big_comet,big_ast);	  
@@ -846,16 +891,11 @@ int main(int argc, char* argv[])
 	    }
 	  }
 
-	  /*Draw PV*/
-	  for (i = 0; i<space_ship.life ; i++)
-	    {
-	      SDL_BlitSurface(vie, NULL, screen, &PV[i].position);
-	    }
 	  /*Collision*/
 	  if (cogne == false)
 	    {
 	      collide(&space_ship, tirs, big_ast, norm_ast, small_ast, &gameover,
-		      &cogne, &decompte);
+		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered);
 	      dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
 		   &gameover, score_total, &droitDeScorer);
 	    }
@@ -876,6 +916,7 @@ int main(int argc, char* argv[])
 	  SDL_BlitSurface(textSurface, NULL, screen, NULL);
 	  SDL_FreeSurface(textSurface);
 
+
 	  /* update the screen */
 	  SDL_UpdateRect(screen, 0, 0, 0, 0);
 	  /*End of while of the game */
@@ -893,7 +934,7 @@ int main(int argc, char* argv[])
       printf("Commandant ! voici votre score : %d \n", *score_total);
       *score_total = 0;
       droitDeScorer = true;
-      
+
       while(!ending){
 	
 	      /*Insert function of menu here (blitsurface...)*/

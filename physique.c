@@ -72,25 +72,23 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     sprite->position.x = sprite->col;
     sprite->position.y = sprite->lig;
     break;
+  case 21:
+    Random_Position_Partout(sprite);
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
+    break;
   default:
     break;
   }
 }
 
-void Set_up_PV(sprite_t *PV)
+void Random_Position_Partout(sprite_t *sprite)
 {
-  int i;
-  for(i = 0; i<MAX_LIFE_SHIP ; i++)
-    {
-      PV[i].x = 0 +i*PV_SIZE;
-      PV[i].y = PV_SIZE;
-      PV[i].col = PV[i].x;
-      PV[i].lig = PV[i].y;
-      PV[i].position.x = PV[i].col;
-      PV[i].position.y = PV[i].lig;
-    }
+    sprite->x = rand()%(SCREEN_WIDTH);
+    sprite->y = rand()%(SCREEN_HEIGHT);
 }
- 
 /*Set a random position on the edge of the grid*/
 void Random_Position (sprite_t *sprite)
 {
@@ -130,7 +128,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
 		    , sprite_t *game_over, sprite_t *return_menu
-		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV)
+		     , sprite_t *jouer, sprite_t *quitter)
 {
   int i;
   /*init menu*/
@@ -139,24 +137,22 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
   sprite_init(game_over, 12, menu_game_over, MENU_GAME_OVER_SIZE, NB_MENU_GAME_OVER_SPRITE, NB_MAX_MENU_GAME_OVER);
   sprite_init(return_menu, 13, menu_return, MENU_RETURN_SIZE, NB_MENU_RETURN_SPRITE, NB_MAX_MENU_RETURN);
    
-  for(i=0; i<MAX_LIFE_SHIP ; i++){
-    sprite_init(PV, 20, vie, PV_SIZE, NB_PV_SPRITE, MAX_LIFE_SHIP);
-  }
+  
   /*init ship*/
   sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
   /*Init all ast at begun (big_small_norm)*/
   for(i=0 ; i<NB_MAX_BIG_AST ; i++){
-    sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
+  sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
   }
   for(i=0 ; i<NB_MAX_NORM_AST ; i++){
     sprite_init(&norm_ast[i], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
   }
   for(i=0 ; i<NB_MAX_SMALL_AST ; i++){
-    sprite_init(&small_ast[i], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
+  sprite_init(&small_ast[i], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
   }
   for(i=0 ; i<NB_MAX_PIOU ; i++){
-    sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
+  sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
   }
   for(i=0 ; i<NB_MAX_EXPL ; i++){
     sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
@@ -207,11 +203,8 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 10 || type == 11){
+  if(type == 10 || type == 11 ||type == 12 || type == 21){
     SetUpPosition(sprite);
-  }
-  if(type == 20){
-    Set_up_PV(sprite);
   }
 }
 /*the animation of the sprite turn */
@@ -371,6 +364,8 @@ void downloadsprite()
   menu_quitter_selec = download_sprite_("Quitter_selec.bmp");
   menu_game_over = download_sprite_("Game_over.bmp");
   menu_return = download_sprite_("Return_menu.bmp");
+  atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
+
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);
@@ -387,6 +382,9 @@ void downloadsprite()
   set_colorkey_(menu_quitter, 255, 255, 255, screen);
   set_colorkey_(menu_game_over, 255, 255, 255, screen);
   set_colorkey_(menu_return, 255, 255, 255, screen);
+
+  //Bonus:
+  set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -478,7 +476,7 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
 
     bmp_it = bmp1;
     test = false;
- 
+
     /* for each pixel p1 in bmp1, until test = true... */
     while (!test && v1 < sprite1.sprite_picture->h) {
       int u1 = 0;
