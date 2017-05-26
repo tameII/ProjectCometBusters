@@ -1,5 +1,5 @@
 #include "physique.h"
-  
+   
 //////////////////////////////////////////////////////////////////////////////////////////////// 
 /******************************FIN HEADER******************************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -629,7 +629,7 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel, int *qui
 	break;
       }
     break;
-  }
+  } 
   if(Table_move[0] == 1){
     *accel = CONS_ACCEL;
   }
@@ -689,7 +689,9 @@ int main(int argc, char* argv[])
   /*Definition des différents sprites*/
   sprite_t jouer;      //type 10
   sprite_t quitter;    //type 11
-  //sprite_t credit; //type 12 ?
+  sprite_t game_over;  //type 12
+  sprite_t return_menu; //type 13
+  //sprite_t credit; //type 14 ?
   //les highscore avec SDL ttf ?
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
@@ -723,7 +725,7 @@ int main(int argc, char* argv[])
   downloadsprite();
  
   /*Initialise all sprite*/
-  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion, &jouer, &quitter);
+  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion, &jouer, &quitter, &game_over, &return_menu);
   int gameover = 0;
   int ending = 0;
   int finmenu = 0;
@@ -758,7 +760,6 @@ int main(int argc, char* argv[])
 	  int i;
 	  double accel = 0.0;
 	  SDL_Event event;
-	  *score_total = 0;
 	  temps_actuel +=1;
 	  /* look for an event; possibly update the position and the shape
 	   * of the sprite. */
@@ -852,9 +853,7 @@ int main(int argc, char* argv[])
       kill_all_number();
       temps_actuel = 0;
       while(!ending){
-	
 	      /*Insert function of menu here (blitsurface...)*/
-	
 	SDL_Event event3;
 	if (SDL_PollEvent(&event3)) {
 	  HandleEventMenu(event3, &gameover, &play, &ending, &finmenu, &jouer, &quitter);
@@ -862,6 +861,8 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(background, NULL, screen, NULL);
 	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
 	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
+	SDL_BlitSurface(game_over.sprite_picture, NULL, screen, &game_over.position);
+	//SDL_BlitSurface(return_menu.sprite_picture, NULL, screen, &return_menu.position);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
     }
@@ -873,6 +874,8 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(menu_jouer_selec);
   SDL_FreeSurface(menu_quitter);
   SDL_FreeSurface(menu_quitter_selec);
+  SDL_FreeSurface(menu_return);
+  SDL_FreeSurface(menu_game_over);
   SDL_FreeSurface(vie);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(small_comet);

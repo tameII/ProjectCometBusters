@@ -56,6 +56,22 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     sprite->position.x = sprite->col;
     sprite->position.y = sprite->lig;
     break;
+  case 12:
+    sprite->x = (SCREEN_WIDTH - MENU_GAME_OVER_SIZE)/2;
+    sprite->y = 0;
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
+    break;
+  case 13:
+    sprite->x = (SCREEN_WIDTH - MENU_RETURN_SIZE)/2;
+    sprite->y = (SCREEN_HEIGHT - 400);
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
+    break;
   default:
     break;
   }
@@ -99,12 +115,14 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 /*Need to init all sprite at begun*/
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
-		     , sprite_t *jouer, sprite_t *quitter)
+		     , sprite_t *jouer, sprite_t *quitter, sprite_t *game_over, sprite_t *return_menu)
 {
   int i;
   /*init menu*/
   sprite_init(jouer, 10, menu_jouer_selec, MENU_JOUER_SIZE, NB_MENU_JOUER_SPRITE, NB_MAX_MENU_JOUER);
   sprite_init(quitter, 11, menu_quitter, MENU_QUITTER_SIZE, NB_MENU_QUITTER_SPRITE, NB_MAX_MENU_QUITTER);
+  sprite_init(game_over, 12, menu_game_over, MENU_GAME_OVER_SIZE, NB_MENU_GAME_OVER_SPRITE, NB_MAX_MENU_GAME_OVER);
+  sprite_init(return_menu, 13, menu_return, MENU_RETURN_SIZE, NB_MENU_RETURN_SPRITE, NB_MAX_MENU_RETURN);
   
   
   /*init ship*/
@@ -172,10 +190,10 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 10 || type == 11){
+  if(type == 10 || type == 11 || type == 12 || type == 13){
     SetUpPosition(sprite);
   }
-}
+} 
 /*the animation of the sprite turn */
 void sprite_turn_left(sprite_t *sprite)
 {
@@ -331,6 +349,8 @@ void downloadsprite()
   menu_jouer_selec = download_sprite_("Jouer_selec.bmp");
   menu_quitter = download_sprite_("Quitter.bmp");
   menu_quitter_selec = download_sprite_("Quitter_selec.bmp");
+  menu_game_over = download_sprite_("Game_over.bmp");
+  menu_return = download_sprite_("Return_menu.bmp");
   
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
@@ -346,6 +366,8 @@ void downloadsprite()
   set_colorkey_(menu_jouer_selec, 255, 255, 255, screen);
   set_colorkey_(menu_quitter_selec, 255, 255, 255, screen);
   set_colorkey_(menu_quitter, 255, 255, 255, screen);
+  set_colorkey_(menu_game_over, 255, 255, 255, screen);
+  set_colorkey_(menu_return, 255, 255, 255, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
