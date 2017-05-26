@@ -1,9 +1,11 @@
 #include "physique.h"
-  
-/*Give various information, press b in game to know what.*/
-void various_information(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast)
+   
+/*Give various information, press v in game to know what.*/
+void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *score)
 {
   int i;
+  printf("space_ship->life : %d\n", space_ship->life);
+  
   for(i=0;i<gimmeIsNb(big_ast);i++){
     printf("big_ast[%d].life = %d \n", i, big_ast[i].life);
   }
@@ -14,10 +16,11 @@ void various_information(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_
   printf("\n");
   for(i=0;i<gimmeIsNb(small_ast);i++){
     printf("small_ast[%d].life = %d \n", i, small_ast[i].life);
-  }
+  } 
   printf("\n");
   printf("nbBigAst: %d |nbNormAst: %d |nbSmallAst: %d |", nbBigAst, nbNormAst, nbSmallAst);
   printf("nbtirs: %d |temps_actuel: %d |\n", nbtirs, temps_actuel);
+  printf("score: %d \n", *score);
 }
 
 /*Set Position of all Sprites*/
@@ -28,12 +31,30 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
   case 0:
     sprite->x = (SCREEN_WIDTH - SPACE_SHIP_SIZE) / 2;
     sprite->y = (SCREEN_HEIGHT - SPACE_SHIP_SIZE) / 2;
+    sprite->vx = 0;
+    sprite->vy = 0;
     break;
   case 1:
   case 2:
   case 3:
     // printf("in SUPos: sprite type : %d \n",sprite->type);
     Random_Position(sprite);
+    break;
+  case 10:
+    sprite->x =(SCREEN_WIDTH - PLACEMENT_MENU_JOUER_X)/2;
+    sprite->y = (SCREEN_HEIGHT - PLACEMENT_MENU_JOUER_Y);
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
+    break;
+  case 11:
+    sprite->x = (SCREEN_WIDTH - PLACEMENT_MENU_QUITTER_X)/2;
+    sprite->y = (SCREEN_HEIGHT - PLACEMENT_MENU_QUITTER_Y);
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
     break;
   default:
     break;
@@ -76,9 +97,16 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
-void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion)
+void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
+		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
+		     , sprite_t *jouer, sprite_t *quitter)
 {
   int i;
+  /*init menu*/
+  sprite_init(jouer, 10, menu_jouer_selec, MENU_JOUER_SIZE, NB_MENU_JOUER_SPRITE, NB_MAX_MENU_JOUER);
+  sprite_init(quitter, 11, menu_quitter, MENU_QUITTER_SIZE, NB_MENU_QUITTER_SPRITE, NB_MAX_MENU_QUITTER);
+  
+  
   /*init ship*/
   sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
@@ -102,7 +130,8 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
 }
 
 /*Main fonction to create new sprite*/
-void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sprite_size, int anim_sprite_num, int nombre_max_sprite)
+void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
+		 int sprite_size, int anim_sprite_num, int nombre_max_sprite)
 {
   sprite->type = type;
   sprite->current = 0;
@@ -111,6 +140,8 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   sprite->decompte = 0;
   sprite->vx = 0;
   sprite->vy = 0;
+  sprite->col = 0;      //AJOUT
+  sprite->lig = 0;      //AJOUT
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
@@ -141,8 +172,8 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture, int sp
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 5){
-    //  sprite->numero_object = nbExplosion;
+  if(type == 10 || type == 11){
+    SetUpPosition(sprite);
   }
 }
 /*the animation of the sprite turn */
@@ -286,8 +317,6 @@ SDL_Surface* download_sprite_(char *nomSprite)
 /*init SDL-Surface with picture, set up colorkey for each.*/
 void downloadsprite()
 {
-  printf("entree download");
-
   /*Load all sprite_picture*/
   explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
   small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
@@ -298,7 +327,11 @@ void downloadsprite()
   background = download_sprite_("espace.bmp");
   bullet = download_sprite_("bullet02.bmp");
   vie = download_sprite_("PackDeSoin.bmp");
-
+  menu_jouer = download_sprite_("Jouer.bmp");
+  menu_jouer_selec = download_sprite_("Jouer_selec.bmp");
+  menu_quitter = download_sprite_("Quitter.bmp");
+  menu_quitter_selec = download_sprite_("Quitter_selec.bmp");
+  
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);
@@ -308,6 +341,11 @@ void downloadsprite()
   set_colorkey_(explosion_picture, 0, 255, 255, screen);
   set_colorkey_(bullet, 255, 125, 0, screen);
   set_colorkey_(vie, 0, 0, 0, screen);
+  //menu
+  set_colorkey_(menu_jouer, 255, 255, 255, screen);
+  set_colorkey_(menu_jouer_selec, 255, 255, 255, screen);
+  set_colorkey_(menu_quitter_selec, 255, 255, 255, screen);
+  set_colorkey_(menu_quitter, 255, 255, 255, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
