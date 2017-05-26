@@ -692,7 +692,9 @@ int main(int argc, char* argv[])
   /*Definition des différents sprites*/
   sprite_t jouer;      //type 10
   sprite_t quitter;    //type 11
-  //sprite_t credit; //type 12 ?
+  sprite_t game_over;  //type 12
+  sprite_t return_menu; //type 13
+  //sprite_t credit; //type 14 ?
 
   //les highscore avec SDL ttf ?
   sprite_t space_ship;
@@ -708,7 +710,6 @@ int main(int argc, char* argv[])
   int ScoreTotal;
   int *score_total;
   score_total = &ScoreTotal;
-  int score_a_afficher = ScoreTotal;
 
   /*Initialize rand :*/
   srand(time(NULL)); 
@@ -733,7 +734,9 @@ int main(int argc, char* argv[])
   downloadsprite();
  
   /*Initialise all sprite*/
-  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion, &jouer, &quitter);
+  init_all_sprite(&space_ship, big_ast, norm_ast, small_ast,
+		  tirs, explosion, &game_over,
+		  &return_menu, &jouer, &quitter);
   int gameover = 0;
   int ending = 0;
   int finmenu = 0;
@@ -894,6 +897,7 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(background, NULL, screen, NULL);
 	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
 	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
+	SDL_BlitSurface(game_over.sprite_picture, NULL, screen, &game_over.position);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
     }
@@ -906,6 +910,8 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(menu_jouer_selec);
   SDL_FreeSurface(menu_quitter);
   SDL_FreeSurface(menu_quitter_selec);
+  SDL_FreeSurface(menu_return);
+  SDL_FreeSurface(menu_game_over);
   SDL_FreeSurface(vie);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(small_comet);

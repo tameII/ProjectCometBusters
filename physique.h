@@ -21,15 +21,23 @@
 /*Parametre Menu:*/
 #define MENU_JOUER_SIZE 425  //425*252
 #define PLACEMENT_MENU_JOUER_X 420
-#define PLACEMENT_MENU_JOUER_Y 650
+#define PLACEMENT_MENU_JOUER_Y 550
 #define NB_MENU_JOUER_SPRITE 1
 #define NB_MAX_MENU_JOUER 1
 
 #define MENU_QUITTER_SIZE 425 //425*252 aussi ?
 #define PLACEMENT_MENU_QUITTER_X 420
-#define PLACEMENT_MENU_QUITTER_Y 450
+#define PLACEMENT_MENU_QUITTER_Y 300
 #define NB_MENU_QUITTER_SPRITE 1
 #define NB_MAX_MENU_QUITTER  1
+
+#define MENU_GAME_OVER_SIZE 425
+#define NB_MENU_GAME_OVER_SPRITE 1
+#define NB_MAX_MENU_GAME_OVER 1
+
+#define MENU_RETURN_SIZE 960
+#define NB_MENU_RETURN_SPRITE 1
+#define NB_MAX_MENU_RETURN 1
 
 /* Points added to the score */
 #define BIG_AST_POINT   250   
@@ -93,6 +101,7 @@ SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion
 SDL_Surface *vie; //NBRE DE VIE
 SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
+SDL_Surface *menu_game_over, *menu_return;
 int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion;
 bool cogne;
 int temps_actuel; 
@@ -131,6 +140,7 @@ void Random_Direction(sprite_t *sprite, float vitesse);
 
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
+		     sprite_t *game_over, sprite_t *return_menu,
 		     sprite_t *jouer, sprite_t *quitter);
 
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture,
