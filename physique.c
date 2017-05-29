@@ -1,5 +1,5 @@
 #include "physique.h"
-
+ 
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *score)
 {
@@ -73,6 +73,7 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     sprite->position.y = sprite->lig;
     break;
   case 21:
+  case 23:
     Random_Position_Partout(sprite);
     sprite->col = sprite->x;
     sprite->lig = sprite->y;
@@ -223,7 +224,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 10 || type == 11 ||type == 12 || type == 21){
+  if(type == 10 || type == 11 ||type == 12 || type == 21 || type == 23){
     SetUpPosition(sprite);
   }
   if(type == 20){
@@ -259,7 +260,7 @@ void ship_turn_right(sprite_t *sprite)
   if(sprite->current < 0)
     sprite->current = sprite->nb_sprite*2 - 1;
 }
-
+/*SHIP*/
 void ship_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -269,7 +270,7 @@ void ship_image(sprite_t *sprite)
   /* choose image according to direction and animation flip: */
   sprite->image.x = sprite->size * (sprite->current / 2);
 }
-
+/*SPRITE NORMAL*/
 void sprite_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -388,7 +389,7 @@ void downloadsprite()
   menu_game_over = download_sprite_("Game_over.bmp");
   menu_return = download_sprite_("Return_menu.bmp");
   atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
-
+  portail_picture = download_sprite_("portail.bmp");
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);
@@ -408,6 +409,7 @@ void downloadsprite()
 
   //Bonus:
   set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
+  set_colorkey_(portail_picture, 255, 0, 255, screen);
 }
 
 ///////////////////////////////////////////////////////////////////

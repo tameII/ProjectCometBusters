@@ -2,12 +2,25 @@
 #include <SDL_ttf.h> 
 
 
-
+ 
 
 void kill(int *nb);
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
 //////////////////////////////////////////////////////////////////////////////
+/*Createsprite special : créé deux sprites lié, si l'on rentre dans l'un, on apparait dans l'autre */
+void CreatePortal(sprite_t *portal)
+{
+  if(nbPortal < NB_MAX_PORTAL){
+    sprite_init(&portal[nbPortal], 23, portail_picture, PORTAL_SIZE, NB_PORTAL_SPRITE,
+		NB_MAX_PORTAL);
+    sprite_init(&portal[nbPortal+1], 23, portail_picture, PORTAL_SIZE, NB_PORTAL_SPRITE,
+		NB_MAX_PORTAL);
+    nbPortal += 2;
+  }
+
+}
+
 /*Create bombe atomique qui fait apparaitre a un endroit aleatoire une BOMBE ATOMIQUE OUH YEAH*/
 void CreateAtomicBomb(sprite_t *bonus_atomic_bomb){
   if(nbAtomicBomb < 1){
@@ -304,8 +317,11 @@ int gimmeIsNb(sprite_t *sprite)
   case 21:
     return nbAtomicBomb;
     break;
+  case 23:
+    return nbPortal;
+    break;
   default:
-    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21. \nType asked: %d \n",type);
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21, 23. \nType asked: %d \n",type);
     return 0;
     break;
   }
@@ -352,7 +368,11 @@ void kill_ast(sprite_t *ast, int numero)
 	case 5:
 	  kill(&nbExplosion);
 	  killed = true;
-	  break; 
+	  break;
+	case 23:
+	  kill(&nbPortal);
+	  killed = true;
+	  break;
 	default:
 	  printf("Kill_ast : wrong type. (you asked %d)",ast->type);
 	  killed = true;
@@ -745,10 +765,11 @@ int main(int argc, char* argv[])
   /*bonus et affichage:*/
   sprite_t PV[MAX_LIFE_SHIP]; //type 20
   sprite_t bonus_atomic_bomb; //type 21
-  
-  int ScoreTotal;
-  int *score_total;
-  score_total = &ScoreTotal;
+
+  int nb_max_portal = NB_MAX_PORTAL*2;
+  sprite_t portal[nb_max_portal]; //type 23
+
+
 
   /*Initialize rand :*/
   srand(time(NULL)); 
@@ -785,16 +806,20 @@ int main(int argc, char* argv[])
   int Table_move[5]={0,0,0,0,0};
   bool can_piou = true;
   bool bomb_triggered = false;
-  *score_total = 0;  //score_total = 0;
   cogne = false;
-  //CreateAtomicBomb(&bonus_atomic_bomb);
-  /*Les variables utilisée avec SDL_TTF       *
-   *  (les autres sont plus haut dans le main)*/
+
+  /*Les variables utilisée avec SDL_TTF       */
+  int ScoreTotal;
+  int *score_total;
+  score_total = &ScoreTotal;
+  *score_total = 0;  //score_total = 0;
+
   char affichage_score[25] = "Comet Buster !!!"; /* Tableau de char suffisamment grand */
   SDL_Color color = { 255, 255, 255 };
   SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);
-
+  CreatePortal(portal);
+  CreatePortal(portal);
   /*Menu :*/
   while (!finmenu){
 
@@ -850,6 +875,8 @@ int main(int argc, char* argv[])
 
 	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image, screen, &space_ship.position);
 	  }
+
+
 	  /*Affichage des bonus:*/
 	  /*Atomic_bomb*/
 	  if(gimmeIsNb(&bonus_atomic_bomb) == 1){
@@ -892,7 +919,20 @@ int main(int argc, char* argv[])
 	      SDL_BlitSurface(bullet, NULL , screen, &tirs[i].position);
 	    }
 	  }
-  /*Draw PV*/
+
+	  /*Draw Portal*/
+	  move_all_sprite(portal);
+	  draw_all_sprite(portail_picture, portal);
+	  for (i=0; i<nbPortal; i++){
+	    if (nbPortal>0){
+	      if (portal[i].decompte >= 100*12+1){
+		portal[i].decompte = 0;
+		kill_ast(portal, i);
+	      }
+	    }
+	  }
+
+	  /*Draw PV*/
 	  for (i = 0; i<space_ship.life ; i++)
 	    {
 	      SDL_BlitSurface(vie, NULL, screen, &PV[i].position);
@@ -915,7 +955,7 @@ int main(int argc, char* argv[])
 		  cogne = false;
 		}
 	    }
-   
+
 	  sprintf(affichage_score, "Score : %d", *score_total);
 	  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);
@@ -940,6 +980,7 @@ int main(int argc, char* argv[])
       printf("Commandant ! voici votre score : %d \n", *score_total);
       *score_total = 0;
       droitDeScorer = true;
+      animationFinale = false;
 
       while(!ending){
 	
@@ -960,6 +1001,7 @@ int main(int argc, char* argv[])
   }
    
   /* clean up */
+  SDL_FreeSurface(portail_picture);
   SDL_FreeSurface(textSurface);
   SDL_FreeSurface(menu_jouer);
   SDL_FreeSurface(menu_jouer_selec);

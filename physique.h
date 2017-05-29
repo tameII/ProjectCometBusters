@@ -1,6 +1,6 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
-  
+   
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -105,6 +105,13 @@
 #define NB_MAX_ATOMIC_BOMB 1
 #define CHANCE_D_APPARITION_ATOMIC_BOMBE 50000      //1 chance sur "donne le nombre ici" par tour de boucle
 
+/*portal*/
+#define PORTAL_SIZE  64
+#define NB_PORTAL_SPRITE  5
+#define NB_MAX_PORTAL 2
+#define CHANCE_D_APPARITION_PORTAL 1  //1 chance sur "donne le nombre ici" par tour de boucle
+
+
 /*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
 #define FROTTEMENT   0.0009
@@ -116,10 +123,11 @@
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion
 SDL_Surface *vie; //NBRE DE VIE
-SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
+SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; 
 SDL_Surface *menu_game_over, *menu_return;
+SDL_Surface *portail_picture; //portal
 SDL_Surface *atomic_bomb_picture;
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb;
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb, nbPortal;
 bool cogne;
 int temps_actuel; 
 int decompte;
