@@ -934,7 +934,7 @@ int main(int argc, char* argv[])
       printf("Commandant ! voici votre score : %d \n", *score_total);
       *score_total = 0;
       droitDeScorer = true;
-
+      animationFinale = false;
       while(!ending){
 	
 	      /*Insert function of menu here (blitsurface...)*/
