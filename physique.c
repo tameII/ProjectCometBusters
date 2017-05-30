@@ -73,13 +73,19 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     sprite->position.y = sprite->lig;
     break;
   case 21:
-  case 23:
     Random_Position_Partout(sprite);
     sprite->col = sprite->x;
     sprite->lig = sprite->y;
     sprite->position.x = sprite->col;
     sprite->position.y = sprite->lig;
     break;
+  case 23:
+    Random_Position_Partout(sprite);
+    sprite->col = sprite->x;
+    sprite->lig = sprite->y;
+    sprite->position.x = sprite->col;
+    sprite->position.y = sprite->lig;
+    break; 
   default:
     break;
   }
@@ -144,7 +150,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
 		    , sprite_t *game_over, sprite_t *return_menu
-		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV)
+		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV, sprite_t *portal)
 {
   int i;
   /*init menu*/
@@ -178,7 +184,9 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
   for(i=0 ; i<NB_MAX_EXPL ; i++){
     sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
   }
-					    
+  for(i=0 ; i<NB_MAX_PORTAL ; i++){
+  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+  }
 }
 
 /*Main fonction to create new sprite*/
@@ -224,11 +232,14 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 10 || type == 11 ||type == 12 || type == 21 || type == 23){
+  if(type == 10 || type == 11 ||type == 12 || type == 21){
     SetUpPosition(sprite);
   }
   if(type == 20){
     Set_up_PV(sprite);
+  }
+  if(type == 23){
+    SetUpPosition(sprite);
   }
 }
 /*the animation of the sprite turn */
@@ -260,7 +271,7 @@ void ship_turn_right(sprite_t *sprite)
   if(sprite->current < 0)
     sprite->current = sprite->nb_sprite*2 - 1;
 }
-/*SHIP*/
+
 void ship_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -270,7 +281,7 @@ void ship_image(sprite_t *sprite)
   /* choose image according to direction and animation flip: */
   sprite->image.x = sprite->size * (sprite->current / 2);
 }
-/*SPRITE NORMAL*/
+
 void sprite_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -315,7 +326,12 @@ void sprite_move(sprite_t *sprite)
     if (sprite->decompte %100 == 0){  /*Permet d'animer l'explosion (utilisation du modulo car sinon plus complexe d'arreter la fameuse explosion)*/
       sprite_turn_left(sprite);   
    }
-  }  
+  }
+  if(sprite->type == 23){
+    if(sprite->decompte %50 == 0){
+    sprite_turn_right(sprite);
+    }
+  }
 }
 /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
@@ -389,7 +405,8 @@ void downloadsprite()
   menu_game_over = download_sprite_("Game_over.bmp");
   menu_return = download_sprite_("Return_menu.bmp");
   atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
-  portail_picture = download_sprite_("portail.bmp");
+  portal_picture = download_sprite_("portail.bmp");
+  
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);
@@ -409,7 +426,6 @@ void downloadsprite()
 
   //Bonus:
   set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
-  set_colorkey_(portail_picture, 255, 0, 255, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
