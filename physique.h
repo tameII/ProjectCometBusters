@@ -58,7 +58,7 @@
 #define SPACE_SHIP_SIZE     32
 #define NB_MAX_SHIP         1
 /* Nb of life at the start */
-#define MAX_LIFE_SHIP        3  
+#define MAX_LIFE_SHIP        10  
 
 /*life affichage */
 #define PV_SIZE 32
@@ -105,12 +105,12 @@
 #define NB_MAX_ATOMIC_BOMB 1
 #define CHANCE_D_APPARITION_ATOMIC_BOMBE 50000      //1 chance sur "donne le nombre ici" par tour de boucle
 
-/*portal*/
-#define PORTAL_SIZE  64
-#define NB_PORTAL_SPRITE  5
-#define NB_MAX_PORTAL 2
-#define CHANCE_D_APPARITION_PORTAL 1  //1 chance sur "donne le nombre ici" par tour de boucle
 
+/*Portal*/
+#define PORTAL_SIZE  64
+#define NB_PORTAL_SPRITE  5 
+#define NB_MAX_PORTAL     15
+#define CHANCE_D_APPARITION_PORTAL 6666         //6666
 
 /*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
@@ -123,10 +123,10 @@
 SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; //stocke l'image de l'explosion
 SDL_Surface *vie; //NBRE DE VIE
-SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; 
+SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
 SDL_Surface *menu_game_over, *menu_return;
-SDL_Surface *portail_picture; //portal
 SDL_Surface *atomic_bomb_picture;
+SDL_Surface *portal_picture;
 int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb, nbPortal;
 bool cogne;
 int temps_actuel; 
@@ -169,7 +169,7 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
 		     sprite_t *game_over, sprite_t *return_menu,
 		     sprite_t *jouer, sprite_t *quitter,
-		     sprite_t *PV);
+		     sprite_t *PV, sprite_t *portal);
 
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture,
 		 int sprite_size, int anim_sprite_num, int nombre_max_sprite);
@@ -213,7 +213,7 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2);
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
 	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
 	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
-	     bool *bomb_triggered);
+	     bool *bomb_triggered, sprite_t *portal);
 
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast,
 	       sprite_t *norm_ast, sprite_t *small_ast);
