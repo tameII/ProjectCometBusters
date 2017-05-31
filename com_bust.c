@@ -2,7 +2,7 @@
 #include <SDL_ttf.h> 
 
 
-
+ 
 
 void kill(int *nb);
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,14 @@ void CreateAtomicBomb(sprite_t *bonus_atomic_bomb){
 	      
     nbAtomicBomb += 1;
   }
+}
+void CreateMitraille(sprite_t *mitraille)
+{
+  if(nbMitraille < 1)
+    {
+      sprite_init(mitraille,  22, bonus_mitraille, BONUS_MITRAILLE_SIZE, NB_BONUS_MITRAILLE_SPRITE, NB_MAX_BONUS_MITRAILLE);
+      nbMitraille += 1;
+    }
 }
 //    sprite_init(&big_ast[nbBigAst], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
 void kill_all_sprite_param(sprite_t *sprite, int nb_max)
@@ -135,15 +143,23 @@ void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t 
   dead_tab_param(norm_ast, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
   dead_tab_param(small_ast, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
   dead_tab_param(tirs, big_ast, norm_ast, small_ast, explosion, score_total, droitDeScorer);
-
 }
-void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2, bool *bomb_triggered)
+
+
+void Get_Mitraille();
+void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2, bool *bomb_triggered, bool *have_mitraille)
 {
   if(sprite2->type == 21){
     if(compare_position(sprite1, sprite2)){
       *bomb_triggered = true;
       kill(&nbAtomicBomb);
-	}
+    }
+  }
+  if(sprite2->type == 22){
+    if(compare_position(sprite1, sprite2)){
+      Get_Mitraille();
+      kill(&nbMitraille);
+    }
   }
 }
 
@@ -186,7 +202,7 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2)
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
 	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
 	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
-	     bool *bomb_triggered)
+	     bool *bomb_triggered, bool *have_mitraille, sprite_t *mitraille)
 {
   collide_tab_param(tirs, big_ast);
   collide_tab_param(tirs, norm_ast);
@@ -196,7 +212,8 @@ void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
   collide_ship_param(space_ship, norm_ast, cogne, decompte);
   collide_ship_param(space_ship, small_ast, cogne, decompte);
 
-  collide_ship_bonus_param(space_ship, bonus_atomic_bomb, bomb_triggered);
+  collide_ship_bonus_param(space_ship, bonus_atomic_bomb, bomb_triggered, have_mitraille);
+  collide_ship_bonus_param(space_ship, mitraille, bomb_triggered, have_mitraille);
 }
 
 /*Prend deux sprites, rend true si les deux sprites sont en contact très grossier*/
@@ -436,14 +453,18 @@ void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_as
   }
 
 }
-void CreateBonusWithTime(sprite_t *bonus_atomic_bomb)
+void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille)
 {
   int i;
-
-   i = rand()%(CHANCE_D_APPARITION_ATOMIC_BOMBE);
-   if(i == 0){
-     CreateAtomicBomb(bonus_atomic_bomb);
-   }
+  int j;
+  j = rand()%(CHANCE_D_APPARITION_MITRAILLE);
+  i = rand()%(CHANCE_D_APPARITION_ATOMIC_BOMBE);
+  if(i == 0){
+    CreateAtomicBomb(bonus_atomic_bomb);
+  }
+  if(j == 0){
+    CreateMitraille(mitraille);
+  }
 }
 
 
@@ -469,6 +490,19 @@ void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship, SDL_Surface * 
   else
     {
       ship->sprite_picture = spaceship;
+    }
+}
+
+void Get_Mitraille(){
+  have_mitraille = true;
+  bonus_compt = 5000;
+}
+void Effect_mitraille()
+{
+  if (bonus_compt > 0)
+    {
+      can_piou = true;
+      bonus_compt--;
     }
 }
 
@@ -745,7 +779,7 @@ int main(int argc, char* argv[])
   /*bonus et affichage:*/
   sprite_t PV[MAX_LIFE_SHIP]; //type 20
   sprite_t bonus_atomic_bomb; //type 21
-  
+  sprite_t mitraille;  //type 22
   int ScoreTotal;
   int *score_total;
   score_total = &ScoreTotal;
@@ -783,10 +817,12 @@ int main(int argc, char* argv[])
   bool droitDeScorer = true;
   int animationFinale = 0;
   int Table_move[5]={0,0,0,0,0};
-  bool can_piou = true;
+  can_piou = true;
   bool bomb_triggered = false;
   *score_total = 0;  //score_total = 0;
   cogne = false;
+  have_mitraille = false;
+  bonus_compt = 0;
   //CreateAtomicBomb(&bonus_atomic_bomb);
   /*Les variables utilisée avec SDL_TTF       *
    *  (les autres sont plus haut dans le main)*/
@@ -836,7 +872,7 @@ int main(int argc, char* argv[])
 	  	  
 	  /*Call new ast and bonus */
 	  CreateAstWithTime(big_ast, norm_ast, small_ast);
-	  CreateBonusWithTime(&bonus_atomic_bomb);
+	  CreateBonusWithTime(&bonus_atomic_bomb, &mitraille);
  
 
 	  /* draw the background */
@@ -856,7 +892,11 @@ int main(int argc, char* argv[])
 	  SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
 			  NULL, screen, &bonus_atomic_bomb.position);
 	  }
-
+	  if(nbMitraille > 0)
+	    {
+	      SDL_BlitSurface(mitraille.sprite_picture, NULL, screen, &mitraille.position);
+	      //printf(" position mitraille : x: %d y: %d\n",mitraille.position.x, mitraille.position.y);
+	    }
 	  /*draw Big Asteroid*/
 	  move_all_sprite(big_ast);
 	  draw_all_sprite(big_comet,big_ast);	  
@@ -901,7 +941,7 @@ int main(int argc, char* argv[])
 	  if (cogne == false)
 	    {
 	      collide(&space_ship, tirs, big_ast, norm_ast, small_ast, &gameover,
-		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered);
+		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered, &have_mitraille, &mitraille);
 	      dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
 		   &gameover, score_total, &droitDeScorer);
 	    }
@@ -915,7 +955,7 @@ int main(int argc, char* argv[])
 		  cogne = false;
 		}
 	    }
-   
+	  Effect_mitraille();
 	  sprintf(affichage_score, "Score : %d", *score_total);
 	  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);

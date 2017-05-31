@@ -58,7 +58,7 @@
 #define SPACE_SHIP_SIZE     32
 #define NB_MAX_SHIP         1
 /* Nb of life at the start */
-#define MAX_LIFE_SHIP        3  
+#define MAX_LIFE_SHIP        10  
 
 /*life affichage */
 #define PV_SIZE 32
@@ -104,7 +104,11 @@
 #define NB_ATOMIC_BOMB_SPRITE 1
 #define NB_MAX_ATOMIC_BOMB 1
 #define CHANCE_D_APPARITION_ATOMIC_BOMBE 50000      //1 chance sur "donne le nombre ici" par tour de boucle
-
+/*Mitraille*/
+#define BONUS_MITRAILLE_SIZE 32
+#define NB_BONUS_MITRAILLE_SPRITE 1
+#define NB_MAX_BONUS_MITRAILLE 1
+#define CHANCE_D_APPARITION_MITRAILLE 5000
 /*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
 #define FROTTEMENT   0.0009
@@ -118,9 +122,12 @@ SDL_Surface *explosion_picture; //stocke l'image de l'explosion
 SDL_Surface *vie; //NBRE DE VIE
 SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
 SDL_Surface *menu_game_over, *menu_return;
-SDL_Surface *atomic_bomb_picture;
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb;
+SDL_Surface *atomic_bomb_picture, *bonus_mitraille;
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb, nbMitraille;
 bool cogne;
+bool can_piou;
+bool have_mitraille;
+int bonus_compt;
 int temps_actuel; 
 int decompte;
 
@@ -205,7 +212,7 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2);
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
 	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
 	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
-	     bool *bomb_triggered);
+	     bool *bomb_triggered, bool*have_mitraille, sprite_t *mitraille);
 
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast,
 	       sprite_t *norm_ast, sprite_t *small_ast);

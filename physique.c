@@ -73,6 +73,7 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     sprite->position.y = sprite->lig;
     break;
   case 21:
+  case 22:
     Random_Position_Partout(sprite);
     sprite->col = sprite->x;
     sprite->lig = sprite->y;
@@ -223,7 +224,7 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   if(type == 4){
     sprite->numero_object = nbtirs;
   }
-  if(type == 10 || type == 11 ||type == 12 || type == 21){
+  if(type == 10 || type == 11 ||type == 12 || type == 21 || type == 22){
     SetUpPosition(sprite);
   }
   if(type == 20){
@@ -381,14 +382,14 @@ void downloadsprite()
   background = download_sprite_("espace.bmp");
   bullet = download_sprite_("bullet02.bmp");
   vie = download_sprite_("PackDeSoin.bmp");
-  menu_jouer = download_sprite_("Jouer.bmp");
-  menu_jouer_selec = download_sprite_("Jouer_selec.bmp");
-  menu_quitter = download_sprite_("Quitter.bmp");
-  menu_quitter_selec = download_sprite_("Quitter_selec.bmp");
-  menu_game_over = download_sprite_("Game_over.bmp");
-  menu_return = download_sprite_("Return_menu.bmp");
+  menu_jouer = download_sprite_("Bouton_play.bmp");
+  menu_jouer_selec = download_sprite_("Bouton_play_selec.bmp");
+  menu_quitter = download_sprite_("Bouton_quit.bmp");
+  menu_quitter_selec = download_sprite_("Bouton_quit_selec.bmp");
+  menu_game_over = download_sprite_("Game_Over_redim.bmp");
+  menu_return = download_sprite_("Back_to_menu.bmp");
   atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
-
+  bonus_mitraille = download_sprite_("Mitraille.bmp");
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);
@@ -408,6 +409,7 @@ void downloadsprite()
 
   //Bonus:
   set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
+  set_colorkey_(bonus_mitraille, 136, 136, 136, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
