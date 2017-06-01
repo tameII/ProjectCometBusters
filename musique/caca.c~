@@ -1,0 +1,13 @@
+while (!gameover){
+  menu;
+    if(play){
+      while (!gameover){
+	JEU ;   
+	  }
+    }
+  if(gameover){
+    while(){
+      GAMEOVER;
+	}
+  }
+ }
