@@ -1,13 +1,56 @@
 #include "physique.h"
 #include <SDL_ttf.h> 
-
-
+#include <unistd.h>
+#include <string.h>
+  
  
-
+void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2);
 void kill(int *nb);
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
 //////////////////////////////////////////////////////////////////////////////
+/****************************************************************************/
+/*FONCTION ANNEXE MUSIQUE*/
+ /* Les données du fichier son chargé */
+ Uint8 * sounddata;
+ /* La taille du fichier son chargé, en octets */
+ Uint32 soundlength;
+ /* Position courante de lecture dans le fichier son */
+ Uint32 soundpos;
+
+ /* Fonction de rappel qui copie les données sonores dans le tampon audio */
+ void mixaudio(void * userdata, Uint8 * stream, int len)
+ {
+   /* Attention à ne pas déborder lors de la copie */
+   Uint32 tocopy = soundlength - soundpos > len ? len : soundlength - soundpos; 
+
+   /* Copie des données sonores dans le tampon audio... */
+   memcpy(stream, sounddata + soundpos, tocopy); 
+
+   /* Mise à jour de la position de lecture */
+   soundpos += tocopy;
+ }
+
+ 
+
+
+/**************************************************************************/
+
+/*Create two portal, be aware to set the NB_MAX to a pair number, even if i set a security*/
+void CreatePortal(sprite_t *portal)
+{
+  if(nbPortal < NB_MAX_PORTAL-1){  
+    if(nbPortal < NB_MAX_PORTAL){
+      sprite_init(&portal[nbPortal], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+      nbPortal +=1;
+    }
+    if(nbPortal < NB_MAX_PORTAL){
+      sprite_init(&portal[nbPortal], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+      nbPortal +=1;
+    }
+  }
+}
+
 /*Create bombe atomique qui fait apparaitre a un endroit aleatoire une BOMBE ATOMIQUE OUH YEAH*/
 void CreateAtomicBomb(sprite_t *bonus_atomic_bomb){
   if(nbAtomicBomb < 1){
@@ -69,6 +112,7 @@ void kill_all_number()
   nbSmallAst = 0;
   nbtirs = 0;
   nbExplosion = 0;
+  nbPortal = 0;
 }
 
 void ajout_score(int *score, int point)
@@ -152,13 +196,13 @@ void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2, bool *bomb_
   if(sprite2->type == 21){
     if(compare_position(sprite1, sprite2)){
       *bomb_triggered = true;
-      kill(&nbAtomicBomb);
+      kill_sprite_number(&nbAtomicBomb);
     }
   }
   if(sprite2->type == 22){
     if(compare_position(sprite1, sprite2)){
       Get_Mitraille();
-      kill(&nbMitraille);
+      kill_sprite_number(&nbMitraille);
     }
   }
 }
@@ -196,13 +240,34 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2)
     }
   }
 }
+
+/*Fonction qui teleporte UN sprite si CE sprite rencontre un portal*/
+void teleportation(sprite_t *sprite1, sprite_t *portal)
+{
+  int j;
+  for(j=0; j<nbPortal; j++){
+    if(compare_position(sprite1, &portal[j])){
+      if(j%2 == 0){
+	SetUpAtMiddle(sprite1, &portal[j+1]);
+	kill_ast(portal, j+1);
+	kill_ast(portal, j);
+      }
+      else if(j%2 == 1){
+	SetUpAtMiddle(sprite1, &portal[j-1]);
+	kill_ast(portal, j);
+	kill_ast(portal, j-1);
+      }
+    }
+  }
+}
+
 /*Verifie si le tirs ou space_ship est en contact avec big/norm/small_ast*/
 /*Faites appel a collide_tab_param dans le cas de deux tableau,          */
 /*et collide_ship_param dans le cas d'un sprite un tableau               */
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
 	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
 	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
-	     bool *bomb_triggered, bool *have_mitraille, sprite_t *mitraille)
+	     bool *bomb_triggered, bool *have_mitraille, sprite_t *mitraille,sprite_t *portal)
 {
   collide_tab_param(tirs, big_ast);
   collide_tab_param(tirs, norm_ast);
@@ -211,6 +276,7 @@ void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
   collide_ship_param(space_ship, big_ast, cogne, decompte);
   collide_ship_param(space_ship, norm_ast, cogne, decompte);
   collide_ship_param(space_ship, small_ast, cogne, decompte);
+  teleportation(space_ship, portal);
 
   collide_ship_bonus_param(space_ship, bonus_atomic_bomb, bomb_triggered, have_mitraille);
   collide_ship_bonus_param(space_ship, mitraille, bomb_triggered, have_mitraille);
@@ -287,7 +353,7 @@ void CreateAst(sprite_t *ast){
 
 
 /*Kill, The cursor on the tab recule*/
-void kill(int *nb)
+void kill_sprite_number(int *nb)
 {
   if (*nb>0){
     *nb -= 1;
@@ -321,6 +387,12 @@ int gimmeIsNb(sprite_t *sprite)
   case 21:
     return nbAtomicBomb;
     break;
+  case 22:
+    return nbMitraille;
+    break;
+  case 23:
+    return nbPortal;
+    break;
   default:
     printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21. \nType asked: %d \n",type);
     return 0;
@@ -351,25 +423,29 @@ void kill_ast(sprite_t *ast, int numero)
       if (numero >= nbAst){
 	switch (type) {
 	case 1:
-	  kill(&nbBigAst);
+	  kill_sprite_number(&nbBigAst);
 	  killed = true;
 	  break;
 	case 2:
-	  kill(&nbNormAst);
+	  kill_sprite_number(&nbNormAst);
 	  killed = true;
 	  break;
 	case 3:
-	  kill(&nbSmallAst);
+	  kill_sprite_number(&nbSmallAst);
 	  killed = true;
 	  break;
 	case 4:
-	  kill(&nbtirs);
+	  kill_sprite_number(&nbtirs);
 	  killed = true;
 	  break;
 	case 5:
-	  kill(&nbExplosion);
+	  kill_sprite_number(&nbExplosion);
 	  killed = true;
-	  break; 
+	  break;
+	case 23:
+	  kill_sprite_number(&nbPortal);
+	  killed = true;
+	  break;
 	default:
 	  printf("Kill_ast : wrong type. (you asked %d)",ast->type);
 	  killed = true;
@@ -453,7 +529,7 @@ void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_as
   }
 
 }
-void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille)
+void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille, sprite_t *portal)
 {
   int i;
   int j;
@@ -465,6 +541,10 @@ void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille)
   if(j == 0){
     CreateMitraille(mitraille);
   }
+  i = rand()%(CHANCE_D_APPARITION_PORTAL);
+   if(i == 0){
+     CreatePortal(portal);
+   }
 }
 
 
@@ -595,11 +675,11 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       SDL_Delay(100); //delai de 100 ms pour pas faire ooooooooooo
       break;
     case SDLK_p:                                               //it kill everything it touche
-      // printf("Touch p pressed \n");
+      /*   // printf("Touch p pressed \n");
       kill(&nbBigAst);
       kill(&nbNormAst);
       kill(&nbSmallAst);
-      kill(&nbtirs);
+      kill(&nbtirs); */
       //SDL_Delay(100);
       break;
     case SDLK_e:                                                //BOOOM
@@ -757,10 +837,84 @@ void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
     break;
   }
 }
+//////////////////////////////////////////////////////////////////////////////
+void pause_and_close_audio()
+{
+  /* On cesse d'appeler la fonction de rappel */
+  SDL_PauseAudio(1);
+
+  /* Fermer le périphérique audio */
+  SDL_CloseAudio(); 
+}
+/*Parametres généraux a mettre en place.*/
+int musique_param(SDL_AudioSpec *soundfile, SDL_AudioSpec *obtained, SDL_AudioCVT *cvt )
+{
+
+      /* Conversion vers le format du tampon audio */
+      if (SDL_BuildAudioCVT(cvt, soundfile->format, soundfile->channels, soundfile->freq, 
+			    obtained->format, obtained->channels, obtained->freq) < 0) {
+	printf("Impossible de construire le convertisseur audio!\n");
+	return 1;
+      }
+      /* Création du tampon utilisé pour la conversion */
+      cvt->buf = malloc(soundlength * cvt->len_mult);
+      cvt->len = soundlength;
+      memcpy(cvt->buf, sounddata, soundlength);
+
+      /* Conversion... */
+      if (SDL_ConvertAudio(cvt) != 0) {
+	printf("Erreur lors de la conversion du fichier audio: %s\n", SDL_GetError());
+	return 1;
+      } 
+
+      /* Libération de l'ancien tampon, création du nouveau,
+	 copie des données converties, effacement du tampon de conversion */
+      SDL_FreeWAV(sounddata);
+      sounddata = malloc(cvt->len_cvt);
+      memcpy(sounddata, cvt->buf, cvt->len_cvt);
+      free(cvt->buf);
+
+      soundlength = cvt->len_cvt;
+      printf("Taille du son converti: %d octets\n", soundlength);
+      soundpos = 0;
+
+
+      return 0;
+}
+
+
+
+int musique(char *titre, SDL_AudioSpec *desired, SDL_AudioSpec *obtained, SDL_AudioSpec *soundfile, SDL_AudioCVT *cvt )
+{
+  int bug;
+
+  if (SDL_OpenAudio(desired, obtained) != 0) {
+    printf("Erreur lors de l'ouverture du périphérique audio: %s\n", SDL_GetError());
+    return 1;
+  }
+  /* Chargement du fichier .wav */
+  if (SDL_LoadWAV(titre, soundfile, &sounddata, &soundlength) == NULL) {
+    printf("Erreur lors du chargement du fichier son: %s\n", SDL_GetError());
+    return 1;
+  }
+    bug = musique_param(soundfile, obtained, cvt);
+
+    /* La fonction de rappel commence à être appelée à partir de maintenant. */
+    printf("Démarrage de la lecture...\n");
+    SDL_PauseAudio(0);
+
+    return bug;
+  
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
+  /*Definition des variables musicales :*/
+  SDL_AudioSpec desired, obtained, soundfile;
+  SDL_AudioCVT cvt; 
+
+ 
   /*Definition des différents sprites*/
   sprite_t jouer;      //type 10
   sprite_t quitter;    //type 11
@@ -780,16 +934,37 @@ int main(int argc, char* argv[])
   sprite_t PV[MAX_LIFE_SHIP]; //type 20
   sprite_t bonus_atomic_bomb; //type 21
   sprite_t mitraille;  //type 22
-  int ScoreTotal;
-  int *score_total;
-  score_total = &ScoreTotal;
+  sprite_t portal[NB_MAX_PORTAL]; //type 23 TOUJOURS METTRE NB MAX PAIR
+
 
   /*Initialize rand :*/
   srand(time(NULL)); 
 
   /* initialize SDL */
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
   TTF_Init();
+  
+  /*Initialisation de tout ce qui a trait a la musique*/
+  /*C'est marrant parce que une freq de 11025 fonctionne quand même*/
+  /* Son 16 bits stéréo à 44100 Hz */ 
+  desired.freq = 44100;
+  desired.format = AUDIO_U16SYS;
+  desired.channels = 2;
+  
+  /* Le tampon audio contiendra 512 échantillons */
+  desired.samples = 512;
+
+  /* Mise en place de la fonction de rappel et des données utilisateur */
+  desired.callback = &mixaudio;
+  desired.userdata = NULL;
+
+
+  if (musique("KDE_Startup_new.wav",&desired, &obtained, &soundfile, &cvt ) == 1){
+    return 1;
+  }
+
+   
+  /*****************************************************/
 
   /* Load the font. */
   TTF_Font *font = TTF_OpenFont("04B_30__.TTF", 32);
@@ -809,7 +984,7 @@ int main(int argc, char* argv[])
   /*Initialise all sprite*/
   init_all_sprite(&space_ship, big_ast, norm_ast, small_ast,
 		  tirs, explosion, &game_over,
-		  &return_menu, &jouer, &quitter, PV);
+		  &return_menu, &jouer, &quitter, PV, portal);
   int gameover = 0;
   int ending = 0;
   int finmenu = 0;
@@ -819,13 +994,15 @@ int main(int argc, char* argv[])
   int Table_move[5]={0,0,0,0,0};
   can_piou = true;
   bool bomb_triggered = false;
-  *score_total = 0;  //score_total = 0;
+
   cogne = false;
   have_mitraille = false;
   bonus_compt = 0;
-  //CreateAtomicBomb(&bonus_atomic_bomb);
-  /*Les variables utilisée avec SDL_TTF       *
-   *  (les autres sont plus haut dans le main)*/
+  /*Les variables utilisée avec SDL_TTF  */
+  int ScoreTotal;
+  int *score_total;
+  score_total = &ScoreTotal;
+  *score_total = 0;  //score_total = 0;
   char affichage_score[25] = "Comet Buster !!!"; /* Tableau de char suffisamment grand */
   SDL_Color color = { 255, 255, 255 };
   SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
@@ -849,9 +1026,18 @@ int main(int argc, char* argv[])
     }
     /*JEU:*/
     if(play){
+
+      pause_and_close_audio();
+      if( musique("Castlevania_Soundtrack_modifie.wav",&desired, &obtained,
+		  &soundfile, &cvt ) == 1){
+	return 1;
+      }
+
       /* main loop: check events and re-draw the window until the end */
       while (!gameover)
 	{
+
+	  
 	  int i;
 	  double accel = 0.0;
 	  SDL_Event event;
@@ -872,13 +1058,20 @@ int main(int argc, char* argv[])
 	  	  
 	  /*Call new ast and bonus */
 	  CreateAstWithTime(big_ast, norm_ast, small_ast);
-	  CreateBonusWithTime(&bonus_atomic_bomb, &mitraille);
+	  CreateBonusWithTime(&bonus_atomic_bomb, &mitraille, portal);
  
 
 	  /* draw the background */
 	  SDL_BlitSurface(background, NULL, screen, NULL);
       
-      
+
+
+	  /*draw portal:*/
+	  for (i=0 ; i<nbPortal; i++){
+	    sprite_move(&portal[i]);
+	    SDL_BlitSurface(portal[i].sprite_picture, &portal[i].image, screen, &portal[i].position);
+	  }
+
 	  {
 	    /*position, mouvement et acceleration des sprites*/
 	    sprite_boost(&space_ship, accel);
@@ -889,8 +1082,8 @@ int main(int argc, char* argv[])
 	  /*Affichage des bonus:*/
 	  /*Atomic_bomb*/
 	  if(gimmeIsNb(&bonus_atomic_bomb) == 1){
-	  SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
-			  NULL, screen, &bonus_atomic_bomb.position);
+	    SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
+			    NULL, screen, &bonus_atomic_bomb.position);
 	  }
 	  if(nbMitraille > 0)
 	    {
@@ -932,7 +1125,7 @@ int main(int argc, char* argv[])
 	      SDL_BlitSurface(bullet, NULL , screen, &tirs[i].position);
 	    }
 	  }
-  /*Draw PV*/
+	  /*Draw PV*/
 	  for (i = 0; i<space_ship.life ; i++)
 	    {
 	      SDL_BlitSurface(vie, NULL, screen, &PV[i].position);
@@ -941,7 +1134,7 @@ int main(int argc, char* argv[])
 	  if (cogne == false)
 	    {
 	      collide(&space_ship, tirs, big_ast, norm_ast, small_ast, &gameover,
-		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered, &have_mitraille, &mitraille);
+		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered, &have_mitraille, &mitraille, portal);
 	      dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
 		   &gameover, score_total, &droitDeScorer);
 	    }
@@ -958,7 +1151,7 @@ int main(int argc, char* argv[])
 	  Effect_mitraille();
 	  sprintf(affichage_score, "Score : %d", *score_total);
 	  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
-						  color);
+							  color);
 	  SDL_BlitSurface(textSurface, NULL, screen, NULL);
 	  SDL_FreeSurface(textSurface);
 
@@ -972,18 +1165,26 @@ int main(int argc, char* argv[])
       /*End of if(play)*/
     }
     if(gameover){
+      
+      /*Musique gameover*/ 
+      pause_and_close_audio();
+      if(musique("game_over_coupe.wav",&desired, &obtained, &soundfile, &cvt ) == 1){
+	return 1;
+      }
+
+      /*Refresh the whole game except the score_total*/
       play = false;
       space_ship.life = MAX_LIFE_SHIP;
       SetUpPosition(&space_ship);
       kill_all_number();
       temps_actuel = 0;
       printf("Commandant ! voici votre score : %d \n", *score_total);
-      *score_total = 0;
+  
       droitDeScorer = true;
 
       while(!ending){
 	
-	      /*Insert function of menu here (blitsurface...)*/
+	/*Insert function of menu here (blitsurface...)*/
 	
 	SDL_Event event3;
 	if (SDL_PollEvent(&event3)) {
@@ -993,13 +1194,27 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(jouer.sprite_picture, NULL, screen, &jouer.position);
 	SDL_BlitSurface(quitter.sprite_picture, NULL, screen, &quitter.position);
 	SDL_BlitSurface(game_over.sprite_picture, NULL, screen, &game_over.position);
+	
+	/*Affichage score*/
+	sprintf(affichage_score, "Score : %d", *score_total);
+	SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
+							color);
+	SDL_BlitSurface(textSurface, NULL, screen, NULL);
+	SDL_FreeSurface(textSurface);
+
+	
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
       }
+      /*Refresh the score*/
+      *score_total = 0;
     }
     /*End of while menu*/
   }
+  
+   pause_and_close_audio();
    
   /* clean up */
+  SDL_FreeSurface(portal_picture);
   SDL_FreeSurface(textSurface);
   SDL_FreeSurface(menu_jouer);
   SDL_FreeSurface(menu_jouer_selec);

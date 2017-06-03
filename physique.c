@@ -1,5 +1,5 @@
-#include "physique.h"
-
+#include "physique.h" 
+  
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *score)
 {
@@ -74,6 +74,7 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     break;
   case 21:
   case 22:
+  case 23:
     Random_Position_Partout(sprite);
     sprite->col = sprite->x;
     sprite->lig = sprite->y;
@@ -144,7 +145,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
 		    , sprite_t *game_over, sprite_t *return_menu
-		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV)
+		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV, sprite_t *portal)
 {
   int i;
   /*init menu*/
@@ -178,7 +179,9 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
   for(i=0 ; i<NB_MAX_EXPL ; i++){
     sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
   }
-					    
+  for(i=0 ; i<NB_MAX_PORTAL ; i++){
+  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+  }					    
 }
 
 /*Main fonction to create new sprite*/
@@ -229,6 +232,9 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   }
   if(type == 20){
     Set_up_PV(sprite);
+  }
+if(type == 23){
+    SetUpPosition(sprite);
   }
 }
 /*the animation of the sprite turn */
@@ -315,7 +321,13 @@ void sprite_move(sprite_t *sprite)
     if (sprite->decompte %100 == 0){  /*Permet d'animer l'explosion (utilisation du modulo car sinon plus complexe d'arreter la fameuse explosion)*/
       sprite_turn_left(sprite);   
    }
-  }  
+  }
+  if (sprite->type == 23){
+    if(sprite->decompte > 50){
+      sprite_turn_right(sprite);
+      sprite->decompte = 0;
+    }
+  }
 }
 /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
@@ -390,6 +402,7 @@ void downloadsprite()
   menu_return = download_sprite_("Back_to_menu.bmp");
   atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
   bonus_mitraille = download_sprite_("Mitraille.bmp");
+  portal_picture = download_sprite_("portail.bmp");
   /*Set all colorkey*/
   set_colorkey_(spaceship, 255, 0, 255, screen);
   set_colorkey_(spaceship2, 255, 0, 255, screen);

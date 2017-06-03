@@ -1,9 +1,9 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
-  
+   
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#include <stdbool.h> 
 #include <SDL.h>
 #include <SDL_ttf.h> 
 #include <math.h>
@@ -14,23 +14,23 @@
 /* Size of the window */
 #define SCREEN_WIDTH    1024
 #define SCREEN_HEIGHT   761
-
+ 
 /*Parametre fin du jeu*/
 #define DECOMPTE_FIN 2000
 /*Parametre Menu:*/
-#define MENU_JOUER_SIZE 425  //425*252
-#define PLACEMENT_MENU_JOUER_X 420
-#define PLACEMENT_MENU_JOUER_Y 550
+#define MENU_JOUER_SIZE 256  //256*128
+#define PLACEMENT_MENU_JOUER_X 300
+#define PLACEMENT_MENU_JOUER_Y 500
 #define NB_MENU_JOUER_SPRITE 1
 #define NB_MAX_MENU_JOUER 1
 
-#define MENU_QUITTER_SIZE 425 //425*252 aussi ?
-#define PLACEMENT_MENU_QUITTER_X 420
+#define MENU_QUITTER_SIZE 256 //256*128 
+#define PLACEMENT_MENU_QUITTER_X 300
 #define PLACEMENT_MENU_QUITTER_Y 300
 #define NB_MENU_QUITTER_SPRITE 1
 #define NB_MAX_MENU_QUITTER  1
 
-#define MENU_GAME_OVER_SIZE 425
+#define MENU_GAME_OVER_SIZE 256
 #define NB_MENU_GAME_OVER_SPRITE 1
 #define NB_MAX_MENU_GAME_OVER 1
 
@@ -58,7 +58,7 @@
 #define SPACE_SHIP_SIZE     32
 #define NB_MAX_SHIP         1
 /* Nb of life at the start */
-#define MAX_LIFE_SHIP        10  
+#define MAX_LIFE_SHIP        2  
 
 /*life affichage */
 #define PV_SIZE 32
@@ -109,6 +109,13 @@
 #define NB_BONUS_MITRAILLE_SPRITE 1
 #define NB_MAX_BONUS_MITRAILLE 1
 #define CHANCE_D_APPARITION_MITRAILLE 5000
+
+/*Portal*/
+#define PORTAL_SIZE  64
+#define NB_PORTAL_SPRITE  5 
+#define NB_MAX_PORTAL     15
+#define CHANCE_D_APPARITION_PORTAL 6666         //6666
+
 /*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
 #define FROTTEMENT   0.0009
@@ -122,8 +129,8 @@ SDL_Surface *explosion_picture; //stocke l'image de l'explosion
 SDL_Surface *vie; //NBRE DE VIE
 SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
 SDL_Surface *menu_game_over, *menu_return;
-SDL_Surface *atomic_bomb_picture, *bonus_mitraille;
-int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb, nbMitraille;
+SDL_Surface *atomic_bomb_picture, *bonus_mitraille, *portal_picture;
+int nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb, nbMitraille, nbPortal ;
 bool cogne;
 bool can_piou;
 bool have_mitraille;
@@ -168,7 +175,7 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
 		     sprite_t *game_over, sprite_t *return_menu,
 		     sprite_t *jouer, sprite_t *quitter,
-		     sprite_t *PV);
+		     sprite_t *PV, sprite_t *portal);
 
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture,
 		 int sprite_size, int anim_sprite_num, int nombre_max_sprite);
@@ -196,6 +203,7 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2,
 
 
 /*in com_bust.c*/
+void kill_sprite_number(int *nb);
 void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero);
 bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2);
 bool compare_position(sprite_t *sprite1, sprite_t *sprite2);
@@ -212,7 +220,7 @@ void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2);
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
 	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
 	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
-	     bool *bomb_triggered, bool*have_mitraille, sprite_t *mitraille);
+	     bool *bomb_triggered, bool*have_mitraille, sprite_t *mitraille, sprite_t *portal);
 
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast,
 	       sprite_t *norm_ast, sprite_t *small_ast);
