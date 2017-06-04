@@ -6,15 +6,15 @@ void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm
   int i;
   printf("space_ship->life : %d\n", space_ship->life);
   
-  for(i=0;i<gimmeIsNb(big_ast);i++){
+  for(i=0;i<*gimmeIsNb(big_ast);i++){
     printf("big_ast[%d].life = %d \n", i, big_ast[i].life);
   }
   printf("\n");
-  for(i=0;i<gimmeIsNb(norm_ast);i++){
+  for(i=0;i<*gimmeIsNb(norm_ast);i++){
     printf("norm_ast[%d].life = %d \n", i, norm_ast[i].life);
   }
   printf("\n");
-  for(i=0;i<gimmeIsNb(small_ast);i++){
+  for(i=0;i<*gimmeIsNb(small_ast);i++){
     printf("small_ast[%d].life = %d \n", i, small_ast[i].life);
   } 
   printf("\n");
@@ -84,6 +84,25 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
   default:
     break;
   }
+}
+/*Invert direction of sprite 2 */
+void InvertDirection(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite2->vx = -sprite1->vx;
+  sprite2->vy = -sprite1->vy;
+}
+
+/*Set Up sprite 1 at position sprite 2 */
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x;
+  sprite1->y = sprite2->y;
+}
+/*Set up sprite1 at middle sprite2 ?*/
+void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x + (sprite2->size)/2 - (sprite1->size)/2;
+  sprite1->y = sprite2->y + (sprite2->size)/2 - (sprite1->size)/2;
 }
 
 void Set_up_PV(sprite_t *PV)
@@ -200,8 +219,9 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
-  sprite->sprite_picture = sprite_picture;
   sprite->life = BASE_LIFE;
+  sprite->sprite_picture = sprite_picture;
+  //sprite_image(sprite);
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
@@ -290,45 +310,99 @@ void sprite_image(sprite_t *sprite)
 /*Move of the sprite (+ hyperespace)*/
 void sprite_move(sprite_t *sprite)
 {
-
+ 
+  sprite->decompte += 1;
+  
   sprite->x += sprite->vx;
   sprite->y += sprite->vy;
   
-  hyperespace(sprite);
-  
   sprite->col = sprite->x;
   sprite->lig = sprite->y;
+  
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
+    
+  hyperespace(sprite);
   
-  if (sprite->type == 0)
-    {
+  if (sprite->type == 0){
       ship_image(sprite);
     }
-  else
-    {
+  else {
       sprite_image(sprite);
     }
-  sprite->decompte += 1;
-  
+ 
   if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){ 
-    if (sprite->decompte > 80){          //Un decompte qui permet de faire tourner le sprite
+    if (sprite->decompte > VITESSE_DEFILEMENT_AST){ 
       sprite_turn_left(sprite);
       sprite->decompte = 0;   
     }
   }
   if (sprite->type == 5){
-    if (sprite->decompte %100 == 0){  /*Permet d'animer l'explosion (utilisation du modulo car sinon plus complexe d'arreter la fameuse explosion)*/
+    if (sprite->decompte %VITESSE_DEFILEMENT_EXPLOSION == 0){
+      if(sprite->current >= sprite->nb_sprite){
+	sprite->current = sprite->nb_sprite - 2;
+      }
       sprite_turn_left(sprite);   
    }
   }
   if (sprite->type == 23){
-    if(sprite->decompte > 50){
+    if(sprite->decompte > VITESSE_DEFILEMENT_PORTAL){
       sprite_turn_right(sprite);
       sprite->decompte = 0;
     }
   }
+
+
 }
+/*Decompte le temps restant au sprite et le tue au final.*/
+void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort)
+{
+  int i;
+  for (i=0; i<*gimmeIsNb(sprite); i++){
+    if (sprite[i].decompte > decompte_avant_mort){
+      sprite[i].life -= 1;
+      sprite[i].decompte = 0;
+    }
+  }
+  
+}
+
+/*Appelle sprite move pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
+void move_all_sprite(sprite_t *sprite)
+{
+  int i;
+  int *nb_sprite = gimmeIsNb(sprite);
+  int nbSprite = *nb_sprite;
+  for (i=0; i<nbSprite; i++){
+    if (nbSprite>0){
+      sprite_move(&sprite[i]);
+    }
+  }
+}
+/*Appelle SDL_BlitSurface pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
+void draw_all_sprite(SDL_Surface *picture, sprite_t *sprite)
+{
+  int i;
+  int *nb_sprite = gimmeIsNb(sprite);
+  int nbSprite = *nb_sprite;
+  for (i=0; i<nbSprite; i++){
+    if (nbSprite>0){
+      SDL_BlitSurface(picture, &sprite[i].image, screen, &sprite[i].position);
+    }
+  }
+}
+void draw_all_sprite_one_image(SDL_Surface *picture, sprite_t *sprite)
+{
+  int i;
+  int *nb_sprite = gimmeIsNb(sprite);
+  int nbSprite = *nb_sprite;
+  for (i=0; i<nbSprite; i++){
+    if (nbSprite>0){
+      SDL_BlitSurface(picture, NULL, screen, &sprite[i].position);
+    }
+  }
+}
+
 /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
@@ -426,8 +500,60 @@ void downloadsprite()
 }
 
 ///////////////////////////////////////////////////////////////////
+/*Donne le nombre de sprite demandé présent sur l'écran */
+int* gimmeIsNb(sprite_t *sprite)
+{
+  int type = sprite->type;
+  //printf("sprite->type = %d \n", type);
+  switch (type){
+  case 0:
+    return &nbVaisseau;
+    break;
+  case 1:
+    return &nbBigAst;
+    break;
+  case 2:
+    return &nbNormAst;
+    break;
+  case 3:
+    return &nbSmallAst;
+    break;
+  case 4:
+    return &nbtirs;
+    break;
+  case 5:
+    return &nbExplosion;
+    break;
+  case 21:
+    return &nbAtomicBomb;
+    break;
+  case 22:
+    return &nbMitraille;
+    break;
+  case 23:
+    return &nbPortal;
+    break;
+  default:
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21, 22, 23. \n");
+    printf("Type asked: %d \n",type);
+    return &error_gimmeIsNb;
+    break;
+  }
+  
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+/*Kill, The cursor on the tab recule*/
+void kill_sprite_number(int *nb)
+{
+  if (*nb>0){
+    *nb -= 1;
+  }
+  
+}
 /*test if kill ast is possible*/
-bool kill_ast_param(int nombre_max, int numero, int type)
+bool kill_sprite_param(int nombre_max, int numero, int type)
 {
   bool killed = false;
   /*No need of more object than 100 on screen*/
@@ -448,6 +574,56 @@ bool kill_ast_param(int nombre_max, int numero, int type)
   return killed;
   
 }
+
+/*Kill the sprite[numero], need a tab*/
+void kill_sprite(sprite_t *sprite, int numero)
+{
+  bool killed = false;
+  int type = sprite->type;
+  int nombre_max = sprite->nombre_max;
+  nombre_max -= 1;
+  int nbSprite;
+  nbSprite = *gimmeIsNb(sprite);
+  if (type != 0){
+    if (nbSprite > 0){
+      nbSprite -= 1;
+    }
+    killed = kill_sprite_param(nombre_max, numero, type);
+    
+    while (killed == false){
+      //printf("kill_ast : numero : %d \n",numero);
+      //printf("kill ast : nbAst : %d  \n",nbAst);
+      //printf("kill ast : nb_max : %d \n",nombre_max);
+      if (numero >= nbSprite){
+	switch (type) {
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 23:
+	  kill_sprite_number(gimmeIsNb(sprite));
+	  killed = true;
+	  break;
+	default:
+	  printf("Kill_ast : wrong type. (you asked %d)",sprite->type);
+	  killed = true;
+	  break;
+	}   
+      }
+      if (killed == false){
+	sprite[numero] = sprite[numero+1];
+	if (sprite[numero].numero_object > 0){
+	  sprite[numero].numero_object -= 1;
+	}
+	numero += 1;
+      }
+    }
+  }
+  
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 int max(int a, int b)
 {
@@ -474,6 +650,13 @@ int min(int a, int b)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+/*Prend deux sprites, rend true si les deux sprites sont en contact*/
+bool compare_position(sprite_t *sprite1, sprite_t *sprite2)
+{
+  int cu = 0;
+  int cv = 0;
+  return collide_test(*sprite1, *sprite2, sprite1->sprite_picture->format ,&cu, &cv);
+}
 
 bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, int * cu, int * cv) 
 {
@@ -571,3 +754,15 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
   
   return test;
 }
+
+/*Fonction Collision pour un carré, prend des points x et y et ajoute leurs longueur a    */
+/*Puis compare les position des deux carrés et rend un booleen (vrai = carrés se touchent)*//*
+bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
+{
+  bool collision = false;
+  if(min(x1+a1, x2+a2)>max(x1, x2) && min(y1+a1, y2+a2)>max(y1, y2)){
+    collision = true;
+  }
+  return collision;
+}
+*/
