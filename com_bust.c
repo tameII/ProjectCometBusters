@@ -11,27 +11,136 @@ void kill(int *nb);
 //////////////////////////////////////////////////////////////////////////////
 /****************************************************************************/
 /*FONCTION ANNEXE MUSIQUE*/
- /* Les données du fichier son chargé */
- Uint8 * sounddata;
- /* La taille du fichier son chargé, en octets */
- Uint32 soundlength;
- /* Position courante de lecture dans le fichier son */
- Uint32 soundpos;
+/* Les données du fichier son chargé */
+Uint8 * sounddata;
+/* La taille du fichier son chargé, en octets */
+Uint32 soundlength;
+/* Position courante de lecture dans le fichier son */
+Uint32 soundpos;
 
- /* Fonction de rappel qui copie les données sonores dans le tampon audio */
- void mixaudio(void * userdata, Uint8 * stream, int len)
- {
-   /* Attention à ne pas déborder lors de la copie */
-   Uint32 tocopy = soundlength - soundpos > len ? len : soundlength - soundpos; 
+/* Fonction de rappel qui copie les données sonores dans le tampon audio */
+void mixaudio(void * userdata, Uint8 * stream, int len)
+{
+  /* Attention à ne pas déborder lors de la copie */
+  Uint32 tocopy = soundlength - soundpos > len ? len : soundlength - soundpos; 
 
-   /* Copie des données sonores dans le tampon audio... */
-   memcpy(stream, sounddata + soundpos, tocopy); 
+  /* Copie des données sonores dans le tampon audio... */
+  memcpy(stream, sounddata + soundpos, tocopy); 
 
-   /* Mise à jour de la position de lecture */
-   soundpos += tocopy;
- }
+  /* Mise à jour de la position de lecture */
+  soundpos += tocopy;
+}
 
  
+void pause_and_close_audio()
+{
+  /* On cesse d'appeler la fonction de rappel */
+  SDL_PauseAudio(1);
+
+  /* Fermer le périphérique audio */
+  SDL_CloseAudio();
+  
+}
+
+
+/*Parametres généraux a mettre en place.*/
+int musique_param(SDL_AudioSpec *soundfile, SDL_AudioSpec *obtained, SDL_AudioCVT *cvt )
+{
+
+  /* Conversion vers le format du tampon audio */
+  if (SDL_BuildAudioCVT(cvt, soundfile->format, soundfile->channels, soundfile->freq, 
+			obtained->format, obtained->channels, obtained->freq) < 0) {
+    printf("Impossible de construire le convertisseur audio!\n");
+    return 1;
+  }
+  /* Création du tampon utilisé pour la conversion */
+  cvt->buf = malloc(soundlength * cvt->len_mult);
+  cvt->len = soundlength;
+  memcpy(cvt->buf, sounddata, soundlength);
+
+  /* Conversion... */
+  if (SDL_ConvertAudio(cvt) != 0) {
+    printf("Erreur lors de la conversion du fichier audio: %s\n", SDL_GetError());
+    return 1;
+  } 
+
+  /* Libération de l'ancien tampon, création du nouveau,
+     copie des données converties, effacement du tampon de conversion */
+  SDL_FreeWAV(sounddata);
+  sounddata = malloc(cvt->len_cvt);
+  memcpy(sounddata, cvt->buf, cvt->len_cvt);
+  free(cvt->buf);
+
+  soundlength = cvt->len_cvt;
+  /*printf("Taille du son converti: %d octets\n", soundlength);*/
+  soundpos = 0;
+
+
+  return 0;
+      
+}
+
+/*Fonction mettant en place la musique*/
+int musique(char *titre, SDL_AudioSpec *desired, SDL_AudioSpec *obtained, SDL_AudioSpec *soundfile, SDL_AudioCVT *cvt )
+{
+  int bug;
+
+  if (SDL_OpenAudio(desired, obtained) != 0) {
+    printf("Erreur lors de l'ouverture du périphérique audio: %s\n", SDL_GetError());
+    return 1;
+  }
+  /* Chargement du fichier .wav */
+  if (SDL_LoadWAV(titre, soundfile, &sounddata, &soundlength) == NULL) {
+    printf("Erreur lors du chargement du fichier son: %s\n", SDL_GetError());
+    return 1;
+  }
+  bug = musique_param(soundfile, obtained, cvt);
+
+  /* La fonction de rappel commence à être appelée à partir de maintenant. */
+  /* printf("Démarrage de la lecture...\n");*/
+  SDL_PauseAudio(0);
+
+  return bug;
+  
+}
+
+/*Init musique, met a jour les caractèristiques de la musique.*/
+void init_musique(SDL_AudioSpec *desired, int freq, char *format, int channel, int sample)
+{
+  // printf("%s \n", format);
+  
+  if(strstr(format, "AUDIO_U16SYS")){
+    /*Initialisation de tout ce qui a trait a la musique
+      C'est marrant parce que une freq de 11025 fonctionne quand même*/
+    /* Son 16 bits stéréo à 44100 Hz *///AUDIO_U16SYS
+    desired->freq = freq;
+    desired->format = AUDIO_U16SYS;
+    desired->channels = channel;
+    /* Le tampon audio contiendra 512 ou 1024 échantillons*/ 
+    desired->samples = sample;
+
+    /*Mise en place de la fonction de rappel et des données utilisateur*/
+    desired->callback = &mixaudio;
+    desired->userdata = NULL;
+  }
+
+  
+  if(strstr(format, "AUDIO_S8")){  
+    /* Son 8 bits stéréo à 11025 Hz */
+    desired->freq = freq;
+    desired->format = AUDIO_S8;
+    desired->channels = channel;
+    /* Le tampon audio contiendra 512 ou 1024 échantillons*/ 
+    desired->samples = sample;
+
+    /*Mise en place de la fonction de rappel et des données utilisateur*/
+    desired->callback = &mixaudio;
+    desired->userdata = NULL;
+  }
+
+  
+
+}
 
 
 /**************************************************************************/
@@ -113,6 +222,8 @@ void kill_all_number()
   nbtirs = 0;
   nbExplosion = 0;
   nbPortal = 0;
+  nbAtomicBomb = 0;
+  nbMitraille = 0;
 }
 
 void ajout_score(int *score, int point)
@@ -174,7 +285,7 @@ void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast,
 	  }
 	}
 	DivideAst(sprite, i, big_ast, norm_ast, small_ast);
-	kill_ast(sprite, i);
+	kill_sprite(sprite, i);
       }
     }
   }
@@ -249,13 +360,13 @@ void teleportation(sprite_t *sprite1, sprite_t *portal)
     if(compare_position(sprite1, &portal[j])){
       if(j%2 == 0){
 	SetUpAtMiddle(sprite1, &portal[j+1]);
-	kill_ast(portal, j+1);
-	kill_ast(portal, j);
+	kill_sprite(portal, j+1);
+	kill_sprite(portal, j);
       }
       else if(j%2 == 1){
 	SetUpAtMiddle(sprite1, &portal[j-1]);
-	kill_ast(portal, j);
-	kill_ast(portal, j-1);
+	kill_sprite(portal, j);
+	kill_sprite(portal, j-1);
       }
     }
   }
@@ -401,8 +512,8 @@ int gimmeIsNb(sprite_t *sprite)
 }
 
 
-/*Kill the ast[numero]*/
-void kill_ast(sprite_t *ast, int numero)
+/*Kill the sprite[numero]*/
+void kill_sprite(sprite_t *ast, int numero)
 {
   bool killed = false;
   int type = ast->type;
@@ -644,15 +755,15 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       i = rand()%(3);
       if (i == 0){
 	j = rand()%(NB_MAX_BIG_AST-1);
-	kill_ast(big_ast, j);
+	kill_sprite(big_ast, j);
       }
       if (i == 1){
 	j = rand()%(NB_MAX_NORM_AST);
-	kill_ast(norm_ast, j);
+	kill_sprite(norm_ast, j);
       }
       if (i == 2){
 	j = rand()%(NB_MAX_SMALL_AST);
-	kill_ast(small_ast, j);
+	kill_sprite(small_ast, j);
       }
       // printf("i : %d, j : %d \n",i,j);
       
@@ -838,74 +949,8 @@ void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
   }
 }
 //////////////////////////////////////////////////////////////////////////////
-void pause_and_close_audio()
-{
-  /* On cesse d'appeler la fonction de rappel */
-  SDL_PauseAudio(1);
-
-  /* Fermer le périphérique audio */
-  SDL_CloseAudio(); 
-}
-/*Parametres généraux a mettre en place.*/
-int musique_param(SDL_AudioSpec *soundfile, SDL_AudioSpec *obtained, SDL_AudioCVT *cvt )
-{
-
-      /* Conversion vers le format du tampon audio */
-      if (SDL_BuildAudioCVT(cvt, soundfile->format, soundfile->channels, soundfile->freq, 
-			    obtained->format, obtained->channels, obtained->freq) < 0) {
-	printf("Impossible de construire le convertisseur audio!\n");
-	return 1;
-      }
-      /* Création du tampon utilisé pour la conversion */
-      cvt->buf = malloc(soundlength * cvt->len_mult);
-      cvt->len = soundlength;
-      memcpy(cvt->buf, sounddata, soundlength);
-
-      /* Conversion... */
-      if (SDL_ConvertAudio(cvt) != 0) {
-	printf("Erreur lors de la conversion du fichier audio: %s\n", SDL_GetError());
-	return 1;
-      } 
-
-      /* Libération de l'ancien tampon, création du nouveau,
-	 copie des données converties, effacement du tampon de conversion */
-      SDL_FreeWAV(sounddata);
-      sounddata = malloc(cvt->len_cvt);
-      memcpy(sounddata, cvt->buf, cvt->len_cvt);
-      free(cvt->buf);
-
-      soundlength = cvt->len_cvt;
-      printf("Taille du son converti: %d octets\n", soundlength);
-      soundpos = 0;
 
 
-      return 0;
-}
-
-
-
-int musique(char *titre, SDL_AudioSpec *desired, SDL_AudioSpec *obtained, SDL_AudioSpec *soundfile, SDL_AudioCVT *cvt )
-{
-  int bug;
-
-  if (SDL_OpenAudio(desired, obtained) != 0) {
-    printf("Erreur lors de l'ouverture du périphérique audio: %s\n", SDL_GetError());
-    return 1;
-  }
-  /* Chargement du fichier .wav */
-  if (SDL_LoadWAV(titre, soundfile, &sounddata, &soundlength) == NULL) {
-    printf("Erreur lors du chargement du fichier son: %s\n", SDL_GetError());
-    return 1;
-  }
-    bug = musique_param(soundfile, obtained, cvt);
-
-    /* La fonction de rappel commence à être appelée à partir de maintenant. */
-    printf("Démarrage de la lecture...\n");
-    SDL_PauseAudio(0);
-
-    return bug;
-  
-}
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
@@ -946,20 +991,23 @@ int main(int argc, char* argv[])
   
   /*Initialisation de tout ce qui a trait a la musique*/
   /*C'est marrant parce que une freq de 11025 fonctionne quand même*/
-  /* Son 16 bits stéréo à 44100 Hz */ 
+  /* Son 16 bits stéréo à 44100 Hz */ /*
   desired.freq = 44100;
   desired.format = AUDIO_U16SYS;
   desired.channels = 2;
   
-  /* Le tampon audio contiendra 512 échantillons */
-  desired.samples = 512;
+ Le tampon audio contiendra 512 échantillons 
+  desired.samples = 1024;
 
-  /* Mise en place de la fonction de rappel et des données utilisateur */
+   Mise en place de la fonction de rappel et des données utilisateur 
   desired.callback = &mixaudio;
   desired.userdata = NULL;
+ */
 
-
-  if (musique("KDE_Startup_new.wav",&desired, &obtained, &soundfile, &cvt ) == 1){
+  char format[20] = "AUDIO_U16SYS";
+  init_musique(&desired, 44100, format, 2, 1024);
+  if (musique("KDE_Startup_new.wav",&desired, &obtained, &soundfile,
+	      &cvt ) == 1){
     return 1;
   }
 
@@ -985,6 +1033,7 @@ int main(int argc, char* argv[])
   init_all_sprite(&space_ship, big_ast, norm_ast, small_ast,
 		  tirs, explosion, &game_over,
 		  &return_menu, &jouer, &quitter, PV, portal);
+  
   int gameover = 0;
   int ending = 0;
   int finmenu = 0;
@@ -1008,6 +1057,8 @@ int main(int argc, char* argv[])
   SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);
 
+  bool son_apres_game_over_lance;
+  
   /*Menu :*/
   while (!finmenu){
 
@@ -1028,6 +1079,8 @@ int main(int argc, char* argv[])
     if(play){
 
       pause_and_close_audio();
+      sprintf(format, "AUDIO_S8"); 
+      init_musique(&desired, 11025, format, 2, 1024);
       if( musique("Castlevania_Soundtrack_modifie.wav",&desired, &obtained,
 		  &soundfile, &cvt ) == 1){
 	return 1;
@@ -1079,6 +1132,7 @@ int main(int argc, char* argv[])
 
 	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image, screen, &space_ship.position);
 	  }
+	  
 	  /*Affichage des bonus:*/
 	  /*Atomic_bomb*/
 	  if(gimmeIsNb(&bonus_atomic_bomb) == 1){
@@ -1109,7 +1163,7 @@ int main(int argc, char* argv[])
 	    if (nbExplosion>0){
 	      if (explosion[i].decompte >= 100*12+1){
 		explosion[i].decompte = 0;
-		kill_ast(explosion, i);
+		kill_sprite(explosion, i);
 	      }
 	    }
 	  }
@@ -1125,29 +1179,30 @@ int main(int argc, char* argv[])
 	      SDL_BlitSurface(bullet, NULL , screen, &tirs[i].position);
 	    }
 	  }
+	  
 	  /*Draw PV*/
 	  for (i = 0; i<space_ship.life ; i++)
 	    {
 	      SDL_BlitSurface(vie, NULL, screen, &PV[i].position);
 	    }
+	  
 	  /*Collision*/
-	  if (cogne == false)
-	    {
-	      collide(&space_ship, tirs, big_ast, norm_ast, small_ast, &gameover,
-		      &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered, &have_mitraille, &mitraille, portal);
-	      dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
-		   &gameover, score_total, &droitDeScorer);
-	    }
-	  else
-	    {
-	      decompte--;
-	      change_sprite_ship(&space_ship, spaceship, spaceship2);
-	      can_piou = false;
-	      if (decompte <1)
-		{
-		  cogne = false;
-		}
-	    }
+	  if (cogne == false){ 
+	    collide(&space_ship, tirs, big_ast, norm_ast, small_ast, &gameover,
+		    &cogne, &decompte, &bonus_atomic_bomb, &bomb_triggered, &have_mitraille, &mitraille, portal);
+	    dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
+		 &gameover, score_total, &droitDeScorer);
+	  }
+	  else {
+	    decompte--;
+	    change_sprite_ship(&space_ship, spaceship, spaceship2);
+	    can_piou = false;
+	    if (decompte <1)
+	      {
+		cogne = false;
+	      }
+	  }
+	  
 	  Effect_mitraille();
 	  sprintf(affichage_score, "Score : %d", *score_total);
 	  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
@@ -1201,12 +1256,27 @@ int main(int argc, char* argv[])
 							color);
 	SDL_BlitSurface(textSurface, NULL, screen, NULL);
 	SDL_FreeSurface(textSurface);
-
 	
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
+
+	
+	if (soundpos >= soundlength){
+	  if(!son_apres_game_over_lance){
+	    pause_and_close_audio();
+	    if( musique("apres_game_over.wav",&desired, &obtained,
+			&soundfile, &cvt ) == 1){
+	      return 1;
+	    }
+	     son_apres_game_over_lance = true;
+	  }
+	}
+	
       }
-      /*Refresh the score*/
+      
+      /*Refresh the score and refresh bool son_lance*/
       *score_total = 0;
+      
+       son_apres_game_over_lance = false;
     }
     /*End of while menu*/
   }

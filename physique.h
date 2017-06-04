@@ -207,7 +207,7 @@ void kill_sprite_number(int *nb);
 void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero);
 bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2);
 bool compare_position(sprite_t *sprite1, sprite_t *sprite2);
-void kill_ast(sprite_t *ast, int numero);
+void kill_sprite(sprite_t *ast, int numero);
 void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2);
 void draw_all_sprite(SDL_Surface *picture,sprite_t *sprite);
 void move_all_sprite(sprite_t *sprite);
