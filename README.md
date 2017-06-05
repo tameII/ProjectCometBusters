@@ -6,14 +6,24 @@ This is a project from two L1 informatique from fac des sciences et technologie 
 CHANGELOG:
 --
 
-Ce Changelog sera écrit dans un autre ReadMe lors du rendu de la version finale. (on peut en discuter bien sur ! )  
+Ce Changelog sera écrit dans un fichier changelog  lors du rendu de la version finale.
 Et dans ce ReadMe il y aura le pseudo-scenario + les controles du jeu.  
-(et pourquoi pas les explication de pourquoi il y a des frottement, ou pourquoi un escargot spatial géant glisse le long de l'écran).  
 
-la v.1.0 sera quand on aura un menu et le boss.  
-Désolé pour le franglais :/ .  
---
-Update v.0.5: (Mathieu Levy, 15/06/2017:19h52)
+Désolé pour le franglais :/ 
+
+
+Update v.0.9: (Mathieu Levy, 05/06/2017 : 22:49)  
+-------------
+Nouvelles implémentation :
+
+- Bombe atomique  
+- Portails  
+- Mitraille  
+- Musique  
+- Menu
+- Affichage Pv vaisseau
+
+Update v.0.5: (Mathieu Levy, 15/05/2017:19h52)
 -------------
 Astéroides bien implémentés
 Précédemment j'avais arreté de remplir ce changelog.  
