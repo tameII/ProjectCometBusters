@@ -1,0 +1,18 @@
+Hitbox circulaire :
+Faire une image circulaire pour symboliser la hitbox,
+cette image apparaitra si la hitbox fonctionne.
+
+avec un carré:
+le centre:
+prendre moitié longueur du côté du carré
+partir du point au milieu d'un coté, ajouter la longueur de la moitié du coté adjacent a celui ci.
+
+le cercle
+prendre la moitié de la longueur du côté du carré.
+prendre le centre du carré.
+
+centre -> moitié longueur coté carré = rayon du cercle
+le centre est le point central du cercle aussi.
+
+
+bref c'est un cercle inscrit quoi. plus fin mais pas encore assez je pense.

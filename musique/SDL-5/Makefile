@@ -1,0 +1,11 @@
+CFLAGS = `sdl-config --cflags` -Wall -ansi -g
+LIBS = `sdl-config --libs`
+
+OBJECTS = main.o
+
+all: $(OBJECTS)
+	$(CC) $(OBJECTS) -o playwav $(LIBS)
+
+clean:
+	rm -f *.o playwav
+ 

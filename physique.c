@@ -1,20 +1,20 @@
-#include "physique.h"
-
+#include "physique.h" 
+    
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *score)
 {
   int i;
   printf("space_ship->life : %d\n", space_ship->life);
   
-  for(i=0;i<gimmeIsNb(big_ast);i++){
+  for(i=0;i<*gimmeIsNb(big_ast);i++){
     printf("big_ast[%d].life = %d \n", i, big_ast[i].life);
   }
   printf("\n");
-  for(i=0;i<gimmeIsNb(norm_ast);i++){
+  for(i=0;i<*gimmeIsNb(norm_ast);i++){
     printf("norm_ast[%d].life = %d \n", i, norm_ast[i].life);
   }
   printf("\n");
-  for(i=0;i<gimmeIsNb(small_ast);i++){
+  for(i=0;i<*gimmeIsNb(small_ast);i++){
     printf("small_ast[%d].life = %d \n", i, small_ast[i].life);
   } 
   printf("\n");
@@ -74,6 +74,7 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     break;
   case 21:
   case 22:
+  case 23:
     Random_Position_Partout(sprite);
     sprite->col = sprite->x;
     sprite->lig = sprite->y;
@@ -83,6 +84,25 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
   default:
     break;
   }
+}
+/*Invert direction of sprite 2 */
+void InvertDirection(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite2->vx = -sprite1->vx;
+  sprite2->vy = -sprite1->vy;
+}
+
+/*Set Up sprite 1 at position sprite 2 */
+void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x;
+  sprite1->y = sprite2->y;
+}
+/*Set up sprite1 at middle sprite2 ?*/
+void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2)
+{
+  sprite1->x = sprite2->x + (sprite2->size)/2 - (sprite1->size)/2;
+  sprite1->y = sprite2->y + (sprite2->size)/2 - (sprite1->size)/2;
 }
 
 void Set_up_PV(sprite_t *PV)
@@ -144,7 +164,7 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
 		    , sprite_t *game_over, sprite_t *return_menu
-		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV)
+		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV, sprite_t *portal)
 {
   int i;
   /*init menu*/
@@ -178,7 +198,9 @@ void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast
   for(i=0 ; i<NB_MAX_EXPL ; i++){
     sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
   }
-					    
+  for(i=0 ; i<NB_MAX_PORTAL ; i++){
+  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+  }					    
 }
 
 /*Main fonction to create new sprite*/
@@ -197,8 +219,9 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
-  sprite->sprite_picture = sprite_picture;
   sprite->life = BASE_LIFE;
+  sprite->sprite_picture = sprite_picture;
+  //sprite_image(sprite);
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
@@ -229,6 +252,9 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   }
   if(type == 20){
     Set_up_PV(sprite);
+  }
+if(type == 23){
+    SetUpPosition(sprite);
   }
 }
 /*the animation of the sprite turn */
@@ -284,39 +310,100 @@ void sprite_image(sprite_t *sprite)
 /*Move of the sprite (+ hyperespace)*/
 void sprite_move(sprite_t *sprite)
 {
-
+ 
+  sprite->decompte += 1;
+  
   sprite->x += sprite->vx;
   sprite->y += sprite->vy;
   
-  hyperespace(sprite);
-  
   sprite->col = sprite->x;
   sprite->lig = sprite->y;
+  
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
+    
+  hyperespace(sprite);
   
-  if (sprite->type == 0)
-    {
+  if (sprite->type == 0){
       ship_image(sprite);
     }
-  else
-    {
+  else {
       sprite_image(sprite);
     }
-  sprite->decompte += 1;
-  
+ 
   if (sprite->type == 1 || sprite->type == 2 || sprite->type == 3){ 
-    if (sprite->decompte > 80){          //Un decompte qui permet de faire tourner le sprite
+    if (sprite->decompte > VITESSE_DEFILEMENT_AST){ 
       sprite_turn_left(sprite);
       sprite->decompte = 0;   
     }
   }
   if (sprite->type == 5){
-    if (sprite->decompte %100 == 0){  /*Permet d'animer l'explosion (utilisation du modulo car sinon plus complexe d'arreter la fameuse explosion)*/
+    if (sprite->decompte %VITESSE_DEFILEMENT_EXPLOSION == 0){
+      if(sprite->current >= sprite->nb_sprite){
+	sprite->current = sprite->nb_sprite - 2;
+      }
       sprite_turn_left(sprite);   
    }
-  }  
+  }
+  if (sprite->type == 23){
+    if(sprite->decompte > VITESSE_DEFILEMENT_PORTAL){
+      sprite_turn_right(sprite);
+      sprite->decompte = 0;
+    }
+  }
+
+
 }
+/*Decompte le temps restant au sprite et le tue au final.*/
+void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort)
+{
+  int i;
+  for (i=0; i<*gimmeIsNb(sprite); i++){
+    if (sprite[i].decompte > decompte_avant_mort){
+      sprite[i].life -= 1;
+      sprite[i].decompte = 0;
+    }
+  }
+  
+}
+
+/*Appelle sprite move pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
+void move_all_sprite(sprite_t *sprite)
+{
+  int i;
+  int *nb_sprite = gimmeIsNb(sprite);
+  int nbSprite = *nb_sprite;
+  for (i=0; i<nbSprite; i++){
+    if (nbSprite>0){
+      sprite_move(&sprite[i]);
+    }
+  }
+}
+/*Appelle SDL_BlitSurface pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
+void draw_all_sprite(sprite_t *sprite)
+{
+  int i;
+  int *nb_sprite = gimmeIsNb(sprite);
+  int nbSprite = *nb_sprite;
+  for (i=0; i<nbSprite; i++){
+    if (nbSprite>0){
+      SDL_BlitSurface(sprite[i].sprite_picture, &sprite[i].image, screen, &sprite[i].position);
+    }
+  }
+}
+void draw_all_sprite_one_image(sprite_t *sprite)
+{
+  int i;
+  int *nb_sprite = gimmeIsNb(sprite);
+  int nbSprite = *nb_sprite;
+  for (i=0; i<nbSprite; i++){
+    if (nbSprite>0){
+      SDL_BlitSurface(sprite[i].sprite_picture, NULL, screen,
+		      &sprite[i].position);
+    }
+  }
+}
+
 /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
 {
@@ -369,52 +456,62 @@ SDL_Surface* download_sprite_(char *nomSprite)
   
   return nom;
 }
-/*init SDL-Surface with picture, set up colorkey for each.*/
-void downloadsprite()
-{
-  /*Load all sprite_picture*/
-  explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
-  small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
-  norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
-  big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
-  spaceship = download_sprite_("sprite(new)v2.bmp");
-  spaceship2 = download_sprite_("sprite(new).bmp");
-  background = download_sprite_("espace.bmp");
-  bullet = download_sprite_("bullet02.bmp");
-  vie = download_sprite_("PackDeSoin.bmp");
-  menu_jouer = download_sprite_("Bouton_play.bmp");
-  menu_jouer_selec = download_sprite_("Bouton_play_selec.bmp");
-  menu_quitter = download_sprite_("Bouton_quit.bmp");
-  menu_quitter_selec = download_sprite_("Bouton_quit_selec.bmp");
-  menu_game_over = download_sprite_("Game_Over_redim.bmp");
-  menu_return = download_sprite_("Back_to_menu.bmp");
-  atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
-  bonus_mitraille = download_sprite_("Mitraille.bmp");
-  /*Set all colorkey*/
-  set_colorkey_(spaceship, 255, 0, 255, screen);
-  set_colorkey_(spaceship2, 255, 0, 255, screen);
-  set_colorkey_(big_comet, 0, 255, 255, screen);
-  set_colorkey_(norm_comet, 0, 255, 255, screen);
-  set_colorkey_(small_comet, 0, 255, 255, screen);
-  set_colorkey_(explosion_picture, 0, 255, 255, screen);
-  set_colorkey_(bullet, 255, 125, 0, screen);
-  set_colorkey_(vie, 0, 0, 0, screen);
-  //menu
-  set_colorkey_(menu_jouer, 255, 255, 255, screen);
-  set_colorkey_(menu_jouer_selec, 255, 255, 255, screen);
-  set_colorkey_(menu_quitter_selec, 255, 255, 255, screen);
-  set_colorkey_(menu_quitter, 255, 255, 255, screen);
-  set_colorkey_(menu_game_over, 255, 255, 255, screen);
-  set_colorkey_(menu_return, 255, 255, 255, screen);
-
-  //Bonus:
-  set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
-  set_colorkey_(bonus_mitraille, 136, 136, 136, screen);
-}
 
 ///////////////////////////////////////////////////////////////////
+/*Donne le nombre de sprite demandé présent sur l'écran */
+int* gimmeIsNb(sprite_t *sprite)
+{
+  int type = sprite->type;
+  //printf("sprite->type = %d \n", type);
+  switch (type){
+  case 0:
+    return &nbVaisseau;
+    break;
+  case 1:
+    return &nbBigAst;
+    break;
+  case 2:
+    return &nbNormAst;
+    break;
+  case 3:
+    return &nbSmallAst;
+    break;
+  case 4:
+    return &nbtirs;
+    break;
+  case 5:
+    return &nbExplosion;
+    break;
+  case 21:
+    return &nbAtomicBomb;
+    break;
+  case 22:
+    return &nbMitraille;
+    break;
+  case 23:
+    return &nbPortal;
+    break;
+  default:
+    printf("gimmeIsNB : Error : ask type 0, 1, 2, 3, 4, 5, 21, 22, 23. \n");
+    printf("Type asked: %d \n",type);
+    return &error_gimmeIsNb;
+    break;
+  }
+  
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+/*Kill, The cursor on the tab recule*/
+void kill_sprite_number(int *nb)
+{
+  if (*nb>0){
+    *nb -= 1;
+  }
+  
+}
 /*test if kill ast is possible*/
-bool kill_ast_param(int nombre_max, int numero, int type)
+bool kill_sprite_param(int nombre_max, int numero, int type)
 {
   bool killed = false;
   /*No need of more object than 100 on screen*/
@@ -435,6 +532,56 @@ bool kill_ast_param(int nombre_max, int numero, int type)
   return killed;
   
 }
+
+/*Kill the sprite[numero], need a tab*/
+void kill_sprite(sprite_t *sprite, int numero)
+{
+  bool killed = false;
+  int type = sprite->type;
+  int nombre_max = sprite->nombre_max;
+  nombre_max -= 1;
+  int nbSprite;
+  nbSprite = *gimmeIsNb(sprite);
+  if (type != 0){
+    if (nbSprite > 0){
+      nbSprite -= 1;
+    }
+    killed = kill_sprite_param(nombre_max, numero, type);
+    
+    while (killed == false){
+      //printf("kill_ast : numero : %d \n",numero);
+      //printf("kill ast : nbAst : %d  \n",nbAst);
+      //printf("kill ast : nb_max : %d \n",nombre_max);
+      if (numero >= nbSprite){
+	switch (type) {
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 23:
+	  kill_sprite_number(gimmeIsNb(sprite));
+	  killed = true;
+	  break;
+	default:
+	  printf("Kill_ast : wrong type. (you asked %d)",sprite->type);
+	  killed = true;
+	  break;
+	}   
+      }
+      if (killed == false){
+	sprite[numero] = sprite[numero+1];
+	if (sprite[numero].numero_object > 0){
+	  sprite[numero].numero_object -= 1;
+	}
+	numero += 1;
+      }
+    }
+  }
+  
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 int max(int a, int b)
 {
@@ -461,6 +608,13 @@ int min(int a, int b)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+/*Prend deux sprites, rend true si les deux sprites sont en contact*/
+bool compare_position(sprite_t *sprite1, sprite_t *sprite2)
+{
+  int cu = 0;
+  int cv = 0;
+  return collide_test(*sprite1, *sprite2, sprite1->sprite_picture->format ,&cu, &cv);
+}
 
 bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, int * cu, int * cv) 
 {
@@ -558,3 +712,15 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
   
   return test;
 }
+
+/*Fonction Collision pour un carré, prend des points x et y et ajoute leurs longueur a    */
+/*Puis compare les position des deux carrés et rend un booleen (vrai = carrés se touchent)*//*
+bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
+{
+  bool collision = false;
+  if(min(x1+a1, x2+a2)>max(x1, x2) && min(y1+a1, y2+a2)>max(y1, y2)){
+    collision = true;
+  }
+  return collision;
+}
+*/
