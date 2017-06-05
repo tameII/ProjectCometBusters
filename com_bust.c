@@ -1,6 +1,6 @@
 #include "physique.h"
   
-
+ 
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
 //////////////////////////////////////////////////////////////////////////////
@@ -424,15 +424,19 @@ void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2,
 			      bool *bomb_triggered, bool *have_mitraille)
 {
   if(sprite2->type == 21){
-    if(compare_position(sprite1, sprite2)){
-      *bomb_triggered = true;
-      kill_sprite_number(&nbAtomicBomb);
+    if(nbAtomicBomb > 0){
+      if(compare_position(sprite1, sprite2)){
+	*bomb_triggered = true;
+	kill_sprite_number(&nbAtomicBomb);
+      }
     }
   }
   if(sprite2->type == 22){
-    if(compare_position(sprite1, sprite2)){
-      Get_Mitraille();
-      kill_sprite_number(&nbMitraille);
+    if(nbMitraille > 0){
+      if(compare_position(sprite1, sprite2)){
+	Get_Mitraille();
+	kill_sprite_number(&nbMitraille);
+      }
     }
   }
 }
@@ -875,7 +879,7 @@ void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
 
 int main(int argc, char* argv[])
 {
-
+  /*Tout les SDL_Surfaces sont définis en variable globale*/
   /*Definition des différents sprites*/
   sprite_t jouer;      //type 10
   sprite_t quitter;    //type 11
@@ -1029,59 +1033,64 @@ int main(int argc, char* argv[])
 	  /* draw the background */
 	  SDL_BlitSurface(background, NULL, screen, NULL);
       
-
-	  /*draw portal*/
-	  move_all_sprite(portal);
-	  draw_all_sprite(portal_picture, portal);
-
-
 	  {
 	    /*position, mouvement et acceleration des sprites*/
+	    /*draw portal*/
+	    move_all_sprite(portal);
+	    draw_all_sprite(portal);
+
+	    /*Space_ship*/
 	    sprite_boost(&space_ship, accel);
 	    sprite_move(&space_ship);
 
-	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image, screen, &space_ship.position);
-	  }
+	    SDL_BlitSurface(space_ship.sprite_picture, &space_ship.image,
+			    screen, &space_ship.position);
+	  
 	  
 	  /*Affichage des bonus:*/
 	  /*Atomic_bomb*/
-	  if(*gimmeIsNb(&bonus_atomic_bomb) == 1){
+	  if(*gimmeIsNb(&bonus_atomic_bomb) > 1){
 	    SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
 			    NULL, screen, &bonus_atomic_bomb.position);
 	  }
+	  
+	  /*Mitraille*/
 	  if(nbMitraille > 0)
 	    {
-	      SDL_BlitSurface(mitraille.sprite_picture, NULL, screen, &mitraille.position);
-	      //printf(" position mitraille : x: %d y: %d\n",mitraille.position.x, mitraille.position.y);
+	      SDL_BlitSurface(mitraille.sprite_picture, NULL, screen,
+			      &mitraille.position);
 	    }
+	  
 	  /*draw Big Asteroid*/
 	  move_all_sprite(big_ast);
-	  draw_all_sprite(big_comet,big_ast);	  
+	  draw_all_sprite(big_ast);	  
 
 	  /*draw norm asteroid*/
 	  move_all_sprite(norm_ast);
-	  draw_all_sprite(norm_comet, norm_ast);
+	  draw_all_sprite(norm_ast);
 
 	  /*draw small asteroid*/
 	  move_all_sprite(small_ast);
-	  draw_all_sprite(small_comet, small_ast);	  
+	  draw_all_sprite(small_ast);	  
 
 	  /*Draw EXPLOSION*/ 
 	  move_all_sprite(explosion);
-	  draw_all_sprite(explosion_picture, explosion);
+	  draw_all_sprite(explosion);
 	  decompte_and_destroy_sprite(explosion, DECOMPTE_MORT_EXPLOSION);
       
 	  /*Draw projectile (piou)*/
 	  move_all_sprite(tirs);
-	  draw_all_sprite_one_image(bullet, tirs);
+	  draw_all_sprite_one_image(tirs);
 	  decompte_and_destroy_sprite(tirs, PORTEE_PIOU);
 
 	  
 	  /*Draw PV*/
 	  for (i = 0; i<space_ship.life ; i++)
 	    {
-	      SDL_BlitSurface(vie, NULL, screen, &PV[i].position);
+	      SDL_BlitSurface(PV->sprite_picture, NULL, screen, &PV[i].position);
 	    }
+
+	  }
 	  
 	  /*Collision*/
 	  if (cogne == false){ 
@@ -1104,6 +1113,8 @@ int main(int argc, char* argv[])
 	  }
 	  
 	  Effect_mitraille();
+
+	  /*Update the score:*/
 	  sprintf(affichage_score, "Score : %d", *score_total);
 	  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 							  color);
@@ -1227,4 +1238,48 @@ int main(int argc, char* argv[])
 
   return 0;
   
+}
+
+/*init SDL-Surface with picture, set up colorkey for each.*/
+void downloadsprite()
+{
+  /*Load all sprite_picture*/
+  explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
+  small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
+  norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
+  big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
+  spaceship = download_sprite_("sprite(new)v2.bmp");
+  spaceship2 = download_sprite_("sprite(new).bmp");
+  background = download_sprite_("espace.bmp");
+  bullet = download_sprite_("bullet02.bmp");
+  vie = download_sprite_("PackDeSoin.bmp");
+  menu_jouer = download_sprite_("Bouton_play.bmp");
+  menu_jouer_selec = download_sprite_("Bouton_play_selec.bmp");
+  menu_quitter = download_sprite_("Bouton_quit.bmp");
+  menu_quitter_selec = download_sprite_("Bouton_quit_selec.bmp");
+  menu_game_over = download_sprite_("Game_Over_redim.bmp");
+  menu_return = download_sprite_("Back_to_menu.bmp");
+  atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
+  bonus_mitraille = download_sprite_("Mitraille.bmp");
+  portal_picture = download_sprite_("portail.bmp");
+  /*Set all colorkey*/
+  set_colorkey_(spaceship, 255, 0, 255, screen);
+  set_colorkey_(spaceship2, 255, 0, 255, screen);
+  set_colorkey_(big_comet, 0, 255, 255, screen);
+  set_colorkey_(norm_comet, 0, 255, 255, screen);
+  set_colorkey_(small_comet, 0, 255, 255, screen);
+  set_colorkey_(explosion_picture, 0, 255, 255, screen);
+  set_colorkey_(bullet, 255, 125, 0, screen);
+  set_colorkey_(vie, 0, 0, 0, screen);
+  //menu
+  set_colorkey_(menu_jouer, 255, 255, 255, screen);
+  set_colorkey_(menu_jouer_selec, 255, 255, 255, screen);
+  set_colorkey_(menu_quitter_selec, 255, 255, 255, screen);
+  set_colorkey_(menu_quitter, 255, 255, 255, screen);
+  set_colorkey_(menu_game_over, 255, 255, 255, screen);
+  set_colorkey_(menu_return, 255, 255, 255, screen);
+
+  //Bonus:
+  set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
+  set_colorkey_(bonus_mitraille, 136, 136, 136, screen);
 }

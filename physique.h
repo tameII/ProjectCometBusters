@@ -1,6 +1,6 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
-   
+    
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h> 
@@ -200,8 +200,8 @@ void sprite_turn_left(sprite_t *sprite);
 void sprite_turn_right(sprite_t *sprite);
 void sprite_move(sprite_t *sprite);
 void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort);
-void draw_all_sprite_one_image(SDL_Surface *picture, sprite_t *sprite);
-void draw_all_sprite(SDL_Surface *picture,sprite_t *sprite);
+void draw_all_sprite_one_image(sprite_t *sprite);
+void draw_all_sprite(sprite_t *sprite);
 void move_all_sprite(sprite_t *sprite);
 void sprite_boost(sprite_t *sprite, float accel);
 void hyperespace(sprite_t *sprite);
@@ -209,8 +209,9 @@ void ship_turn_left(sprite_t *sprite);
 void ship_turn_right(sprite_t *sprite);
 void ship_image(sprite_t *sprite);
 
+void set_colorkey_(SDL_Surface *sprite_picture, int R, int G, int B,
+		   SDL_Surface *screen);
 SDL_Surface* download_sprite_(char *nomSprite);
-void downloadsprite();
 
 bool kill_sprite_param(int nombre_max, int numero, int type);
 void kill_sprite(sprite_t *ast, int numero);
@@ -225,6 +226,7 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2,
 
 
 /*in com_bust.c*/
+void downloadsprite();
 void kill_sprite_number(int *nb);
 void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero);
 

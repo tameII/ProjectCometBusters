@@ -1,5 +1,5 @@
 #include "physique.h" 
-  
+   
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *score)
 {
@@ -380,25 +380,26 @@ void move_all_sprite(sprite_t *sprite)
   }
 }
 /*Appelle SDL_BlitSurface pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
-void draw_all_sprite(SDL_Surface *picture, sprite_t *sprite)
+void draw_all_sprite(sprite_t *sprite)
 {
   int i;
   int *nb_sprite = gimmeIsNb(sprite);
   int nbSprite = *nb_sprite;
   for (i=0; i<nbSprite; i++){
     if (nbSprite>0){
-      SDL_BlitSurface(picture, &sprite[i].image, screen, &sprite[i].position);
+      SDL_BlitSurface(sprite[i].sprite_picture, &sprite[i].image, screen, &sprite[i].position);
     }
   }
 }
-void draw_all_sprite_one_image(SDL_Surface *picture, sprite_t *sprite)
+void draw_all_sprite_one_image(sprite_t *sprite)
 {
   int i;
   int *nb_sprite = gimmeIsNb(sprite);
   int nbSprite = *nb_sprite;
   for (i=0; i<nbSprite; i++){
     if (nbSprite>0){
-      SDL_BlitSurface(picture, NULL, screen, &sprite[i].position);
+      SDL_BlitSurface(sprite[i].sprite_picture, NULL, screen,
+		      &sprite[i].position);
     }
   }
 }
@@ -454,49 +455,6 @@ SDL_Surface* download_sprite_(char *nomSprite)
   SDL_FreeSurface(temp);
   
   return nom;
-}
-/*init SDL-Surface with picture, set up colorkey for each.*/
-void downloadsprite()
-{
-  /*Load all sprite_picture*/
-  explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
-  small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
-  norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
-  big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
-  spaceship = download_sprite_("sprite(new)v2.bmp");
-  spaceship2 = download_sprite_("sprite(new).bmp");
-  background = download_sprite_("espace.bmp");
-  bullet = download_sprite_("bullet02.bmp");
-  vie = download_sprite_("PackDeSoin.bmp");
-  menu_jouer = download_sprite_("Bouton_play.bmp");
-  menu_jouer_selec = download_sprite_("Bouton_play_selec.bmp");
-  menu_quitter = download_sprite_("Bouton_quit.bmp");
-  menu_quitter_selec = download_sprite_("Bouton_quit_selec.bmp");
-  menu_game_over = download_sprite_("Game_Over_redim.bmp");
-  menu_return = download_sprite_("Back_to_menu.bmp");
-  atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
-  bonus_mitraille = download_sprite_("Mitraille.bmp");
-  portal_picture = download_sprite_("portail.bmp");
-  /*Set all colorkey*/
-  set_colorkey_(spaceship, 255, 0, 255, screen);
-  set_colorkey_(spaceship2, 255, 0, 255, screen);
-  set_colorkey_(big_comet, 0, 255, 255, screen);
-  set_colorkey_(norm_comet, 0, 255, 255, screen);
-  set_colorkey_(small_comet, 0, 255, 255, screen);
-  set_colorkey_(explosion_picture, 0, 255, 255, screen);
-  set_colorkey_(bullet, 255, 125, 0, screen);
-  set_colorkey_(vie, 0, 0, 0, screen);
-  //menu
-  set_colorkey_(menu_jouer, 255, 255, 255, screen);
-  set_colorkey_(menu_jouer_selec, 255, 255, 255, screen);
-  set_colorkey_(menu_quitter_selec, 255, 255, 255, screen);
-  set_colorkey_(menu_quitter, 255, 255, 255, screen);
-  set_colorkey_(menu_game_over, 255, 255, 255, screen);
-  set_colorkey_(menu_return, 255, 255, 255, screen);
-
-  //Bonus:
-  set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
-  set_colorkey_(bonus_mitraille, 136, 136, 136, screen);
 }
 
 ///////////////////////////////////////////////////////////////////
