@@ -1,6 +1,6 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
-    
+     
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h> 
@@ -111,7 +111,7 @@
 #define ATOMIC_BOMB_SIZE 32
 #define NB_ATOMIC_BOMB_SPRITE 1
 #define NB_MAX_ATOMIC_BOMB 1
-#define CHANCE_D_APPARITION_ATOMIC_BOMBE 50000
+#define CHANCE_D_APPARITION_ATOMIC_BOMBE 30000 //50000
 
 /*Mitraille*/
 #define BONUS_MITRAILLE_SIZE 32
@@ -129,8 +129,6 @@
 /*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
 #define FROTTEMENT   0.0009
-
-
 
 
 

@@ -1,5 +1,5 @@
 #include "physique.h"
-  
+   
  
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
@@ -1049,7 +1049,7 @@ int main(int argc, char* argv[])
 	  
 	  /*Affichage des bonus:*/
 	  /*Atomic_bomb*/
-	  if(*gimmeIsNb(&bonus_atomic_bomb) > 1){
+	  if(*gimmeIsNb(&bonus_atomic_bomb) > 0){
 	    SDL_BlitSurface(bonus_atomic_bomb.sprite_picture,
 			    NULL, screen, &bonus_atomic_bomb.position);
 	  }
@@ -1104,6 +1104,7 @@ int main(int argc, char* argv[])
 	    decompte--;
 	    change_sprite_ship(&space_ship, spaceship, spaceship2);
 	    can_piou = false;
+	    bonus_compt = 0;
 	    if (decompte <1)
 	      {
 		cogne = false;
