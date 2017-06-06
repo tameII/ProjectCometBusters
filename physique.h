@@ -1,3 +1,10 @@
+/****************************/
+/*      Physique.h          */
+/*Authors : Albin Parmentier*/
+/*        : Mathieu Levy    */
+/****************************/
+
+
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
       
@@ -18,7 +25,7 @@
 #define SCREEN_HEIGHT   761
  
 /*Parametre fin du jeu*/
-#define DECOMPTE_FIN 1700
+#define DECOMPTE_FIN 1200  //Adapté pour salle 310(1700 en normal)
 /*Parametre Menu:*/
 #define MENU_JOUER_SIZE 256  //256*128
 #define PLACEMENT_MENU_JOUER_X 300
@@ -69,22 +76,22 @@
 /* Size and number of asteroids */
 #define VITESSE_DEFILEMENT_AST   80
 #define BIG_AST_SIZE    64
-#define NB_MAX_BIG_AST      15
-#define VIT_BIG_AST     0.04     //0.02
-#define BIG_AST_LIFE    4
-#define CHANCE_D_APPARITION_BIG_AST 1000
+#define NB_MAX_BIG_AST      20   //20
+#define VIT_BIG_AST     0.04     //0.04
+#define BIG_AST_LIFE    3
+#define CHANCE_D_APPARITION_BIG_AST 500 //SALLE 310, normal : 800
 /*Norm ast:*/
 #define NORM_AST_SIZE   32
-#define NB_MAX_NORM_AST     25    //15
-#define VIT_NORM_AST    0.08     //0.05
+#define NB_MAX_NORM_AST     35    //35
+#define VIT_NORM_AST    0.08     //0.08
 #define NORM_AST_LIFE   2        //2
-#define CHANCE_D_APPARITION_NORM_AST 4000
+#define CHANCE_D_APPARITION_NORM_AST 3500
 /*Small ast:*/
 #define SMALL_AST_SIZE  16   
-#define NB_MAX_SMALL_AST    45   //30
-#define VIT_SMALL_AST   0.2      //0.1
+#define NB_MAX_SMALL_AST    50   //50
+#define VIT_SMALL_AST   0.25      //0.2
 #define SMALL_AST_LIFE  1        //1
-#define CHANCE_D_APPARITION_SMALL_AST 3000
+#define CHANCE_D_APPARITION_SMALL_AST 2500 
 
 /*Number of type of asteroid => big, norm, small at this moment*/
 #define NB_TYPE_AST 3
@@ -93,11 +100,11 @@
  
 //////////
 /*EXPLOSION:*/
-#define VITESSE_DEFILEMENT_EXPLOSION  70
-#define DECOMPTE_MORT_EXPLOSION 750
+#define VITESSE_DEFILEMENT_EXPLOSION  20   //SALLE 310, normal 70
+#define DECOMPTE_MORT_EXPLOSION 200        //Salle 310, normal 850
 #define EXPLOSION_SIZE     64
 #define ANIM_EXPLOSION_NUM 12
-#define NB_MAX_EXPL   100
+#define NB_MAX_EXPL   120
 
 /*Projectiles*/
 #define NB_MAX_PIOU 20
@@ -111,7 +118,7 @@
 #define ATOMIC_BOMB_SIZE 32
 #define NB_ATOMIC_BOMB_SPRITE 1
 #define NB_MAX_ATOMIC_BOMB 1
-#define CHANCE_D_APPARITION_ATOMIC_BOMBE 30000 //50000
+#define CHANCE_D_APPARITION_ATOMIC_BOMBE 30000 
 
 /*Mitraille*/
 #define BONUS_MITRAILLE_SIZE 32
@@ -124,7 +131,7 @@
 #define PORTAL_SIZE  64
 #define NB_PORTAL_SPRITE  5 
 #define NB_MAX_PORTAL     15
-#define CHANCE_D_APPARITION_PORTAL 6666         //6666
+#define CHANCE_D_APPARITION_PORTAL 6666
 
 /*Vrac:*/
 #define DUREE_INV_APP_DEGATS 1000
@@ -132,18 +139,22 @@
 
 
 
-SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet;
-SDL_Surface *background, *bullet, *spaceship2;
+SDL_Surface *screen, *temp;
+SDL_Surface *background;
+SDL_Surface *spaceship, *spaceship2, *bullet, *vie;
+SDL_Surface *big_comet, *norm_comet, *small_comet;
 SDL_Surface *explosion_picture; 
-SDL_Surface *vie; 
-SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
+SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec;
 SDL_Surface *menu_game_over, *menu_return;
 SDL_Surface *atomic_bomb_picture, *bonus_mitraille, *portal_picture;
+
 int error_gimmeIsNb, nbVaisseau, nbBigAst, nbNormAst, nbSmallAst, nbtirs;
-int  nbExplosion, nbAtomicBomb, nbMitraille, nbPortal ;
+int nbExplosion, nbAtomicBomb, nbMitraille, nbPortal ;
+
 bool cogne;
 bool can_piou;
 bool have_mitraille;
+
 int bonus_compt;
 int temps_actuel; 
 int decompte;
@@ -171,82 +182,153 @@ struct Sprite_t{
 typedef struct Sprite_t sprite_t;
 
 
-/*in physique.c*/
-void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
-			 sprite_t *small_ast, int *score);
+/*physique.c*/
+/*1 fonction donnant des info diverse*/
+void various_information(sprite_t *space_ship, sprite_t *big_ast,
+			 sprite_t *norm_ast, sprite_t *small_ast, 
+			 int *score);
 
-void SetUpPosition(sprite_t *sprite); //, SDL_Surface *surface
+/*8 fonction de position et direction*/
+void SetUpPosition(sprite_t *sprite);
 void InvertDirection(sprite_t *sprite1, sprite_t *sprite2);
 void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2);
 void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2);
-
 void Set_up_PV(sprite_t *PV);
 void Random_Position_Partout(sprite_t *sprite);
 void Random_Position (sprite_t *sprite);
 void Random_Direction(sprite_t *sprite, float vitesse);
 
+/*2 fonctions d'initialisation*/
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
 		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
-		     sprite_t *game_over, sprite_t *return_menu,
-		     sprite_t *jouer, sprite_t *quitter,
-		     sprite_t *PV, sprite_t *portal);
-
-void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture,
+		     sprite_t *game_over, sprite_t *return_menu,sprite_t *jouer,
+		     sprite_t *quitter, sprite_t *PV, sprite_t *portal);
+void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
 		 int sprite_size, int anim_sprite_num, int nombre_max_sprite);
 
-void ship_image(sprite_t *sprite);
-void sprite_image(sprite_t *sprite);
+/*13 fonction de physique, dessin et decompte*/
 void sprite_turn_left(sprite_t *sprite);
 void sprite_turn_right(sprite_t *sprite);
-void sprite_move(sprite_t *sprite);
-void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort);
-void draw_all_sprite_one_image(sprite_t *sprite);
-void draw_all_sprite(sprite_t *sprite);
-void move_all_sprite(sprite_t *sprite);
-void sprite_boost(sprite_t *sprite, float accel);
-void hyperespace(sprite_t *sprite);
 void ship_turn_left(sprite_t *sprite);
 void ship_turn_right(sprite_t *sprite);
 void ship_image(sprite_t *sprite);
+void sprite_image(sprite_t *sprite);
+void sprite_move(sprite_t *sprite);
+void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort);
+void move_all_sprite(sprite_t *sprite);
+void draw_all_sprite(sprite_t *sprite);
+void draw_all_sprite_one_image(sprite_t *sprite);
+void sprite_boost(sprite_t *sprite, float accel);
+void hyperespace(sprite_t *sprite);
 
+/*2 fonction permettant de charger un sprite*/
 void set_colorkey_(SDL_Surface *sprite_picture, int R, int G, int B,
 		   SDL_Surface *screen);
-SDL_Surface* download_sprite_(char *nomSprite);
+  SDL_Surface* download_sprite_(char *nomSprite);
 
+/*1 fonction donnant le nombre de sprite demandé sur l'ecran*/
+int* gimmeIsNb(sprite_t *sprite);
+
+/*3 fonctions de mort de base*/
+void kill_sprite_number(int *nb);
 bool kill_sprite_param(int nombre_max, int numero, int type);
-void kill_sprite(sprite_t *ast, int numero);
+void kill_sprite(sprite_t *sprite, int numero);
 
+/*4 fonction de calcul de collision*/
 int max(int a, int b);
 int min(int a, int b);
-
 bool compare_position(sprite_t *sprite1, sprite_t *sprite2);
-bool collide_test(sprite_t sprite1, sprite_t sprite2,
-		  SDL_PixelFormat* format, int * cu, int * cv);
+bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format,
+		  int * cu, int * cv);
 
+/***************************************************/
 
 
 /*in com_bust.c*/
-void downloadsprite();
-void kill_sprite_number(int *nb);
+/*5 fonctions de musique.*/
+void mixaudio(void * userdata, Uint8 * stream, int len);
+void pause_and_close_audio();
+int musique_param(SDL_AudioSpec *soundfile, SDL_AudioSpec *obtained,
+		  SDL_AudioCVT *cvt );
+int musique(char *titre, SDL_AudioSpec *desired, SDL_AudioSpec *obtained,
+	    SDL_AudioSpec *soundfile, SDL_AudioCVT *cvt );
+void init_musique(SDL_AudioSpec *desired, int freq, char *format, int channel,
+		  int sample);
+
+/*8 fonctions de Creations (CreateAst rassemble juste les 3 avant)*/
+void CreatePortal(sprite_t *portal);
+void CreateAtomicBomb(sprite_t *bonus_atomic_bomb);
+void CreateMitraille(sprite_t *mitraille);
 void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero);
+void CreateSmallAst(sprite_t *small_ast);
+void CreateNormAst(sprite_t *norm_ast);
+void CreateBigAst(sprite_t *big_ast) ;
+void CreateAst(sprite_t *ast);
+void create_piou (sprite_t* tirs, sprite_t* space_ship);
 
+/*3 fonctions permettant de tout kill*/
+void kill_all_sprite_param(sprite_t *sprite, int nb_max);
+void kill_all_sprite(sprite_t *space_ship,sprite_t *big_ast, sprite_t *norm_ast,
+		     sprite_t *small_ast, sprite_t *tirs, int *gameover,
+		     int *animationFinale, bool *bomb_triggered);
+void kill_all_number();
 
+/*5 fonctions gérant la mort des sprites*/
+void ajout_score(int *score, int point);
+void score(int *score, int type);
+void dead_ship_param(sprite_t *sprite, int  *gameover, int *score_total,
+		     bool *droitDeScorer);
+void dead_tab_param(sprite_t *sprite, sprite_t *big_ast, sprite_t *norm_ast,
+		    sprite_t *small_ast, sprite_t *explosion, int *score_total,
+		    bool *droitDeScorer);
+void dead(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
+	  sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
+	  int *gameover, int *score_total, bool *droitDeScorer);
 
-void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2,
-			bool *cogne, int *decompte);
-
+/*5 fonctions de collision (dont la tp)*/
+void teleportation(sprite_t *sprite1, sprite_t *portal);
+void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2,
+			      bool *bomb_triggered, bool *have_mitraille);
+void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne,
+			int *decompte);
 void collide_tab_param(sprite_t *sprite1,  sprite_t *sprite2);
-
 void collide(sprite_t *space_ship, sprite_t *tirs, sprite_t *big_ast,
 	     sprite_t *norm_ast, sprite_t *small_ast, int *gameover,
 	     bool *cogne, int *decompte, sprite_t *bonus_atomic_bomb,
-	     bool *bomb_triggered, bool*have_mitraille, sprite_t *mitraille, sprite_t *portal);
+	     bool *bomb_triggered, bool *have_mitraille, sprite_t *mitraille,
+	     sprite_t *portal);
 
+/*1 fonction de division d'astéroide*/
 void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast,
 	       sprite_t *norm_ast, sprite_t *small_ast);
-int* gimmeIsNb(sprite_t *sprite);
 
+/*2 fonctions de création de sprite automatique*/
+void CreateAstWithTime(sprite_t *big_ast, sprite_t *norm_ast,
+		       sprite_t *small_ast);
+void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille,
+			 sprite_t *portal);
+
+/*1 fonction modifiant le sprite du ship*/
+void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship,
+			 SDL_Surface * spaceship2);
+
+/*2 fonctions gérant le bonus Mitraille*/
 void Get_Mitraille();
+void Effect_mitraille();
+
+/*4 Fonctions gérant les touches*/
+void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel,
+		 sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast,
+		 sprite_t *tirs, sprite_t *explosion, bool *play,
+		 int *score_total, bool *bomb_triggered);
+void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel,
+		  int *quit, int Table_move[5], sprite_t *tirs, bool *can_piou);
+void HandleMenuReturn(sprite_t *jouer, sprite_t *quitter, bool *play,
+		      int *gameover, int *ending, int *finmenu);
+void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
+		     int *finmenu, sprite_t *jouer, sprite_t *quitter);
+/*1 fonction de chargement de sprite*/
+void downloadsprite();
 
 
 #endif
