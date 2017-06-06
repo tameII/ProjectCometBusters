@@ -1,6 +1,6 @@
 /****************************/
-/*      Physique.c          */
-/*Authors : Albin Parmentier*/
+/*      physique.c          */
+/*Authors : Albin Parmentier*/ 
 /*        : Mathieu Levy    */
 /****************************/
 #include "physique.h" 
@@ -494,7 +494,6 @@ SDL_Surface* download_sprite_(char *nomSprite)
 int* gimmeIsNb(sprite_t *sprite)
 {
   int type = sprite->type;
-  //printf("sprite->type = %d \n", type);
   switch (type){
   case 0:
     return &nbVaisseau;
@@ -581,9 +580,6 @@ void kill_sprite(sprite_t *sprite, int numero)
     killed = kill_sprite_param(nombre_max, numero, type);
     
     while (killed == false){
-      //printf("kill_ast : numero : %d \n",numero);
-      //printf("kill ast : nbAst : %d  \n",nbAst);
-      //printf("kill ast : nb_max : %d \n",nombre_max);
       if (numero >= nbSprite){
 	switch (type) {
 	case 1:
@@ -753,16 +749,3 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format,
   return test;
 }
 
-/*Fonction Collision pour un carré, prend des points x et y et ajoute leurs *
- * longueur a puis compare les position des deux carrés et rend un booleen  *
- * (vrai = carrés se touchent)                                              */
-/*
-  bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
-  {
-  bool collision = false;
-  if(min(x1+a1, x2+a2)>max(x1, x2) && min(y1+a1, y2+a2)>max(y1, y2)){
-  collision = true;
-  }
-  return collision;
-  }
-*/

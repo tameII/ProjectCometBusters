@@ -3,7 +3,7 @@
 /*Authors : Albin Parmentier*/
 /*        : Mathieu Levy    */
 /****************************/
-  
+   
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
       

@@ -1,10 +1,11 @@
+/****************************/
+/*      com_bust.c          */
+/*Authors : Albin Parmentier*/
+/*        : Mathieu Levy    */
+/****************************/
 #include "physique.h"
       
  
-///////////////////////////////////////////////////////////////////////////////
-/******************************FIN HEADER*************************************/
-//////////////////////////////////////////////////////////////////////////////
-/****************************************************************************/
 /*FONCTION ANNEXE MUSIQUE*/
 /* Les données du fichier son chargé */
 Uint8 * sounddata;
@@ -70,7 +71,6 @@ int musique_param(SDL_AudioSpec *soundfile, SDL_AudioSpec *obtained,
   free(cvt->buf);
 
   soundlength = cvt->len_cvt;
-  /*printf("Taille du son converti: %d octets\n", soundlength);*/
   soundpos = 0;
 
 
@@ -98,7 +98,6 @@ int musique(char *titre, SDL_AudioSpec *desired, SDL_AudioSpec *obtained,
   bug = musique_param(soundfile, obtained, cvt);
 
   /* La fonction de rappel commence à être appelée à partir de maintenant. */
-  /* printf("Démarrage de la lecture...\n");*/
   SDL_PauseAudio(0);
 
   return bug;
@@ -109,12 +108,8 @@ int musique(char *titre, SDL_AudioSpec *desired, SDL_AudioSpec *obtained,
 void init_musique(SDL_AudioSpec *desired, int freq, char *format, int channel,
 		  int sample)
 {
-  // printf("%s \n", format);
-  
+  /*son unsigned 16 bits*/
   if(strstr(format, "AUDIO_U16SYS")){
-    /*Initialisation de tout ce qui a trait a la musique
-      C'est marrant parce que une freq de 11025 fonctionne quand même*/
-    /* Son 16 bits stéréo à 44100 Hz *///AUDIO_U16SYS
     desired->freq = freq;
     desired->format = AUDIO_U16SYS;
     desired->channels = channel;
@@ -126,9 +121,8 @@ void init_musique(SDL_AudioSpec *desired, int freq, char *format, int channel,
     desired->userdata = NULL;
   }
 
-  
+  /* Son 8 bits */
   if(strstr(format, "AUDIO_S8")){  
-    /* Son 8 bits stéréo à 11025 Hz */
     desired->freq = freq;
     desired->format = AUDIO_S8;
     desired->channels = channel;
@@ -148,7 +142,7 @@ void init_musique(SDL_AudioSpec *desired, int freq, char *format, int channel,
 /**************************************************************************/
 /*FONCTION OF CREATION :*/
 /*Create two portal, be aware to set the NB_MAX to a pair number,*
- *even if i set a security*/
+ *even if i set a security                                       */
 void CreatePortal(sprite_t *portal)
 {
   if(nbPortal < NB_MAX_PORTAL-1){  
@@ -262,7 +256,6 @@ void create_piou (sprite_t* tirs, sprite_t* space_ship)
     tirs[nbtirs].current = space_ship->current/2;
     sprite_boost(&tirs[nbtirs], VIT_NORM_PIOU);
     SetUpAtMiddle(&tirs[nbtirs], space_ship);
-    //printf("Piou !\n");
     nbtirs += 1;
   }
 }
@@ -455,7 +448,6 @@ void collide_ship_param(sprite_t *sprite1,  sprite_t *sprite2, bool *cogne,
       sprite2[j].life -= 1;
       *cogne = true;
       *decompte = DUREE_INV_APP_DEGATS;
-      //printf("Ship collide with sprite type : %d \n",sprite2[j].type);
     }
   }
 }
@@ -516,9 +508,7 @@ void DivideAst(sprite_t *ast, int numero, sprite_t *big_ast,
   int nb_Big_Ast = nbBigAst;
   int nb_Norm_Ast = nbNormAst;
   int nb_Small_Ast = nbSmallAst;
-  //printf("Divide Ast: ast type %d \t | nb_Big_ast: %d \t|", type, nb_Big_Ast);
-  //printf("nb_Norm_Ast: %d \n nb_Small_Ast %d \n", nb_Norm_Ast, nb_Small_Ast);
-  
+
   
   if(type == 1 && nb_Big_Ast > 0){  
     CreateAst(norm_ast);                                                 
@@ -657,8 +647,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
     case SDLK_q:
       *quit = 1;
       break;
-    case SDLK_k:  //KIll a random ast
-      printf("touch k pressed \n");
+    case SDLK_k:  
       i = rand()%(3);
       if (i == 0){
 	j = rand()%(NB_MAX_BIG_AST-1);
@@ -672,33 +661,27 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
 	j = rand()%(NB_MAX_SMALL_AST);
 	kill_sprite(small_ast, j);
       }
-      // printf("i : %d, j : %d \n",i,j);
       SDL_Delay(100);
       break;
     case SDLK_u:
-      //printf("touch u pressed \n");
       CreateAst(small_ast);
       SDL_Delay(100);
       break;
     case SDLK_i:
-      // printf("Touch i pressed \n");
       CreateAst(norm_ast);
       SDL_Delay(100);
       break;
     case SDLK_o:
-      //printf("Touch o pressed\n");
       CreateAst(big_ast);
       SDL_Delay(100); 
       break;
     case SDLK_p: 
-      // printf("Touch p pressed \n");
       kill_sprite_number(&nbBigAst);
       kill_sprite_number(&nbNormAst);
       kill_sprite_number(&nbSmallAst);
       kill_sprite_number(&nbtirs); 
       break;
-    case SDLK_e:   //BOOOM
-      printf("touch e pressed \n");
+    case SDLK_e: 
       CreateExplosion(explosion, big_ast, 0);
       SDL_Delay(100);
       break;
@@ -708,17 +691,14 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       CreateAst(small_ast);
       break;
     case SDLK_w:  
-      printf("touch l pressed \n");
       DivideAst(big_ast, 1, big_ast, norm_ast, small_ast );  
       SDL_Delay(100);
       break;
     case SDLK_x:    
-      printf("touch l pressed \n");
       DivideAst(norm_ast, 1, big_ast, norm_ast, small_ast);
       SDL_Delay(100);
       break;
     case SDLK_n:    
-      printf("touch n pressed \n");
       i = 0; //numero ast demandé
       j = 1; //nombre de vie retirée
       if(small_ast[i].life > 0){
@@ -734,7 +714,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
     case SDLK_c :
       change_sprite_ship(space_ship, spaceship_picture, spaceship2_picture);
       break;
-    case SDLK_b : //BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM
+    case SDLK_b :
       *bomb_triggered = true;
       break;
     default:
@@ -779,7 +759,7 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel,
 	break;
       }
     break;
-    /*déactivation des actions en arretant d'appuyer*/
+    /*désactivation des actions en arretant d'appuyer*/
   case SDL_KEYUP:
     switch (event.key.keysym.sym)
       {
@@ -884,22 +864,23 @@ void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
 int main(int argc, char* argv[])
 {
   /*Tout les SDL_Surfaces sont définis en variable globale*/
+  /*Les nombres de sprite présents sont définis en variable globale*/
   /*Definition des différents sprites*/
   sprite_t jouer;      //type 10
   sprite_t quitter;    //type 11
   sprite_t game_over;  //type 12
   sprite_t return_menu; //type 13
-  //sprite_t credit; //type 14 ?
 
-  //les highscore avec SDL ttf ?
+  /*Sprite de jeu:*/
   sprite_t space_ship;
   sprite_t big_ast[NB_MAX_BIG_AST];
   sprite_t norm_ast[NB_MAX_NORM_AST];
   sprite_t small_ast[NB_MAX_SMALL_AST]; 
   sprite_t tirs[NB_MAX_PIOU];
-  sprite_t explosion[NB_MAX_EXPL];
+
 
   /*bonus et affichage:*/
+  sprite_t explosion[NB_MAX_EXPL];
   sprite_t PV[MAX_LIFE_SHIP]; //type 20
   sprite_t bonus_atomic_bomb; //type 21
   sprite_t mitraille;  //type 22
@@ -919,8 +900,6 @@ int main(int argc, char* argv[])
   SDL_AudioSpec desired, obtained, soundfile;
   SDL_AudioCVT cvt; 
 
-  /*C'est marrant parce que une freq de 11025 fonctionne quand même*/
-  /*Mais des bug apparaissent très rapidement bien sur.*/
   /*Deux format supporté ici : AUDIO_U16SYS et AUDIO_S8 */
   char format[20] = "AUDIO_U16SYS";
   init_musique(&desired, 44100, format, 2, 1024);
@@ -971,7 +950,7 @@ int main(int argc, char* argv[])
   int *score_total;
   score_total = &ScoreTotal;
   *score_total = 0;  //score_total = 0;
-  char affichage_score[25] = "Comet Buster !!!"; /* Tableau de char suffisamment grand */
+  char affichage_score[25] = "Comet Buster !!!"; 
   SDL_Color color = { 255, 255, 255 };
   SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, affichage_score,
 						  color);
@@ -1174,8 +1153,6 @@ int main(int argc, char* argv[])
       droitDeScorer = true;
 
       while(!ending){
-	
-	/*Insert function of menu here (blitsurface...)*/
 	
 	SDL_Event event3;
 	if (SDL_PollEvent(&event3)) {

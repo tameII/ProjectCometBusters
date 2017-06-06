@@ -757,9 +757,6 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel,
   case SDL_KEYDOWN:
     switch (event.key.keysym.sym)
       {
-	/* case SLDK_ESCAPE: */
-	/* 	*quit = 1; */
-	/* 	break; */
       case SDLK_ESCAPE:
 	*quit = 1;
 	break;

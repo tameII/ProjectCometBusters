@@ -4,7 +4,7 @@
 /*        : Mathieu Levy    */
 /****************************/
 #include "physique.h" 
-       
+        
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast,
 			 sprite_t *norm_ast, sprite_t *small_ast, 

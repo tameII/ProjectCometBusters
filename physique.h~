@@ -182,7 +182,7 @@ struct Sprite_t{
 typedef struct Sprite_t sprite_t;
 
 
-/*physique.c*/
+/*physique.c : 34 fonctions*/
 /*1 fonction donnant des info diverse*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast,
 			 sprite_t *norm_ast, sprite_t *small_ast, 
@@ -244,7 +244,7 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format,
 /***************************************************/
 
 
-/*in com_bust.c*/
+/*in com_bust.c : 37 fonctions*/
 /*5 fonctions de musique.*/
 void mixaudio(void * userdata, Uint8 * stream, int len);
 void pause_and_close_audio();
