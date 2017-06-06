@@ -3,7 +3,7 @@
 /*Authors : Albin Parmentier*/
 /*        : Mathieu Levy    */
 /****************************/
- 
+  
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
       
@@ -24,7 +24,7 @@
 #define SCREEN_HEIGHT   761
  
 /*Parametre fin du jeu*/
-#define DECOMPTE_FIN 1200  //Adapté pour salle 310(1700 en normal)
+#define DECOMPTE_FIN 300  //Adapté pour salle 310(1700 en normal)
 /*Parametre Menu:*/
 #define MENU_JOUER_SIZE 256  //256*128
 #define PLACEMENT_MENU_JOUER_X 300
@@ -117,7 +117,7 @@
 #define ATOMIC_BOMB_SIZE 32
 #define NB_ATOMIC_BOMB_SPRITE 1
 #define NB_MAX_ATOMIC_BOMB 1
-#define CHANCE_D_APPARITION_ATOMIC_BOMBE 30000 
+#define CHANCE_D_APPARITION_ATOMIC_BOMBE 30000
 
 /*Mitraille*/
 #define BONUS_MITRAILLE_SIZE 32
