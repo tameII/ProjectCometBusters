@@ -54,21 +54,21 @@ Appuyez sur la « Barre d’espace » pour tirer.
 
 
 
-Ceci symbolise les munitions pour mitrailleuse :  
-	Ramassez le pour avoir une cadence de tir accrue.
+(image de mitrailleuse) Ceci symbolise les munitions pour mitrailleuse :  
+				Ramassez le pour avoir une cadence de tir accrue.
 
 
-Ceci symbolise la bombe atomique :  
-	Ramassez la pour faire exploser tout les astéroïdes.
+(image de bombe atomique ) Ceci symbolise la bombe atomique :  
+				Ramassez la pour faire exploser tout les astéroïdes.
 
 
-Ceci symbolise le trou du champ quantique :  
-	Que va-t-il se passer ?
+(image de carré multicolore)Ceci symbolise le trou du champ quantique :  
+				Que va-t-il se passer ?
 
 
 
-Ceci symbolise le nombre de vie restant.  
-	Lorsqu’il tombe à zero vous perdez.  
+(image de coeur) Ceci symbolise le nombre de vie restant.  
+			Lorsqu’il tombe à zero vous perdez.  
 
 Votre score est affiché en haut à gauche.  
 Il vous donne une idée de la qualité de votre prestation.  
@@ -79,9 +79,9 @@ Choisissez quitter pour quitter le jeu.
 
 
 
+Je ne suis pas parvenu à faire passer les images que j'avais implémenté
+via libre_office_writer.
 
-
-Des images ont été ajoutées pour aider. Pour les voir ouvrez ce fichier sur LibreOfficeWriter.  
 Ceci est un projet de jeux vidéo réalisé par
 des étudiants de la Fac des Science de Lorraine.  
 Mathieu Levy et Albin Parmentier.
