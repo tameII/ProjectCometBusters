@@ -1,9 +1,8 @@
 /****************************/
-/*      Physique.h          */
+/*      physique.h          */
 /*Authors : Albin Parmentier*/
 /*        : Mathieu Levy    */
 /****************************/
-
 
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
@@ -79,19 +78,19 @@
 #define NB_MAX_BIG_AST      20   //20
 #define VIT_BIG_AST     0.04     //0.04
 #define BIG_AST_LIFE    3
-#define CHANCE_D_APPARITION_BIG_AST 500 //SALLE 310, normal : 800
+#define CHANCE_D_APPARITION_BIG_AST 500 //pour SALLE 310, normal : 800
 /*Norm ast:*/
 #define NORM_AST_SIZE   32
 #define NB_MAX_NORM_AST     35    //35
 #define VIT_NORM_AST    0.08     //0.08
 #define NORM_AST_LIFE   2        //2
-#define CHANCE_D_APPARITION_NORM_AST 3500
+#define CHANCE_D_APPARITION_NORM_AST 2000
 /*Small ast:*/
 #define SMALL_AST_SIZE  16   
 #define NB_MAX_SMALL_AST    50   //50
 #define VIT_SMALL_AST   0.25      //0.2
 #define SMALL_AST_LIFE  1        //1
-#define CHANCE_D_APPARITION_SMALL_AST 2500 
+#define CHANCE_D_APPARITION_SMALL_AST 1250 
 
 /*Number of type of asteroid => big, norm, small at this moment*/
 #define NB_TYPE_AST 3
@@ -100,8 +99,8 @@
  
 //////////
 /*EXPLOSION:*/
-#define VITESSE_DEFILEMENT_EXPLOSION  20   //SALLE 310, normal 70
-#define DECOMPTE_MORT_EXPLOSION 200        //Salle 310, normal 850
+#define VITESSE_DEFILEMENT_EXPLOSION  20   //pour SALLE 310, normal 70
+#define DECOMPTE_MORT_EXPLOSION 200        //pour Salle 310, normal 850
 #define EXPLOSION_SIZE     64
 #define ANIM_EXPLOSION_NUM 12
 #define NB_MAX_EXPL   120
@@ -141,12 +140,13 @@
 
 SDL_Surface *screen, *temp;
 SDL_Surface *background;
-SDL_Surface *spaceship, *spaceship2, *bullet, *vie;
-SDL_Surface *big_comet, *norm_comet, *small_comet;
+SDL_Surface *spaceship_picture, *spaceship2_picture, *tirs_picture, *PV_picture;
+SDL_Surface *big_ast_picture, *norm_ast_picture, *small_ast_picture;
 SDL_Surface *explosion_picture; 
-SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec;
-SDL_Surface *menu_game_over, *menu_return;
-SDL_Surface *atomic_bomb_picture, *bonus_mitraille, *portal_picture;
+SDL_Surface *menu_jouer_selec_picture, *menu_jouer_picture;
+SDL_Surface *menu_quitter_picture, *menu_quitter_selec_picture;
+SDL_Surface *menu_game_over_picture, *menu_return_picture;
+SDL_Surface *atomic_bomb_picture, *bonus_mitraille_picture, *portal_picture;
 
 int error_gimmeIsNb, nbVaisseau, nbBigAst, nbNormAst, nbSmallAst, nbtirs;
 int nbExplosion, nbAtomicBomb, nbMitraille, nbPortal ;

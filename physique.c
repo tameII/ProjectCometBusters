@@ -1,10 +1,15 @@
+/****************************/
+/*      Physique.c          */
+/*Authors : Albin Parmentier*/
+/*        : Mathieu Levy    */
+/****************************/
 #include "physique.h" 
-     
+      
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast,
 			 sprite_t *norm_ast, sprite_t *small_ast, 
 			 int *score)
-{
+{ 
   int i;
   printf("space_ship->life : %d\n", space_ship->life);
   
@@ -26,8 +31,9 @@ void various_information(sprite_t *space_ship, sprite_t *big_ast,
   printf("score: %d \n", *score);
 }
 
+////////////////////////////////////////////////////////////////////////
 /*Set Position of all Sprites*/
-void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
+void SetUpPosition(sprite_t *sprite){
   
   /* set sprite position in the middle of the window */
   switch(sprite->type) {
@@ -88,7 +94,6 @@ void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
     break;
   }
 }
-
 /*Invert direction of sprite 2 */
 void InvertDirection(sprite_t *sprite1, sprite_t *sprite2)
 {
@@ -102,14 +107,13 @@ void SetUpAtPosition(sprite_t *sprite1, sprite_t *sprite2)
   sprite1->x = sprite2->x;
   sprite1->y = sprite2->y;
 }
-
 /*Set up sprite1 at middle sprite2 ?*/
 void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2)
 {
   sprite1->x = sprite2->x + (sprite2->size)/2 - (sprite1->size)/2;
   sprite1->y = sprite2->y + (sprite2->size)/2 - (sprite1->size)/2;
 }
-
+//affichage des pvs
 void Set_up_PV(sprite_t *PV)
 
  {
@@ -124,14 +128,12 @@ void Set_up_PV(sprite_t *PV)
       PV[i].position.y = PV[i].lig;
     }
  }
-
-
+//fonctio pour donner des coordonnées aléatoires
 void Random_Position_Partout(sprite_t *sprite)
 {
     sprite->x = rand()%(SCREEN_WIDTH);
     sprite->y = rand()%(SCREEN_HEIGHT);
 }
-
 /*Set a random position on the edge of the grid*/
 void Random_Position (sprite_t *sprite)
 {
@@ -158,7 +160,6 @@ void Random_Position (sprite_t *sprite)
   }
   
 }
-
 /*Set a random direction at a constant speed */
 void Random_Direction(sprite_t *sprite, float vitesse)
 {
@@ -170,44 +171,55 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
-		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
-		    , sprite_t *game_over, sprite_t *return_menu
-		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV, sprite_t *portal)
+		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
+		     sprite_t *game_over, sprite_t *return_menu,
+		     sprite_t *jouer, sprite_t *quitter, 
+		     sprite_t *PV, sprite_t *portal)
 {
   int i;
   /*init menu*/
-  sprite_init(jouer, 10, menu_jouer_selec, MENU_JOUER_SIZE, NB_MENU_JOUER_SPRITE, NB_MAX_MENU_JOUER);
-  sprite_init(quitter, 11, menu_quitter, MENU_QUITTER_SIZE, NB_MENU_QUITTER_SPRITE, NB_MAX_MENU_QUITTER);
-  sprite_init(game_over, 12, menu_game_over, MENU_GAME_OVER_SIZE, NB_MENU_GAME_OVER_SPRITE, NB_MAX_MENU_GAME_OVER);
-  sprite_init(return_menu, 13, menu_return, MENU_RETURN_SIZE, NB_MENU_RETURN_SPRITE, NB_MAX_MENU_RETURN);
+  sprite_init(jouer, 10, menu_jouer_selec_picture, MENU_JOUER_SIZE,
+	      NB_MENU_JOUER_SPRITE, NB_MAX_MENU_JOUER);
+  sprite_init(quitter, 11, menu_quitter_picture, MENU_QUITTER_SIZE,
+	      NB_MENU_QUITTER_SPRITE, NB_MAX_MENU_QUITTER);
+  sprite_init(game_over, 12, menu_game_over_picture, MENU_GAME_OVER_SIZE,
+	      NB_MENU_GAME_OVER_SPRITE, NB_MAX_MENU_GAME_OVER);
+  sprite_init(return_menu, 13, menu_return_picture, MENU_RETURN_SIZE,
+	      NB_MENU_RETURN_SPRITE, NB_MAX_MENU_RETURN);
    
   
   for(i=0; i<MAX_LIFE_SHIP ; i++){
-    sprite_init(PV, 20, vie, PV_SIZE, NB_PV_SPRITE,
+    sprite_init(PV, 20, PV_picture, PV_SIZE, NB_PV_SPRITE,
 		MAX_LIFE_SHIP);
   }
 
   /*init ship*/
-  sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
+  sprite_init(space_ship, 0, spaceship_picture, SPACE_SHIP_SIZE,
+	      NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
   /*Init all ast at begun (big_small_norm)*/
   for(i=0 ; i<NB_MAX_BIG_AST ; i++){
-  sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
+  sprite_init(&big_ast[i], 1, big_ast_picture, BIG_AST_SIZE, NB_AST_SPRITE,
+	      NB_MAX_BIG_AST);
   }
   for(i=0 ; i<NB_MAX_NORM_AST ; i++){
-    sprite_init(&norm_ast[i], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
+    sprite_init(&norm_ast[i], 2, norm_ast_picture, NORM_AST_SIZE, NB_AST_SPRITE,
+		NB_MAX_NORM_AST);
   }
   for(i=0 ; i<NB_MAX_SMALL_AST ; i++){
-  sprite_init(&small_ast[i], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
+  sprite_init(&small_ast[i], 3, small_ast_picture, SMALL_AST_SIZE,
+	      NB_AST_SPRITE, NB_MAX_SMALL_AST);
   }
   for(i=0 ; i<NB_MAX_PIOU ; i++){
-  sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
+  sprite_init(&tirs[i], 4, tirs_picture, PIOU_SIZE, 1, NB_MAX_PIOU);
   }
   for(i=0 ; i<NB_MAX_EXPL ; i++){
-    sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
+    sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE,
+		ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
   }
   for(i=0 ; i<NB_MAX_PORTAL ; i++){
-  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE,
+	      NB_MAX_PORTAL);
   }					    
 }
 
@@ -266,6 +278,7 @@ if(type == 23){
   }
 }
 
+/////////////////////////////////////////////////////////////////////
 /*the animation of the sprite turn */
 void sprite_turn_left(sprite_t *sprite)
 {
@@ -281,23 +294,21 @@ void sprite_turn_right(sprite_t *sprite)
   if(sprite->current < 0)
     sprite->current = sprite->nb_sprite - 1;
 }
-
-
+//animation du vaisseau pour tourner à gauche
 void ship_turn_left(sprite_t *sprite)
 {
   sprite->current += 1;
   if(sprite->current >= sprite->nb_sprite*2)
     sprite->current = 0;
 }
-
+//animation du vaisseau pour tourner à droite
 void ship_turn_right(sprite_t *sprite)
 {
   sprite->current -= 1;
   if(sprite->current < 0)
     sprite->current = sprite->nb_sprite*2 - 1;
 }
-
-
+//affichage du vaisseau
 void ship_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -307,7 +318,7 @@ void ship_image(sprite_t *sprite)
   /* choose image according to direction and animation flip: */
   sprite->image.x = sprite->size * (sprite->current / 2);
 }
-
+//affichage du sprite
 void sprite_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -365,7 +376,6 @@ void sprite_move(sprite_t *sprite)
 
 
 }
-
 /*Decompte le temps restant au sprite et le tue au final.*/
 void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort)
 {
@@ -392,7 +402,6 @@ void move_all_sprite(sprite_t *sprite)
     }
   }
 }
-
 /*Appelle SDL_BlitSurface pour chacun des sprites du tableau *
  *de sprite envoyé  (ne fonctionne que pour des tableau)     */
 void draw_all_sprite(sprite_t *sprite)
@@ -407,7 +416,7 @@ void draw_all_sprite(sprite_t *sprite)
     }
   }
 }
-
+//dessine les sprites définis dans des tableaux
 void draw_all_sprite_one_image(sprite_t *sprite)
 {
   int i;
@@ -420,7 +429,6 @@ void draw_all_sprite_one_image(sprite_t *sprite)
     }
   }
 }
-
 
 /*Acceleration of the sprite (it can be a const)*/
 void sprite_boost(sprite_t *sprite, float accel)
@@ -446,7 +454,7 @@ void sprite_boost(sprite_t *sprite, float accel)
   }
 }
 
-
+/*fonction pour faire réapparaitre un sprite de l'autre coté coté de l'écran*/
 void hyperespace(sprite_t *sprite)
 {
   if(sprite->x < 0)
@@ -459,7 +467,6 @@ void hyperespace(sprite_t *sprite)
     sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
   
 }
-
 //////////////////////////////////////////////////////////////////////////////
 /*auxiliary function : set colorkey*/
 void set_colorkey_(SDL_Surface *sprite_picture, int R, int G, int B,
@@ -535,13 +542,12 @@ void kill_sprite_number(int *nb)
   }
   
 }
- 
 /*test if kill ast is possible*/
 bool kill_sprite_param(int nombre_max, int numero, int type)
 {
   bool killed = false;
-  /*No need of more object than 300 on screen*/
-  if (nombre_max > 300){
+  /*No need of more object than 1000 on screen*/
+  if (nombre_max > 1000){
     printf("kill_ast : nombre_max is overrated : %d \n",nombre_max);
     killed = true;
   }
@@ -575,7 +581,7 @@ void kill_sprite(sprite_t *sprite, int numero)
     killed = kill_sprite_param(nombre_max, numero, type);
     
     while (killed == false){
-      //printf("kill_sprite : numero : %d \n",numero);
+      //printf("kill_ast : numero : %d \n",numero);
       //printf("kill ast : nbAst : %d  \n",nbAst);
       //printf("kill ast : nb_max : %d \n",nombre_max);
       if (numero >= nbSprite){
@@ -604,7 +610,7 @@ void kill_sprite(sprite_t *sprite, int numero)
       }
     }
   }
-
+  
 }
 
 
