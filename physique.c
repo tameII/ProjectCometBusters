@@ -1,7 +1,9 @@
 #include "physique.h" 
      
 /*Give various information, press v in game to know what.*/
-void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast, sprite_t *small_ast, int *score)
+void various_information(sprite_t *space_ship, sprite_t *big_ast,
+			 sprite_t *norm_ast, sprite_t *small_ast, 
+			 int *score)
 {
   int i;
   printf("space_ship->life : %d\n", space_ship->life);
@@ -18,7 +20,8 @@ void various_information(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm
     printf("small_ast[%d].life = %d \n", i, small_ast[i].life);
   } 
   printf("\n");
-  printf("nbBigAst: %d |nbNormAst: %d |nbSmallAst: %d |", nbBigAst, nbNormAst, nbSmallAst);
+  printf("nbBigAst: %d |nbNormAst: %d |", nbBigAst,nbNormAst);
+  printf("nbSmallAst: %d |", nbSmallAst);
   printf("nbtirs: %d |temps_actuel: %d |\n", nbtirs, temps_actuel);
   printf("score: %d \n", *score);
 }
@@ -214,19 +217,19 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface *sprite_picture,
   sprite->decompte = 0;
   sprite->vx = 0;
   sprite->vy = 0;
-  sprite->col = 0;      //AJOUT
-  sprite->lig = 0;      //AJOUT
+  sprite->col = 0;      
+  sprite->lig = 0;      
   sprite->position.x = sprite->col;
   sprite->position.y = sprite->lig;
   sprite->nombre_max = nombre_max_sprite;
   sprite->life = BASE_LIFE;
   sprite->sprite_picture = sprite_picture;
-  //sprite_image(sprite);
+
   /*ship*/
   if(type == 0){
     sprite->current = INIT_DIR;
     sprite->life = MAX_LIFE_SHIP;
-    SetUpPosition(sprite); //,sprite_picture
+    SetUpPosition(sprite);
 }
   /*Big, Normal, Small Ast*/
   if(type == 1 ){
@@ -367,7 +370,8 @@ void decompte_and_destroy_sprite(sprite_t *sprite, int decompte_avant_mort)
   
 }
 
-/*Appelle sprite move pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
+/*Appelle sprite move pour chacun des sprites du tableau *
+ *de sprite envoyé (ne fonctionne que pour des tableau)  */
 void move_all_sprite(sprite_t *sprite)
 {
   int i;
@@ -379,7 +383,8 @@ void move_all_sprite(sprite_t *sprite)
     }
   }
 }
-/*Appelle SDL_BlitSurface pour chacun des sprites du tableau de sprite envoyé (ne fonctionne que pour des tableau)*/
+/*Appelle SDL_BlitSurface pour chacun des sprites du tableau *
+ *de sprite envoyé  (ne fonctionne que pour des tableau)     */
 void draw_all_sprite(sprite_t *sprite)
 {
   int i;
@@ -387,7 +392,8 @@ void draw_all_sprite(sprite_t *sprite)
   int nbSprite = *nb_sprite;
   for (i=0; i<nbSprite; i++){
     if (nbSprite>0){
-      SDL_BlitSurface(sprite[i].sprite_picture, &sprite[i].image, screen, &sprite[i].position);
+      SDL_BlitSurface(sprite[i].sprite_picture, &sprite[i].image, screen,
+		      &sprite[i].position);
     }
   }
 }
@@ -408,11 +414,15 @@ void draw_all_sprite_one_image(sprite_t *sprite)
 void sprite_boost(sprite_t *sprite, float accel)
 {
   if (sprite->type == 0){
-    sprite->vx += accel * cos(sprite->current * 5 * M_PI / 180) - FROTTEMENT * sprite->vx;
-    sprite->vy += accel * (-sin(sprite->current * 5 * M_PI / 180)) - FROTTEMENT * sprite->vy;
-    if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->current * 5 * M_PI / 180)) && accel > 0)
+    sprite->vx += accel * cos(sprite->current * 5 * M_PI / 180)- FROTTEMENT
+      * sprite->vx;
+    sprite->vy += accel * (-sin(sprite->current * 5 * M_PI / 180)) - FROTTEMENT
+      * sprite->vy;
+    if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->current * 5 * M_PI / 180))
+       && accel > 0)
       sprite->vx -= accel * cos(sprite->current * 5 * M_PI / 180);
-    if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 5 * M_PI / 180)))
+    if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 5
+					    * M_PI / 180)))
       sprite->vy -= accel * (-sin(sprite->current * 5 * M_PI / 180));
   }
   if (sprite->type ==4){
@@ -436,9 +446,10 @@ void hyperespace(sprite_t *sprite)
     sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
   
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 /*auxiliary function : set colorkey*/
-void set_colorkey_(SDL_Surface *sprite_picture, int R, int G, int B, SDL_Surface *screen)
+void set_colorkey_(SDL_Surface *sprite_picture, int R, int G, int B,
+		   SDL_Surface *screen)
 {
   int colorkey;
   colorkey = SDL_MapRGB(screen->format, R, G, B);
@@ -613,10 +624,12 @@ bool compare_position(sprite_t *sprite1, sprite_t *sprite2)
 {
   int cu = 0;
   int cv = 0;
-  return collide_test(*sprite1, *sprite2, sprite1->sprite_picture->format ,&cu, &cv);
+  return collide_test(*sprite1, *sprite2, sprite1->sprite_picture->format
+		      ,&cu, &cv);
 }
 
-bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, int * cu, int * cv) 
+bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format,
+		  int * cu, int * cv) 
 {
   /* rough test using the bounding boxes (bb) only */
   bool test = !(sprite2.x > sprite1.x + sprite1.size ||
@@ -624,18 +637,22 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
 		sprite2.y > sprite1.y + sprite1.sprite_picture->h ||
 		sprite2.y + sprite2.sprite_picture->h < sprite1.y);
 
-  /* if the rough test succeeded, a fine test is performed using the colorkeys (transparency colors) of the sprites (may be optimized!) */
+  /* if the rough test succeeded, a fine test is performed using             *
+   *  the colorkeys (transparency colors) of the sprites (may be optimized!) */
   if (test) {
-    Uint32 *bmp1 = (Uint32*)malloc(sizeof(Uint32) * sprite1.size * sprite1.sprite_picture->h), *sprite_it, *bmp_it;
-    Uint32 *bmp2 = (Uint32*)malloc(sizeof(Uint32) * sprite2.size * sprite2.sprite_picture->h);
+    Uint32 *bmp1 = (Uint32*)malloc(sizeof(Uint32) * sprite1.size *
+				   sprite1.sprite_picture->h),
+      *sprite_it, *bmp_it;
+    Uint32 *bmp2 = (Uint32*)malloc(sizeof(Uint32) * sprite2.size *
+				   sprite2.sprite_picture->h);
     int u, v, v1 = 0; 
 
     /* lock the video memory and copy the sprite bitmaps into cpu memory */
-    // printf("SDL_MUSTLOCK(sprite1->sprite) : %d\n", SDL_MUSTLOCK(sprite1->sprite));
     SDL_LockSurface(sprite1.sprite_picture);
     SDL_LockSurface(sprite2.sprite_picture);
     bmp_it = bmp1;
-    sprite_it = (Uint32*)(sprite1.sprite_picture->pixels) +  sprite1.current/2 * sprite1.size;
+    sprite_it = (Uint32*)(sprite1.sprite_picture->pixels) +  sprite1.current/2
+      * sprite1.size;
     for (v = 0; v < sprite1.sprite_picture->h; v++) {
       for (u = 0; u < sprite1.size; u++) {
 	*bmp_it++ = *sprite_it++;
@@ -643,7 +660,8 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
       sprite_it += (sprite1.sprite_picture->w - sprite1.size);
     }
     bmp_it = bmp2;
-    sprite_it = (Uint32*)(sprite2.sprite_picture->pixels) +  sprite2.current/2 * sprite2.size;
+    sprite_it = (Uint32*)(sprite2.sprite_picture->pixels) +  sprite2.current/2
+      * sprite2.size;
     for (v = 0; v < sprite2.sprite_picture->h; v++) {
       for (u = 0; u < sprite2.size; u++) {
 	*bmp_it++ = *sprite_it++;
@@ -684,7 +702,8 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
 	    Uint8 r, g, b;
 	    int u2, v2;
 
-	    /* get the local coordinates of pixel p2 in sprite2 corresponding to the screen coordinates of p1 */
+	    /* get the local coordinates of pixel p2 in sprite2 corresponding *
+	     *  to the screen coordinates of p1                               */
 	    u2 = screen_u - sprite2.x;
 	    v2 = screen_v - sprite2.y;
 	    
@@ -713,14 +732,16 @@ bool collide_test(sprite_t sprite1, sprite_t sprite2, SDL_PixelFormat* format, i
   return test;
 }
 
-/*Fonction Collision pour un carré, prend des points x et y et ajoute leurs longueur a    */
-/*Puis compare les position des deux carrés et rend un booleen (vrai = carrés se touchent)*//*
-bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
-{
+/*Fonction Collision pour un carré, prend des points x et y et ajoute leurs *
+ * longueur a puis compare les position des deux carrés et rend un booleen  *
+ * (vrai = carrés se touchent)                                              */
+/*
+  bool compare_position_param(int x1, int y1, int a1, int x2, int y2, int a2)
+  {
   bool collision = false;
   if(min(x1+a1, x2+a2)>max(x1, x2) && min(y1+a1, y2+a2)>max(y1, y2)){
-    collision = true;
+  collision = true;
   }
   return collision;
-}
+  }
 */

@@ -916,6 +916,7 @@ int main(int argc, char* argv[])
   SDL_AudioCVT cvt; 
 
   /*C'est marrant parce que une freq de 11025 fonctionne quand même*/
+  /*Mais des bug apparaissent très rapidement bien sur.*/
   /*Deux format supporté ici : AUDIO_U16SYS et AUDIO_S8 */
   char format[20] = "AUDIO_U16SYS";
   init_musique(&desired, 44100, format, 2, 1024);
@@ -1025,8 +1026,8 @@ int main(int argc, char* argv[])
 	  CreateBonusWithTime(&bonus_atomic_bomb, &mitraille, portal);
  
 	  /*Look if some sprite need to be boomed*/
-	  kill_all_sprite(&space_ship, big_ast, norm_ast,
-			  small_ast, tirs, &gameover, &animationFinale, 
+	  kill_all_sprite(&space_ship, big_ast, norm_ast, small_ast,
+			  tirs, &gameover, &animationFinale, 
 			  &bomb_triggered);
 
 

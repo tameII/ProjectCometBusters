@@ -100,7 +100,7 @@
 #define NB_MAX_EXPL   100
 
 /*Projectiles*/
-#define NB_MAX_PIOU 10
+#define NB_MAX_PIOU 20
 #define PIOU_SIZE 8
 #define VIT_NORM_PIOU 2   //2
 #define PORTEE_PIOU 150   //150
