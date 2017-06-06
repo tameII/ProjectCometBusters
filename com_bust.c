@@ -321,7 +321,7 @@ void kill_all_number()
   nbMitraille = 0;
   nbPortal = 0;
 }
-
+//fonctions servant à attribuer le score
 void ajout_score(int *score, int point)
 {
   *score += point;
@@ -420,6 +420,7 @@ void teleportation(sprite_t *sprite1, sprite_t *portal)
   }
 }
 
+//fonction qui test la collision entre le vaisseau et les bonus
 void collide_ship_bonus_param(sprite_t *sprite1,  sprite_t *sprite2,
 			      bool *bomb_triggered, bool *have_mitraille)
 {
@@ -580,6 +581,7 @@ void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille,
    
 }
 
+//changement de sprite pour faire clignoter le vaisseau
 void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship,
 			 SDL_Surface * spaceship2)
 {
@@ -592,12 +594,13 @@ void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship,
       ship->sprite_picture = spaceship;
     }
 }
-
+//fonction servant à activer le bonus mitraille
 void Get_Mitraille()
 {
   have_mitraille = true;
   bonus_compt = 5000;
 }
+//fonction du bonus mitraille
 void Effect_mitraille()
 {
   if (bonus_compt > 0)
@@ -757,6 +760,9 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel,
 	/* case SLDK_ESCAPE: */
 	/* 	*quit = 1; */
 	/* 	break; */
+      case SDLK_ESCAPE:
+	*quit = 1;
+	break;
       case SDLK_UP:
 	Table_move[0] = 1;
 	break;
@@ -801,6 +807,7 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel,
       }
     break;
   }
+  //application des commandes
   if(Table_move[0] == 1){
     *accel = CONS_ACCEL;
   }
@@ -957,7 +964,7 @@ int main(int argc, char* argv[])
   int Table_move[5]={0,0,0,0,0};
   can_piou = true;
   bool bomb_triggered = false;
-
+  bool dev_mode = false;
   cogne = false;
   have_mitraille = false;
   bonus_compt = 0;
@@ -1014,9 +1021,12 @@ int main(int argc, char* argv[])
 	  /* look for an event; possibly update the position and the shape
 	   * of the ship. */
 	  if (SDL_PollEvent(&event)) {
-	    HandleEvent(event, &gameover, &space_ship, &accel, big_ast,
-			norm_ast,small_ast, tirs, explosion, &play,
-			score_total, &bomb_triggered);
+	    if(dev_mode)
+	      {
+		HandleEvent(event, &gameover, &space_ship, &accel, big_ast,
+			    norm_ast,small_ast, tirs, explosion, &play,
+			    score_total, &bomb_triggered);
+	      }
 	    HandleEvent2(event, &space_ship, &accel, &gameover, Table_move,
 			 tirs, &can_piou);
 	  }
@@ -1113,7 +1123,7 @@ int main(int argc, char* argv[])
 	    dead(&space_ship, big_ast, norm_ast, small_ast, tirs, explosion,
 		 &gameover, score_total, &droitDeScorer);
 	  }
-	  
+	  /*bonus*/
 	  Effect_mitraille();
 
 	  /*Update the score:*/

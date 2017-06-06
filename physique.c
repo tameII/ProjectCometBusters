@@ -4,7 +4,7 @@
 void various_information(sprite_t *space_ship, sprite_t *big_ast,
 			 sprite_t *norm_ast, sprite_t *small_ast, 
 			 int *score)
-{
+{ 
   int i;
   printf("space_ship->life : %d\n", space_ship->life);
   
@@ -107,7 +107,7 @@ void SetUpAtMiddle(sprite_t *sprite1, sprite_t *sprite2)
   sprite1->x = sprite2->x + (sprite2->size)/2 - (sprite1->size)/2;
   sprite1->y = sprite2->y + (sprite2->size)/2 - (sprite1->size)/2;
 }
-
+//affichage des pvs
 void Set_up_PV(sprite_t *PV)
 
  {
@@ -122,7 +122,7 @@ void Set_up_PV(sprite_t *PV)
       PV[i].position.y = PV[i].lig;
     }
  }
-
+//fonctio pour donner des coordonnées aléatoires
 void Random_Position_Partout(sprite_t *sprite)
 {
     sprite->x = rand()%(SCREEN_WIDTH);
@@ -275,21 +275,21 @@ void sprite_turn_right(sprite_t *sprite)
   if(sprite->current < 0)
     sprite->current = sprite->nb_sprite - 1;
 }
-
+//animation du vaisseau pour tourner à gauche
 void ship_turn_left(sprite_t *sprite)
 {
   sprite->current += 1;
   if(sprite->current >= sprite->nb_sprite*2)
     sprite->current = 0;
 }
-
+//animation du vaisseau pour tourner à droite
 void ship_turn_right(sprite_t *sprite)
 {
   sprite->current -= 1;
   if(sprite->current < 0)
     sprite->current = sprite->nb_sprite*2 - 1;
 }
-
+//affichage du vaisseau
 void ship_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -299,7 +299,7 @@ void ship_image(sprite_t *sprite)
   /* choose image according to direction and animation flip: */
   sprite->image.x = sprite->size * (sprite->current / 2);
 }
-
+//affichage du sprite
 void sprite_image(sprite_t *sprite)
 {
   /* Define the source rectangle for the BlitSurface */
@@ -397,6 +397,7 @@ void draw_all_sprite(sprite_t *sprite)
     }
   }
 }
+//dessine les sprites définis dans des tableaux
 void draw_all_sprite_one_image(sprite_t *sprite)
 {
   int i;
@@ -433,7 +434,7 @@ void sprite_boost(sprite_t *sprite, float accel)
     Random_Direction(sprite, accel);
   }
 }
-
+//fonction pour faire réapparaitre un sprite de l'autre coté coté de l'écran
 void hyperespace(sprite_t *sprite)
 {
   if(sprite->x < 0)
