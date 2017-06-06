@@ -1,6 +1,6 @@
 #ifndef PHYSIQUE_H
 #define PHYSIQUE_H 
-     
+      
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h> 
@@ -132,13 +132,15 @@
 
 
 
-SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet, *background, *bullet, *spaceship2;
+SDL_Surface *screen, *temp, *spaceship, *big_comet, *norm_comet, *small_comet;
+SDL_Surface *background, *bullet, *spaceship2;
 SDL_Surface *explosion_picture; 
 SDL_Surface *vie; 
 SDL_Surface *menu_jouer_selec, *menu_jouer, *menu_quitter, *menu_quitter_selec; //menu
 SDL_Surface *menu_game_over, *menu_return;
 SDL_Surface *atomic_bomb_picture, *bonus_mitraille, *portal_picture;
-int error_gimmeIsNb, nbVaisseau, nbBigAst, nbNormAst, nbSmallAst, nbtirs, nbExplosion, nbAtomicBomb, nbMitraille, nbPortal ;
+int error_gimmeIsNb, nbVaisseau, nbBigAst, nbNormAst, nbSmallAst, nbtirs;
+int  nbExplosion, nbAtomicBomb, nbMitraille, nbPortal ;
 bool cogne;
 bool can_piou;
 bool have_mitraille;
@@ -156,7 +158,7 @@ struct Sprite_t{
   int size;
   int nb_sprite;
   int decompte;
-  int numero_object; //number of the present object
+  int numero_object; 
   int nombre_max;
   int life;
   double vx;
