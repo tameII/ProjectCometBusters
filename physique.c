@@ -1,5 +1,10 @@
+/****************************/
+/*      Physique.c          */
+/*Authors : Albin Parmentier*/
+/*        : Mathieu Levy    */
+/****************************/
 #include "physique.h" 
-     
+       
 /*Give various information, press v in game to know what.*/
 void various_information(sprite_t *space_ship, sprite_t *big_ast,
 			 sprite_t *norm_ast, sprite_t *small_ast, 
@@ -26,8 +31,9 @@ void various_information(sprite_t *space_ship, sprite_t *big_ast,
   printf("score: %d \n", *score);
 }
 
+////////////////////////////////////////////////////////////////////////
 /*Set Position of all Sprites*/
-void SetUpPosition(sprite_t *sprite){  //, SDL_Surface *surface) avant
+void SetUpPosition(sprite_t *sprite){
   
   /* set sprite position in the middle of the window */
   switch(sprite->type) {
@@ -165,44 +171,55 @@ void Random_Direction(sprite_t *sprite, float vitesse)
 ////////////////////////////////////////////////////////////////////////////////
 /*Need to init all sprite at begun*/
 void init_all_sprite(sprite_t *space_ship, sprite_t *big_ast, sprite_t *norm_ast,
-		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion
-		    , sprite_t *game_over, sprite_t *return_menu
-		     , sprite_t *jouer, sprite_t *quitter, sprite_t *PV, sprite_t *portal)
+		     sprite_t *small_ast, sprite_t *tirs, sprite_t *explosion,
+		     sprite_t *game_over, sprite_t *return_menu,
+		     sprite_t *jouer, sprite_t *quitter, 
+		     sprite_t *PV, sprite_t *portal)
 {
   int i;
   /*init menu*/
-  sprite_init(jouer, 10, menu_jouer_selec, MENU_JOUER_SIZE, NB_MENU_JOUER_SPRITE, NB_MAX_MENU_JOUER);
-  sprite_init(quitter, 11, menu_quitter, MENU_QUITTER_SIZE, NB_MENU_QUITTER_SPRITE, NB_MAX_MENU_QUITTER);
-  sprite_init(game_over, 12, menu_game_over, MENU_GAME_OVER_SIZE, NB_MENU_GAME_OVER_SPRITE, NB_MAX_MENU_GAME_OVER);
-  sprite_init(return_menu, 13, menu_return, MENU_RETURN_SIZE, NB_MENU_RETURN_SPRITE, NB_MAX_MENU_RETURN);
+  sprite_init(jouer, 10, menu_jouer_selec_picture, MENU_JOUER_SIZE,
+	      NB_MENU_JOUER_SPRITE, NB_MAX_MENU_JOUER);
+  sprite_init(quitter, 11, menu_quitter_picture, MENU_QUITTER_SIZE,
+	      NB_MENU_QUITTER_SPRITE, NB_MAX_MENU_QUITTER);
+  sprite_init(game_over, 12, menu_game_over_picture, MENU_GAME_OVER_SIZE,
+	      NB_MENU_GAME_OVER_SPRITE, NB_MAX_MENU_GAME_OVER);
+  sprite_init(return_menu, 13, menu_return_picture, MENU_RETURN_SIZE,
+	      NB_MENU_RETURN_SPRITE, NB_MAX_MENU_RETURN);
    
   
   for(i=0; i<MAX_LIFE_SHIP ; i++){
-    sprite_init(PV, 20, vie, PV_SIZE, NB_PV_SPRITE,
+    sprite_init(PV, 20, PV_picture, PV_SIZE, NB_PV_SPRITE,
 		MAX_LIFE_SHIP);
   }
 
   /*init ship*/
-  sprite_init(space_ship, 0, spaceship, SPACE_SHIP_SIZE, NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
+  sprite_init(space_ship, 0, spaceship_picture, SPACE_SHIP_SIZE,
+	      NB_SPACE_SHIP_SPRITE, NB_MAX_SHIP);
   
   /*Init all ast at begun (big_small_norm)*/
   for(i=0 ; i<NB_MAX_BIG_AST ; i++){
-  sprite_init(&big_ast[i], 1, big_comet, BIG_AST_SIZE, NB_AST_SPRITE, NB_MAX_BIG_AST);
+  sprite_init(&big_ast[i], 1, big_ast_picture, BIG_AST_SIZE, NB_AST_SPRITE,
+	      NB_MAX_BIG_AST);
   }
   for(i=0 ; i<NB_MAX_NORM_AST ; i++){
-    sprite_init(&norm_ast[i], 2, norm_comet, NORM_AST_SIZE, NB_AST_SPRITE, NB_MAX_NORM_AST);
+    sprite_init(&norm_ast[i], 2, norm_ast_picture, NORM_AST_SIZE, NB_AST_SPRITE,
+		NB_MAX_NORM_AST);
   }
   for(i=0 ; i<NB_MAX_SMALL_AST ; i++){
-  sprite_init(&small_ast[i], 3, small_comet, SMALL_AST_SIZE, NB_AST_SPRITE, NB_MAX_SMALL_AST);
+  sprite_init(&small_ast[i], 3, small_ast_picture, SMALL_AST_SIZE,
+	      NB_AST_SPRITE, NB_MAX_SMALL_AST);
   }
   for(i=0 ; i<NB_MAX_PIOU ; i++){
-  sprite_init(&tirs[i], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
+  sprite_init(&tirs[i], 4, tirs_picture, PIOU_SIZE, 1, NB_MAX_PIOU);
   }
   for(i=0 ; i<NB_MAX_EXPL ; i++){
-    sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE, ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
+    sprite_init(&explosion[i],  5, explosion_picture, EXPLOSION_SIZE,
+		ANIM_EXPLOSION_NUM, NB_MAX_EXPL);
   }
   for(i=0 ; i<NB_MAX_PORTAL ; i++){
-  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE, NB_MAX_PORTAL);
+  sprite_init(&portal[i], 23, portal_picture, PORTAL_SIZE, NB_PORTAL_SPRITE,
+	      NB_MAX_PORTAL);
   }					    
 }
 
@@ -260,6 +277,8 @@ if(type == 23){
     SetUpPosition(sprite);
   }
 }
+
+/////////////////////////////////////////////////////////////////////
 /*the animation of the sprite turn */
 void sprite_turn_left(sprite_t *sprite)
 {
@@ -434,7 +453,8 @@ void sprite_boost(sprite_t *sprite, float accel)
     Random_Direction(sprite, accel);
   }
 }
-//fonction pour faire réapparaitre un sprite de l'autre coté coté de l'écran
+
+/*fonction pour faire réapparaitre un sprite de l'autre coté coté de l'écran*/
 void hyperespace(sprite_t *sprite)
 {
   if(sprite->x < 0)
@@ -526,8 +546,8 @@ void kill_sprite_number(int *nb)
 bool kill_sprite_param(int nombre_max, int numero, int type)
 {
   bool killed = false;
-  /*No need of more object than 100 on screen*/
-  if (nombre_max > 100){
+  /*No need of more object than 1000 on screen*/
+  if (nombre_max > 1000){
     printf("kill_ast : nombre_max is overrated : %d \n",nombre_max);
     killed = true;
   }

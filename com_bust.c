@@ -1,5 +1,5 @@
 #include "physique.h"
-    
+     
  
 ///////////////////////////////////////////////////////////////////////////////
 /******************************FIN HEADER*************************************/
@@ -182,7 +182,7 @@ void CreateMitraille(sprite_t *mitraille)
 {
   if(nbMitraille < 1)
     {
-      sprite_init(mitraille,  22, bonus_mitraille, BONUS_MITRAILLE_SIZE,
+      sprite_init(mitraille,  22, bonus_mitraille_picture, BONUS_MITRAILLE_SIZE,
 		  NB_BONUS_MITRAILLE_SPRITE, NB_MAX_BONUS_MITRAILLE);
       nbMitraille += 1;
     }
@@ -205,7 +205,7 @@ void CreateExplosion(sprite_t *explosion, sprite_t *sprite, int numero)
 void CreateSmallAst(sprite_t *small_ast)
 {
   if(nbSmallAst < NB_MAX_SMALL_AST){
-    sprite_init(&small_ast[nbSmallAst], 3, small_comet, SMALL_AST_SIZE,
+    sprite_init(&small_ast[nbSmallAst], 3, small_ast_picture, SMALL_AST_SIZE,
 		NB_AST_SPRITE, NB_MAX_SMALL_AST);
     sprite_boost(&small_ast[nbSmallAst], VIT_SMALL_AST);
     nbSmallAst += 1; 
@@ -217,7 +217,7 @@ void CreateSmallAst(sprite_t *small_ast)
 void CreateNormAst(sprite_t *norm_ast)
 {
   if (nbNormAst < NB_MAX_NORM_AST){
-    sprite_init(&norm_ast[nbNormAst], 2, norm_comet, NORM_AST_SIZE,
+    sprite_init(&norm_ast[nbNormAst], 2, norm_ast_picture, NORM_AST_SIZE,
 		NB_AST_SPRITE, NB_MAX_NORM_AST);
     sprite_boost(&norm_ast[nbNormAst], VIT_NORM_AST);
     nbNormAst += 1;
@@ -230,7 +230,7 @@ void CreateBigAst(sprite_t *big_ast)
 {
  
   if (nbBigAst < NB_MAX_BIG_AST){
-    sprite_init(&big_ast[nbBigAst], 1, big_comet, BIG_AST_SIZE,
+    sprite_init(&big_ast[nbBigAst], 1, big_ast_picture, BIG_AST_SIZE,
 		NB_AST_SPRITE, NB_MAX_BIG_AST);
     sprite_boost(&big_ast[nbBigAst], VIT_BIG_AST);
     nbBigAst += 1;
@@ -258,7 +258,7 @@ void CreateAst(sprite_t *ast){
 void create_piou (sprite_t* tirs, sprite_t* space_ship)
 {
   if (nbtirs<NB_MAX_PIOU){
-    sprite_init(&tirs[nbtirs], 4, bullet, PIOU_SIZE, 1, NB_MAX_PIOU);
+    sprite_init(&tirs[nbtirs], 4, tirs_picture, PIOU_SIZE, 1, NB_MAX_PIOU);
     tirs[nbtirs].current = space_ship->current/2;
     sprite_boost(&tirs[nbtirs], VIT_NORM_PIOU);
     SetUpAtMiddle(&tirs[nbtirs], space_ship);
@@ -582,16 +582,16 @@ void CreateBonusWithTime(sprite_t *bonus_atomic_bomb, sprite_t *mitraille,
 }
 
 //changement de sprite pour faire clignoter le vaisseau
-void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship,
-			 SDL_Surface * spaceship2)
+void change_sprite_ship (sprite_t *ship, SDL_Surface * spaceship_picture,
+			 SDL_Surface * spaceship2_picture)
 {
-  if(ship->sprite_picture == spaceship)
+  if(ship->sprite_picture == spaceship_picture)
     {
-      ship->sprite_picture = spaceship2;
+      ship->sprite_picture = spaceship2_picture;
     }
   else
     {
-      ship->sprite_picture = spaceship;
+      ship->sprite_picture = spaceship_picture;
     }
 }
 //fonction servant à activer le bonus mitraille
@@ -732,7 +732,7 @@ void HandleEvent(SDL_Event event, int *quit, sprite_t *space_ship, double *accel
       SDL_Delay(100);
       break;
     case SDLK_c :
-      change_sprite_ship(space_ship, spaceship, spaceship2);
+      change_sprite_ship(space_ship, spaceship_picture, spaceship2_picture);
       break;
     case SDLK_b : //BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM
       *bomb_triggered = true;
@@ -830,12 +830,12 @@ void HandleEvent2(SDL_Event event, sprite_t *space_ship, double *accel,
 void HandleMenuReturn(sprite_t *jouer, sprite_t *quitter, bool *play,
 		      int *gameover, int *ending, int *finmenu)
 {
-  if(jouer->sprite_picture == menu_jouer_selec){
+  if(jouer->sprite_picture == menu_jouer_selec_picture){
     *play = true;
     *gameover = 0;
     *ending = 1;
   }
-  else if(quitter->sprite_picture == menu_quitter_selec){
+  else if(quitter->sprite_picture == menu_quitter_selec_picture){
     *ending = 1;
     *gameover = 1;
     *finmenu = 1;
@@ -867,8 +867,8 @@ void HandleEventMenu(SDL_Event event, int *gameover, bool *play, int *ending,
 	break;
       case SDLK_UP:
       case SDLK_DOWN:
-	change_sprite_ship (jouer, menu_jouer, menu_jouer_selec );
-	change_sprite_ship (quitter, menu_quitter, menu_quitter_selec );
+	change_sprite_ship (jouer, menu_jouer_picture, menu_jouer_selec_picture );
+	change_sprite_ship (quitter, menu_quitter_picture, menu_quitter_selec_picture );
 	break;
       case SDLK_RETURN:
 	HandleMenuReturn(jouer, quitter, play, gameover, ending, finmenu);
@@ -1113,7 +1113,7 @@ int main(int argc, char* argv[])
 	  }
 	  else {
 	    decompte--;
-	    change_sprite_ship(&space_ship, spaceship, spaceship2);
+	    change_sprite_ship(&space_ship, spaceship_picture, spaceship2_picture);
 	    can_piou = false;
 	    bonus_compt = 0;
 	    if (decompte <1)
@@ -1225,21 +1225,22 @@ int main(int argc, char* argv[])
   /* clean up */
   SDL_FreeSurface(portal_picture);
   SDL_FreeSurface(textSurface);
-  SDL_FreeSurface(menu_jouer);
-  SDL_FreeSurface(menu_jouer_selec);
-  SDL_FreeSurface(menu_quitter);
-  SDL_FreeSurface(menu_quitter_selec);
-  SDL_FreeSurface(menu_return);
-  SDL_FreeSurface(menu_game_over);
-  SDL_FreeSurface(vie);
-  SDL_FreeSurface(bullet);
-  SDL_FreeSurface(small_comet);
-  SDL_FreeSurface(norm_comet);
-  SDL_FreeSurface(big_comet);
-  SDL_FreeSurface(spaceship);
-  SDL_FreeSurface(spaceship2);
+  SDL_FreeSurface(menu_jouer_picture);
+  SDL_FreeSurface(menu_jouer_selec_picture);
+  SDL_FreeSurface(menu_quitter_picture);
+  SDL_FreeSurface(menu_quitter_selec_picture);
+  SDL_FreeSurface(menu_return_picture);
+  SDL_FreeSurface(menu_game_over_picture);
+  SDL_FreeSurface(PV_picture);
+  SDL_FreeSurface(tirs_picture);
+  SDL_FreeSurface(small_ast_picture);
+  SDL_FreeSurface(norm_ast_picture);
+  SDL_FreeSurface(big_ast_picture);
+  SDL_FreeSurface(spaceship_picture);
+  SDL_FreeSurface(spaceship2_picture);
   SDL_FreeSurface(background);
   SDL_FreeSurface(screen);
+
 
   /* Free the font. */
   TTF_CloseFont(font);
@@ -1257,41 +1258,41 @@ void downloadsprite()
 {
   /*Load all sprite_picture*/
   explosion_picture = download_sprite_("explosion_model_12_64x64.bmp");
-  small_comet = download_sprite_("asteroid-model1-32_16x16.bmp");
-  norm_comet = download_sprite_("asteroid-model1-32_32x32.bmp");
-  big_comet = download_sprite_("asteroid-model1-32_64x64.bmp");
-  spaceship = download_sprite_("sprite(new)v2.bmp");
-  spaceship2 = download_sprite_("sprite(new).bmp");
+  small_ast_picture = download_sprite_("asteroid-model1-32_16x16.bmp");
+  norm_ast_picture = download_sprite_("asteroid-model1-32_32x32.bmp");
+  big_ast_picture = download_sprite_("asteroid-model1-32_64x64.bmp");
+  spaceship_picture = download_sprite_("sprite(new)v2.bmp");
+  spaceship2_picture = download_sprite_("sprite(new).bmp");
   background = download_sprite_("espace.bmp");
-  bullet = download_sprite_("bullet02.bmp");
-  vie = download_sprite_("PackDeSoin.bmp");
-  menu_jouer = download_sprite_("Bouton_play.bmp");
-  menu_jouer_selec = download_sprite_("Bouton_play_selec.bmp");
-  menu_quitter = download_sprite_("Bouton_quit.bmp");
-  menu_quitter_selec = download_sprite_("Bouton_quit_selec.bmp");
-  menu_game_over = download_sprite_("Game_Over_redim.bmp");
-  menu_return = download_sprite_("Back_to_menu.bmp");
+  tirs_picture = download_sprite_("bullet02.bmp");
+  PV_picture = download_sprite_("PackDeSoin.bmp");
+  menu_jouer_picture = download_sprite_("Bouton_play.bmp");
+  menu_jouer_selec_picture = download_sprite_("Bouton_play_selec.bmp");
+  menu_quitter_picture = download_sprite_("Bouton_quit.bmp");
+  menu_quitter_selec_picture = download_sprite_("Bouton_quit_selec.bmp");
+  menu_game_over_picture = download_sprite_("Game_Over_redim.bmp");
+  menu_return_picture = download_sprite_("Back_to_menu.bmp");
   atomic_bomb_picture = download_sprite_("BombeAtomique.bmp");
-  bonus_mitraille = download_sprite_("Mitraille.bmp");
+  bonus_mitraille_picture = download_sprite_("Mitraille.bmp");
   portal_picture = download_sprite_("portail.bmp");
   /*Set all colorkey*/
-  set_colorkey_(spaceship, 255, 0, 255, screen);
-  set_colorkey_(spaceship2, 255, 0, 255, screen);
-  set_colorkey_(big_comet, 0, 255, 255, screen);
-  set_colorkey_(norm_comet, 0, 255, 255, screen);
-  set_colorkey_(small_comet, 0, 255, 255, screen);
+  set_colorkey_(spaceship_picture, 255, 0, 255, screen);
+  set_colorkey_(spaceship2_picture, 255, 0, 255, screen);
+  set_colorkey_(big_ast_picture, 0, 255, 255, screen);
+  set_colorkey_(norm_ast_picture, 0, 255, 255, screen);
+  set_colorkey_(small_ast_picture, 0, 255, 255, screen);
   set_colorkey_(explosion_picture, 0, 255, 255, screen);
-  set_colorkey_(bullet, 255, 125, 0, screen);
-  set_colorkey_(vie, 0, 0, 0, screen);
+  set_colorkey_(tirs_picture, 255, 125, 0, screen);
+  set_colorkey_(PV_picture, 0, 0, 0, screen);
   //menu
-  set_colorkey_(menu_jouer, 255, 255, 255, screen);
-  set_colorkey_(menu_jouer_selec, 255, 255, 255, screen);
-  set_colorkey_(menu_quitter_selec, 255, 255, 255, screen);
-  set_colorkey_(menu_quitter, 255, 255, 255, screen);
-  set_colorkey_(menu_game_over, 255, 255, 255, screen);
-  set_colorkey_(menu_return, 255, 255, 255, screen);
+  set_colorkey_(menu_jouer_picture, 255, 255, 255, screen);
+  set_colorkey_(menu_jouer_selec_picture, 255, 255, 255, screen);
+  set_colorkey_(menu_quitter_selec_picture, 255, 255, 255, screen);
+  set_colorkey_(menu_quitter_picture, 255, 255, 255, screen);
+  set_colorkey_(menu_game_over_picture, 255, 255, 255, screen);
+  set_colorkey_(menu_return_picture, 255, 255, 255, screen);
 
   //Bonus:
   set_colorkey_(atomic_bomb_picture, 255, 0, 255, screen);
-  set_colorkey_(bonus_mitraille, 136, 136, 136, screen);
+  set_colorkey_(bonus_mitraille_picture, 136, 136, 136, screen);
 }
